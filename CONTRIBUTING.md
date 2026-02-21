@@ -76,7 +76,8 @@ test: cover deleteDevice edge cases
 
 ## Release process
 
-Releases are created automatically by GitHub Actions on every push to `main`.
+Releases are created manually via GitHub Actions:
+**Actions → Release → Run workflow**.
 The version tag is generated from the current UTC date/time in the format `YYYY.MM.DDDHHММ`
 (e.g. `2026.02.0521048` = year 2026, month 02, day-of-year 052, 10:48).
 

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- macOS-ish dark background -->
+    <radialGradient id="bg" cx="35%" cy="30%" r="90%">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#0B1220"/>
+    </radialGradient>
+
+    <!-- your blue→violet vibe -->
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2F6BFF"/>
+      <stop offset="100%" stop-color="#B044FF"/>
+    </linearGradient>
+
+    <!-- soft glow (subtle, not nightclub) -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- squircle background -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
+
+  <!-- SPEAKER (left) -->
+  <g stroke="url(#g)" stroke-width="64" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#glow)">
+    <!-- speaker body -->
+    <path d="M 250 450 H 340 L 440 370 V 654 L 340 574 H 250 Z"/>
+
+    <!-- sound waves (right of speaker) -->
+    <path d="M 520 430 C 585 470 585 554 520 594"/>
+    <path d="M 580 380 C 690 460 690 564 580 644"/>
+  </g>
+
+  <!-- SWITCH ARROWS (top-right & bottom-right) -->
+  <g fill="none" stroke="url(#g)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+    <!-- top arc -->
+    <path d="M 640 300 A 260 260 0 0 1 830 490"/>
+    <!-- arrow head -->
+    <path d="M 804 470 L 846 502 L 796 514"/>
+
+    <!-- bottom arc -->
+    <path d="M 830 534 A 260 260 0 0 1 640 724"/>
+    <!-- arrow head -->
+    <path d="M 666 704 L 624 736 L 674 748"/>
+  </g>
+
+  <!-- tiny waveform line (center accent) -->
+  <path d="M 470 512
+           L 500 512
+           L 520 470
+           L 540 554
+           L 560 490
+           L 580 534
+           L 610 534"
+        stroke="url(#g)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+</svg>

@@ -1,0 +1,2 @@
+import SentrioCore
+SentrioApp.main()

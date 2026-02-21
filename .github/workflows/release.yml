@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Optional version override (default: UTC date %Y.%m.%j%H%M)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${{ inputs.version }}" ]]; then
+            tag="${{ inputs.version }}"
+          else
+            tag="$(date -u '+%Y.%m.%j%H%M')"
+          fi
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Build distributable
+        run: bash build.sh "${{ steps.version.outputs.tag }}"
+
+      - name: Verify bundle metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          plist="build/Sentrio.app/Contents/Info.plist"
+          v="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "${plist}")"
+          b="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "${plist}")"
+          [[ "${v}" == "${{ steps.version.outputs.tag }}" ]]
+          [[ "${b}" == "${{ steps.version.outputs.tag }}" ]]
+
+      - name: Verify universal binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          bin="build/Sentrio.app/Contents/MacOS/Sentrio"
+          lipo -info "${bin}"
+          lipo -info "${bin}" | grep -q "arm64"
+          lipo -info "${bin}" | grep -q "x86_64"
+
+      - name: Zip app bundle
+        run: |
+          cd build
+          zip -r --symlinks "Sentrio-${{ steps.version.outputs.tag }}.zip" Sentrio.app
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Sentrio ${{ steps.version.outputs.tag }}
+          body: |
+            Automated build from ${{ github.sha }}.
+
+            **Install:** download the zip, unzip, drag `Sentrio.app` to `/Applications`, then right-click → **Open** on first launch (unsigned app).
+          files: build/Sentrio-${{ steps.version.outputs.tag }}.zip
+          draft: false
+          prerelease: false

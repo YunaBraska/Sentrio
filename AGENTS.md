@@ -42,4 +42,4 @@ No SwiftLint/SwiftFormat config is currently enforced—use Xcode formatting and
 
 - Use the PR template in `.github/PULL_REQUEST_TEMPLATE.md` (summary, type, linked issue, testing checklist).
 - Commit messages follow `type: short summary` (e.g., `fix: …`, `feat: …`, `test: …`, `docs: …`), present tense.
-- Releases are automated on pushes to `main`; version tags are UTC timestamps (`YYYY.MM.DDDHHMM`).
+- Releases are created via **Actions → Release → Run workflow**; version tags are UTC timestamps (`YYYY.MM.DDDHHMM`).

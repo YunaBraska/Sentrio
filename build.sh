@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # build.sh — builds Sentrio.app for distribution
 # Usage:  ./build.sh [VERSION]
-#   VERSION defaults to the current date/time in format YYYY.MM.DDDHHММ
+#   VERSION defaults to the current date/time in format YYYY.MM.DDDHHMM
 #   (DDD = day of year, e.g. 2026.02.0521048)
 set -euo pipefail
 

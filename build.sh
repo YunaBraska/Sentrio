@@ -97,6 +97,13 @@ iconutil -c icns "${ICONSET}" -o "${CONTENTS}/Resources/AppIcon.icns"
 
 printf "APPL????" > "$CONTENTS/PkgInfo"
 
+echo "→ Code signing (ad-hoc)…"
+if ! command -v codesign >/dev/null 2>&1; then
+    echo "✗ codesign not found (required to sign the app bundle)" >&2
+    exit 1
+fi
+codesign --force --deep --sign - --timestamp=none "${APP_DIR}"
+
 echo "→ Done: ${APP_DIR}  (version ${VERSION})"
 echo ""
 echo "To run:    open $APP_DIR"

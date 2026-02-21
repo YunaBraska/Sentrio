@@ -53,6 +53,9 @@ jobs:
           lipo -info "${bin}" | grep -q "arm64"
           lipo -info "${bin}" | grep -q "x86_64"
 
+      - name: Verify code signature
+        run: codesign --verify --deep --verbose=2 build/Sentrio.app
+
       - name: Zip app bundle
         run: |
           cd build
@@ -66,7 +69,7 @@ jobs:
           body: |
             Automated build from ${{ github.sha }}.
 
-            **Install:** download the zip, unzip, drag `Sentrio.app` to `/Applications`, then right-click → **Open** on first launch (unsigned app).
+            **Install:** download the zip, unzip, drag `Sentrio.app` to `/Applications`, then right-click → **Open** on first launch (not notarized).
           files: build/Sentrio-${{ steps.version.outputs.tag }}.zip
           draft: false
           prerelease: false

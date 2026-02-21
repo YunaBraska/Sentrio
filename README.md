@@ -23,7 +23,7 @@ A lightweight macOS menu bar app that automatically switches between audio devic
 ### Option A — Download (easiest)
 1. Go to [Releases](https://github.com/YunaBraska/Sentrio/releases) and download the latest `Sentrio.zip`
 2. Unzip and drag `Sentrio.app` to your `/Applications` folder
-3. **First launch:** right-click the app → **Open** (macOS shows a Gatekeeper warning for unsigned apps — click Open to allow it once)
+3. **First launch:** right-click the app → **Open** (macOS shows a Gatekeeper warning for non-notarized apps — click Open to allow it once)
 
 ### Option B — Build from source
 See [Building from source](#building-from-source) below.

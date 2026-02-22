@@ -36,6 +36,8 @@ If you already use Homebrew:
 <details>
 <summary>Show Homebrew commands</summary>
 
+Homebrew installs Sentrio from GitHub Releases. If this fails, use the Download option above.
+
 ```bash
 brew tap yunabraska/tap
 brew install --cask sentrio

@@ -18,21 +18,43 @@ A lightweight macOS menu bar app that automatically switches between audio devic
 
 ---
 
-## Installation
+## Install
 
-### Option A — Download (easiest)
-1. Go to [Releases](https://github.com/YunaBraska/Sentrio/releases) and download the latest `Sentrio.zip`
-2. Unzip and drag `Sentrio.app` to your `/Applications` folder
-3. **First launch:** right-click the app → **Open** (macOS shows a Gatekeeper warning for non-notarized apps — click Open to allow it once)
+Sentrio runs on **macOS 13+** and lives in your **menu bar** (no Dock icon).
 
-### Option B — Build from source
-See [Building from source](#building-from-source) below.
+### Download (recommended)
+1. Open [Releases](https://github.com/YunaBraska/Sentrio/releases)
+2. Download the latest zip (named like `Sentrio-2026.02.0521048.zip`)
+3. Unzip it and drag `Sentrio.app` into **Applications**
+4. First launch: **right-click → Open** (Sentrio is not notarized yet)
 
-### Option C — Homebrew
+If macOS still blocks it: **System Settings → Privacy & Security → Open Anyway**.
+
+### Homebrew (easy updates)
+If you already use Homebrew:
+
+<details>
+<summary>Show Homebrew commands</summary>
+
 ```bash
 brew tap yunabraska/tap
 brew install --cask sentrio
 ```
+
+Update later:
+```bash
+brew upgrade --cask sentrio
+```
+
+Uninstall:
+```bash
+brew uninstall --cask sentrio
+```
+
+</details>
+
+### Build from source (advanced)
+See [Building from source](#building-from-source-advanced).
 
 ---
 
@@ -144,30 +166,40 @@ Sentrio filters all aggregate device types to prevent phantom entries from macOS
 
 ---
 
-## Building from source
+## Building from source (advanced)
 
-Requires **macOS 13+** and **Swift 5.9+**. Xcode is not required.
+Requires **macOS 13+** and **Swift 5.9+**. Xcode is optional.
+
+<details>
+<summary>Terminal</summary>
 
 ```bash
-# Clone the project
 git clone https://github.com/YunaBraska/Sentrio.git
 cd Sentrio
 
-# Development — build and run directly
+# Run from source (debug)
 swift build && .build/debug/Sentrio
 
-# Distribution — creates Sentrio.app in ./build/
+# Build an app bundle (creates ./build/Sentrio.app)
 chmod +x build.sh
 ./build.sh
 
-# Install to Applications
+# Install (optional)
 cp -r ./build/Sentrio.app /Applications/
 
-# Run tests
+# Tests
 swift test
 ```
 
-On first launch macOS may show a Gatekeeper warning. Right-click → Open to allow it once.
+</details>
+
+<details>
+<summary>Xcode</summary>
+
+1. Run `open Package.swift`
+2. Press **Run** (or **Product → Run**)
+
+</details>
 
 ---
 

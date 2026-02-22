@@ -10,13 +10,32 @@ A lightweight macOS menu bar app that automatically switches between audio devic
 
 ## What it does
 
-- **Auto-switches** your default output and input device when devices connect or disconnect
-- **Remembers volume** for each device and restores it when that device becomes active
-- **Priority order** — you decide which device wins (e.g. AirPods over built-in speakers, studio mic over AirPods mic)
-- **Alert (system beep) volume** is also saved and restored per output device
-- Lives quietly in the menu bar — no Dock icon, no clutter
+- **Auto-switches** your default output and input device when devices connect/disconnect (and when you reorder priorities)
+- **Priority order** — you decide which device wins (e.g. AirPods over built-in speakers, USB mic over headset mic)
+- **Manual switching** — pick a device yourself when Auto is off
+- **Per-device volume memory** — restores Output, Input, and Alert volumes when a device becomes active
+- **Battery display** (when macOS reports it) — icons in the menu bar; full left/right/case details in Preferences
+- **Smart default icons** for common device types (AirPods/HomePod/iPhone/monitors/headsets), plus per-device overrides
+- **Custom device labels** — rename devices separately for Output vs Input
+- **Device hygiene** — disable devices (kept) or permanently forget disconnected ones
+- **Low‑battery warning** — menu bar icon turns into a red battery when the active output/input device drops below 15%
+- **Backup & restore** — export/import settings as JSON (priorities, disabled devices, names/icons, volume memory)
+- **Privacy-aware input meter** — optional live input level meter only while Preferences is open (macOS shows the mic indicator then)
+- **Stats & easter eggs** — auto-switch counter, “milliseconds saved”, and a few silly messages
 
 ---
+
+## Screenshots
+
+Add screenshots to `docs/screenshots/` using these filenames (the README will auto-render them once you add the files):
+
+- `docs/screenshots/menu-bar.png`
+- `docs/screenshots/preferences-output.png`
+- `docs/screenshots/preferences-general.png`
+
+![Menu bar panel](docs/screenshots/menu-bar.png)
+![Preferences (Output)](docs/screenshots/preferences-output.png)
+![Preferences (General)](docs/screenshots/preferences-general.png)
 
 ## Install
 
@@ -86,8 +105,10 @@ Click the icon in your menu bar to open the panel.
 
 ### Device rows
 - The **icon** shows the device type; the **#N badge** shows priority rank
-- The **mini bar** on the right shows live input level (input devices) or playback activity (output devices)
+- Battery indicators (when available) appear as small battery icons
 - Click a device to switch to it — **only when Auto is off**
+- Right‑click a device to **set a custom icon** or **disable** it
+- For AirPods, there’s also a quick **Bluetooth Settings…** shortcut
 
 > When **Auto-switch is ON**, clicking a device does nothing — the rules engine is in charge. Turn Auto off to select a device manually.
 
@@ -115,6 +136,8 @@ Open via **Preferences…** in the menu bar, or by launching the app again from 
 | **Output / Input / Alert** sliders | Volume controls (handy when the menu bar icon is hidden) |
 | **Hide menu bar icon** | Hides the icon; open Preferences by launching the app again from Launchpad |
 | **Launch at login** | Start Sentrio automatically when you log in |
+| **Show live input level meter (Preferences)** | Shows a live mic meter for the *active* input device while Preferences is open (macOS will show the mic indicator) |
+| **Export / Import Settings** | Backup/restore priorities, disabled devices, custom names/icons, and volume memory |
 | **Open Sound Settings…** | Jump straight to macOS System Sound Settings |
 | **Clear Volume Memory** | Forget all saved volume levels for all devices |
 
@@ -146,7 +169,7 @@ When AirPods disconnect, Sentrio instantly picks the next device on the list.
 This is macOS behaviour, not a Sentrio bug. When the output device changes, some apps briefly pause to re-route audio to the new device. Spotify and Apple Music typically resume automatically within a second or two.
 
 **My input level meter is frozen / always at zero**
-The level meter only shows live input for the currently active (default) input device — all other devices show zero. If the active device's meter is stuck, toggle the device off and on, or restart Sentrio.
+The level meter only shows live input for the currently active (default) input device — all other devices show zero. If the active device's meter is stuck, restart Sentrio.
 
 > **Note:** Monitoring input level for non-active devices is not supported: macOS only allows one microphone tap at a time. Similarly, output level metering (VU-style) is not available without the Screen Recording entitlement.
 

@@ -6,6 +6,10 @@ final class RulesEngine {
     private let settings: AppSettings
     private var cancellables = Set<AnyCancellable>()
 
+    private static let estimatedMillisSavedPerAutoSwitch = 2500
+    private var recentAutoSwitchTimestamps: [Date] = []
+    private var lastAutoSwitchAtByRole: [Bool: Date] = [:] // key: isInput
+
     init(audio: AudioManager, settings: AppSettings) {
         self.audio = audio
         self.settings = settings
@@ -22,7 +26,10 @@ final class RulesEngine {
             .store(in: &cancellables)
 
         settings.$outputPriority.dropFirst().receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in if self?.settings.isAutoMode == true { self?.applyOutputRules() } }
+            .sink { [weak self] _ in
+                guard let self else { return }
+                if settings.isAutoMode { applyOutputRules() }
+            }
             .store(in: &cancellables)
 
         settings.$inputPriority.dropFirst().receive(on: DispatchQueue.main)
@@ -38,10 +45,28 @@ final class RulesEngine {
 
     private func onDevicesChanged() {
         for d in audio.outputDevices {
-            settings.registerDevice(uid: d.uid, name: d.name, isOutput: true)
+            settings.registerDevice(
+                uid: d.uid,
+                name: d.name,
+                isOutput: true,
+                transportType: d.transportType,
+                iconBaseName: d.iconBaseName,
+                modelUID: d.modelUID,
+                isAppleMade: d.isAppleMade,
+                bluetoothMinorType: d.bluetoothMinorType
+            )
         }
         for d in audio.inputDevices {
-            settings.registerDevice(uid: d.uid, name: d.name, isOutput: false)
+            settings.registerDevice(
+                uid: d.uid,
+                name: d.name,
+                isOutput: false,
+                transportType: d.transportType,
+                iconBaseName: d.iconBaseName,
+                modelUID: d.modelUID,
+                isAppleMade: d.isAppleMade,
+                bluetoothMinorType: d.bluetoothMinorType
+            )
         }
         guard settings.isAutoMode else { return }
         applyRules()
@@ -78,6 +103,8 @@ final class RulesEngine {
         guard let target = RulesEngine.selectDevice(from: eligible, priority: priority) else { return }
         guard current?.uid != target.uid else { return }
 
+        recordAutoSwitch(isInput: isInput)
+
         let isOutput = !isInput
         // Save outgoing device volumes
         if let current {
@@ -94,11 +121,32 @@ final class RulesEngine {
         // Restore incoming device volumes
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             guard let self else { return }
-            if let vol = settings.savedVolume(for: target.uid, isOutput: isOutput) {
+            let expectedVol = settings.savedVolume(for: target.uid, isOutput: isOutput)
+            let expectedAlertVol = !isInput ? settings.savedAlertVolume(for: target.uid) : nil
+
+            var didApplyAny = false
+            if let vol = expectedVol {
                 audio.setVolume(vol, for: target, isOutput: isOutput)
+                didApplyAny = true
             }
-            if !isInput, let alertVol = settings.savedAlertVolume(for: target.uid) {
+            if let alertVol = expectedAlertVol {
                 audio.setAlertVolume(alertVol)
+                didApplyAny = true
+            }
+
+            guard didApplyAny else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+                guard let self else { return }
+                var ok = true
+                if let expectedVol {
+                    let actual = audio.volume(for: target, isOutput: isOutput) ?? expectedVol
+                    if abs(actual - expectedVol) > 0.03 { ok = false }
+                }
+                if let expectedAlertVol {
+                    let actualAlert = AudioManager.readAlertVolume()
+                    if abs(actualAlert - expectedAlertVol) > 0.03 { ok = false }
+                }
+                if ok { settings.signalIntegrityScore += 5 }
             }
         }
     }
@@ -114,6 +162,10 @@ final class RulesEngine {
     // MARK: – Manual switch (from UI)
 
     func switchTo(_ device: AudioDevice, isInput: Bool) {
+        if let lastAuto = lastAutoSwitchAtByRole[isInput], Date().timeIntervalSince(lastAuto) <= 5 {
+            settings.signalIntegrityScore -= 3
+        }
+
         let isOutput = !isInput
         let current = isInput ? audio.defaultInput : audio.defaultOutput
         if let current {
@@ -131,6 +183,21 @@ final class RulesEngine {
             if !isInput, let alertVol = settings.savedAlertVolume(for: device.uid) {
                 audio.setAlertVolume(alertVol)
             }
+        }
+    }
+
+    private func recordAutoSwitch(isInput: Bool) {
+        settings.autoSwitchCount += 1
+        settings.millisecondsSaved += Self.estimatedMillisSavedPerAutoSwitch
+        settings.signalIntegrityScore += 10
+
+        let now = Date()
+        lastAutoSwitchAtByRole[isInput] = now
+
+        recentAutoSwitchTimestamps.append(now)
+        recentAutoSwitchTimestamps.removeAll { now.timeIntervalSince($0) > 20 }
+        if recentAutoSwitchTimestamps.count == 3 {
+            settings.signalIntegrityScore -= 10
         }
     }
 }

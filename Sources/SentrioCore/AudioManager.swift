@@ -29,16 +29,39 @@ final class AudioManager: ObservableObject {
     // MARK: – Private
 
     private var listeners: [Any] = []
+    private var volumeListeners: [ListenerToken] = []
+    private var volumeListenerOutputID: AudioDeviceID = kAudioObjectUnknown
+    private var volumeListenerInputID: AudioDeviceID = kAudioObjectUnknown
     private var audioEngine: AVAudioEngine?
+    private var isInputLevelMonitoringEnabled = false
+    private var inputLevelMonitoringDemandTokens: Set<String> = []
+
+    private var bluetoothBatterySnapshot = BluetoothBatterySnapshot()
+    private var bluetoothBatterySnapshotLastRefreshedAt: Date?
+    private var bluetoothBatterySnapshotRefreshInFlight = false
 
     // MARK: – Init
 
     init() {
         refreshDevices()
         addListeners()
-        startInputLevelMonitor()
-        startVolumePolling()
+        startPeriodicRefresh()
         alertVolume = Self.readAlertVolume()
+        refreshBluetoothBatterySnapshotIfNeeded(force: true)
+    }
+
+    // MARK: – Input level (microphone monitor)
+
+    func setInputLevelMonitoringEnabled(_ enabled: Bool) {
+        guard enabled != isInputLevelMonitoringEnabled else { return }
+        isInputLevelMonitoringEnabled = enabled
+        if enabled { startInputLevelMonitor() } else { stopInputLevelMonitor() }
+    }
+
+    func setInputLevelMonitoringDemand(_ demanded: Bool, token: String) {
+        if demanded { inputLevelMonitoringDemandTokens.insert(token) }
+        else { inputLevelMonitoringDemandTokens.remove(token) }
+        setInputLevelMonitoringEnabled(!inputLevelMonitoringDemandTokens.isEmpty)
     }
 
     // MARK: – Device refresh
@@ -55,6 +78,7 @@ final class AudioManager: ObservableObject {
             defaultInput = all.first { $0.id == defaultIn }
             defaultOutput = all.first { $0.id == defaultOut }
             refreshVolumes()
+            rebuildVolumeListenersIfNeeded()
         }
     }
 
@@ -85,6 +109,7 @@ final class AudioManager: ObservableObject {
             if isInput { self?.defaultInput = device }
             else { self?.defaultOutput = device }
             self?.refreshVolumes()
+            self?.rebuildVolumeListenersIfNeeded()
         }
         // Level monitor restart is handled by the defaultInputDevice listener below
     }
@@ -94,7 +119,7 @@ final class AudioManager: ObservableObject {
     func volume(for device: AudioDevice, isOutput: Bool) -> Float? {
         let scope: AudioObjectPropertyScope = isOutput
             ? kAudioObjectPropertyScopeOutput : kAudioObjectPropertyScopeInput
-        for element: UInt32 in [kAudioObjectPropertyElementMain, 1] {
+        for element: UInt32 in [kAudioObjectPropertyElementMain, 1, 2] {
             var addr = AudioObjectPropertyAddress(
                 mSelector: kAudioDevicePropertyVolumeScalar,
                 mScope: scope, mElement: element
@@ -160,55 +185,50 @@ final class AudioManager: ObservableObject {
         return AudioObjectGetPropertyData(device.id, &addr, 0, nil, &size, &running) == noErr && running != 0
     }
 
-    // MARK: – Volume polling (real-time sync with keyboard / system changes)
+    // MARK: – Periodic refresh (battery)
 
-    /// Polls volumes every 1.5 s and updates published properties only when values actually changed.
-    ///
-    /// A true CoreAudio property listener on the device volume would be more efficient but requires
-    /// per-device listener setup and teardown on every device switch — the polling approach is simpler
-    /// and 1.5 s latency is imperceptible for a volume slider.
-    ///
-    /// Output level metering (VU meter) is NOT available for other apps' audio without the
-    /// Screen Recording entitlement. The mini-bar for output shows playback activity only.
-    ///
-    /// Input level for non-active devices is NOT available: AVAudioEngine supports one input tap
-    /// at a time (the current default input device). Monitoring multiple input devices simultaneously
-    /// would require per-device CoreAudio IOProc setup and could conflict with other recording apps.
-    private func startVolumePolling() {
-        Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
-            self?.pollVolumes()
-        }
-        // Refresh device list (including battery levels) every 60 s.
+    private func startPeriodicRefresh() {
         // Batteries on Bluetooth devices can change while connected without
         // triggering a device-list change event, so a periodic refresh is needed.
-        Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
-            self?.refreshDevices()
+        Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { [weak self] _ in
+            self?.refreshBluetoothBatterySnapshotIfNeeded(force: true)
         }
-    }
-
-    private func pollVolumes() {
-        let newOut = defaultOutput.flatMap { volume(for: $0, isOutput: true) } ?? outputVolume
-        let newIn = defaultInput.flatMap { volume(for: $0, isOutput: false) } ?? inputVolume
-        let newAlert = Self.readAlertVolume()
-        if abs(newOut - outputVolume) > 0.005 { outputVolume = newOut }
-        if abs(newIn - inputVolume) > 0.005 { inputVolume = newIn }
-        if abs(newAlert - alertVolume) > 0.005 { alertVolume = newAlert }
     }
 
     // MARK: – Input level (AVAudioEngine)
 
     private func startInputLevelMonitor() {
         stopInputLevelMonitor()
+
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized:
+            break
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    guard granted, self.isInputLevelMonitoringEnabled else { return }
+                    self.startInputLevelMonitor()
+                }
+            }
+            return
+        case .denied, .restricted:
+            inputLevel = 0
+            return
+        @unknown default:
+            inputLevel = 0
+            return
+        }
+
         let engine = AVAudioEngine()
         let input = engine.inputNode
-        // Guard: no input channels means no active input device — nothing to tap.
-        guard input.outputFormat(forBus: 0).channelCount > 0 else { return }
         // Pass nil so AVAudioEngine picks its own compatible format.
         // Passing the hardware format explicitly crashes when the device reports a
         // deinterleaved layout after a switch (AVAudioEngine rejects it as a mismatch).
         input.installTap(onBus: 0, bufferSize: 1024, format: nil) { [weak self] buffer, _ in
             guard let data = buffer.floatChannelData else { return }
             let ch = Int(buffer.format.channelCount)
+            guard ch > 0 else { return }
             let fr = Int(buffer.frameLength)
             var sum: Float = 0
             for c in 0 ..< ch {
@@ -250,10 +270,15 @@ final class AudioManager: ObservableObject {
         ) == noErr
         else { return [] }
         let powerSources = fetchPowerSourceBatteries()
-        return ids.compactMap { makeDevice(from: $0, powerSources: powerSources) }
+        let btSnapshot = bluetoothBatterySnapshot
+        return ids.compactMap { makeDevice(from: $0, powerSources: powerSources, bluetoothBatterySnapshot: btSnapshot) }
     }
 
-    private func makeDevice(from id: AudioDeviceID, powerSources: [String: Float] = [:]) -> AudioDevice? {
+    private func makeDevice(
+        from id: AudioDeviceID,
+        powerSources: [PowerSourceBattery] = [],
+        bluetoothBatterySnapshot: BluetoothBatterySnapshot = .init()
+    ) -> AudioDevice? {
         guard
             let uid = stringProperty(id, kAudioDevicePropertyDeviceUID),
             let name = stringProperty(id, kAudioDevicePropertyDeviceNameCFString)
@@ -270,21 +295,59 @@ final class AudioManager: ObservableObject {
         let hasOut = hasStreams(id, scope: kAudioObjectPropertyScopeOutput)
         guard hasIn || hasOut else { return nil }
 
-        let (iconBase, isApple) = fetchIconInfo(id)
+        let modelUID = stringProperty(id, kAudioDevicePropertyModelUID)
+
+        let (iconBase, isAppleFromIconPath) = fetchIconInfo(id)
+        var isAppleMade = isAppleFromIconPath
+        var bluetoothMinorType: String? = nil
+        if transport == .bluetooth {
+            bluetoothMinorType = bluetoothMinorTypeFromBluetoothSnapshot(
+                deviceName: name,
+                uid: uid,
+                snapshot: bluetoothBatterySnapshot
+            )
+            if let vendorID = bluetoothVendorIDFromBluetoothSnapshot(
+                deviceName: name,
+                uid: uid,
+                snapshot: bluetoothBatterySnapshot
+            ),
+                vendorID == 0x004C
+            {
+                isAppleMade = true
+            }
+        }
+
         // Battery resolution order:
-        //   1. CoreAudio 'batt' — works for some USB headsets and virtual devices
-        //   2. IOPowerSources name-match — the same API used by macOS Control Center;
-        //      covers AirPods, Beats, BT keyboards/mice; works even for renamed devices
-        //   3. IOKit HID service scan — fallback for third-party BT HID headsets
-        let battery = fetchBatteryLevel(id)
-            ?? batteryFromPowerSources(name, powerSources)
-            ?? (transport == .bluetooth ? fetchBluetoothBatteryViaIOKit(uid: uid) : nil)
+        //   1. IOPowerSources (when available)
+        //   2. system_profiler SPBluetoothDataType (Bluetooth battery, incl. multi-cell)
+        //   3. CoreAudio 'batt' (single value)
+        //   4. IOKit HID fallback for third-party BT HID devices (single value)
+
+        var batteryStates: [AudioDevice.BatteryState] = []
+        batteryStates.append(contentsOf: batteryStatesFromPowerSources(name, powerSources))
+        if transport == .bluetooth {
+            batteryStates.append(contentsOf: batteryStatesFromBluetoothSnapshot(
+                deviceName: name,
+                uid: uid,
+                snapshot: bluetoothBatterySnapshot
+            ))
+        }
+        batteryStates = Self.normalizedBatteryStates(batteryStates)
+
+        if batteryStates.isEmpty, let coreAudioBattery = fetchBatteryLevel(id) {
+            batteryStates = [.init(kind: .device, level: coreAudioBattery, sourceName: "CoreAudio")]
+        }
+        if batteryStates.isEmpty, transport == .bluetooth, let fallback = fetchBluetoothBatteryViaIOKit(uid: uid) {
+            batteryStates = [.init(kind: .device, level: fallback, sourceName: "IOKit")]
+        }
         return AudioDevice(id: id, uid: uid, name: name,
                            hasInput: hasIn, hasOutput: hasOut,
                            transportType: transport,
                            iconBaseName: iconBase,
-                           isAppleMade: isApple,
-                           batteryLevel: battery)
+                           modelUID: modelUID,
+                           isAppleMade: isAppleMade,
+                           bluetoothMinorType: bluetoothMinorType,
+                           batteryStates: batteryStates)
     }
 
     /// kAudioDevicePropertyIcon → (lowercased filename stem, isAppleMade).
@@ -302,12 +365,18 @@ final class AudioManager: ObservableObject {
             mScope: kAudioObjectPropertyScopeGlobal,
             mElement: kAudioObjectPropertyElementMain
         )
+        guard AudioObjectHasProperty(id, &addr) else { return (nil, false) }
+
+        var dataSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(id, &addr, 0, nil, &dataSize) == noErr else { return (nil, false) }
+
+        let expected = UInt32(MemoryLayout<Unmanaged<CFURL>?>.size)
+        guard dataSize == expected else { return (nil, false) }
+
         var urlRef: Unmanaged<CFURL>? = nil
-        var size = UInt32(MemoryLayout<Unmanaged<CFURL>?>.size)
+        var size = dataSize
         let status = withUnsafeMutablePointer(to: &urlRef) { ptr in
-            ptr.withMemoryRebound(to: UInt8.self, capacity: Int(size)) { raw in
-                AudioObjectGetPropertyData(id, &addr, 0, nil, &size, raw)
-            }
+            AudioObjectGetPropertyData(id, &addr, 0, nil, &size, ptr)
         }
         guard status == noErr, let url = urlRef?.takeRetainedValue() as URL? else {
             return (nil, false)
@@ -343,18 +412,255 @@ final class AudioManager: ObservableObject {
 
     // MARK: – IOPowerSources battery (dynamic name-based matching)
 
+    private struct BluetoothBatterySnapshot {
+        var byMAC: [String: [AudioDevice.BatteryState]] = [:] // key: aa:bb:cc:dd:ee:ff
+        var byNameKey: [String: [AudioDevice.BatteryState]] = [:] // key: batteryMatchKey(deviceName)
+        var vendorIDByMAC: [String: Int] = [:] // key: aa:bb:cc:dd:ee:ff
+        var vendorIDByNameKey: [String: Int] = [:] // key: batteryMatchKey(deviceName)
+        var productIDByMAC: [String: Int] = [:] // key: aa:bb:cc:dd:ee:ff
+        var productIDByNameKey: [String: Int] = [:] // key: batteryMatchKey(deviceName)
+        var minorTypeByMAC: [String: String] = [:] // key: aa:bb:cc:dd:ee:ff
+        var minorTypeByNameKey: [String: String] = [:] // key: batteryMatchKey(deviceName)
+    }
+
+    private func refreshBluetoothBatterySnapshotIfNeeded(force: Bool = false) {
+        if bluetoothBatterySnapshotRefreshInFlight { return }
+        if !force, let last = bluetoothBatterySnapshotLastRefreshedAt, Date().timeIntervalSince(last) < 30 {
+            return
+        }
+        bluetoothBatterySnapshotRefreshInFlight = true
+
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let snapshot = Self.fetchBluetoothBatterySnapshotFromSystemProfiler()
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.bluetoothBatterySnapshot = snapshot
+                self.bluetoothBatterySnapshotLastRefreshedAt = Date()
+                self.bluetoothBatterySnapshotRefreshInFlight = false
+                self.refreshDevices()
+            }
+        }
+    }
+
+    private static func fetchBluetoothBatterySnapshotFromSystemProfiler() -> BluetoothBatterySnapshot {
+        let profilerPath = "/usr/sbin/system_profiler"
+        guard FileManager.default.isExecutableFile(atPath: profilerPath) else { return BluetoothBatterySnapshot() }
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: profilerPath)
+        process.arguments = ["SPBluetoothDataType", "-json"]
+        let out = Pipe()
+        process.standardOutput = out
+        process.standardError = Pipe()
+        do { try process.run() } catch { return BluetoothBatterySnapshot() }
+        let data = out.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        guard process.terminationStatus == 0 else { return BluetoothBatterySnapshot() }
+
+        guard
+            let obj = try? JSONSerialization.jsonObject(with: data, options: []),
+            let top = obj as? [String: Any],
+            let roots = top["SPBluetoothDataType"] as? [[String: Any]]
+        else { return BluetoothBatterySnapshot() }
+
+        var snapshot = BluetoothBatterySnapshot()
+
+        func ingestSection(from root: [String: Any], _ sectionKey: String) {
+            guard let section = root[sectionKey] as? [Any] else { return }
+            for entry in section {
+                guard let entryDict = entry as? [String: Any] else { continue }
+                for (deviceName, infoAny) in entryDict {
+                    guard let info = infoAny as? [String: Any] else { continue }
+                    let states = batteryStatesFromSystemProfilerDeviceInfo(info)
+                    let vendorID = vendorIDFromSystemProfilerDeviceInfo(info)
+                    let productID = productIDFromSystemProfilerDeviceInfo(info)
+                    let minorType = minorTypeFromSystemProfilerDeviceInfo(info)
+
+                    if let macRaw = info["device_address"] as? String {
+                        let mac = macRaw.lowercased()
+                        if !states.isEmpty {
+                            snapshot.byMAC[mac] = normalizedBatteryStates((snapshot.byMAC[mac] ?? []) + states)
+                        }
+                        if let vendorID {
+                            snapshot.vendorIDByMAC[mac] = vendorID
+                        }
+                        if let productID {
+                            snapshot.productIDByMAC[mac] = productID
+                        }
+                        if let minorType {
+                            snapshot.minorTypeByMAC[mac] = minorType
+                        }
+                    }
+
+                    let nameKey = batteryMatchKey(deviceName)
+                    if !nameKey.isEmpty {
+                        if !states.isEmpty {
+                            snapshot.byNameKey[nameKey] = normalizedBatteryStates((snapshot.byNameKey[nameKey] ?? []) + states)
+                        }
+                        if let vendorID {
+                            snapshot.vendorIDByNameKey[nameKey] = vendorID
+                        }
+                        if let productID {
+                            snapshot.productIDByNameKey[nameKey] = productID
+                        }
+                        if let minorType {
+                            snapshot.minorTypeByNameKey[nameKey] = minorType
+                        }
+                    }
+                }
+            }
+        }
+
+        for root in roots {
+            ingestSection(from: root, "device_connected")
+            ingestSection(from: root, "device_not_connected")
+        }
+
+        return snapshot
+    }
+
+    private func batteryStatesFromBluetoothSnapshot(
+        deviceName: String,
+        uid: String,
+        snapshot: BluetoothBatterySnapshot
+    ) -> [AudioDevice.BatteryState] {
+        if let mac = Self.bluetoothMAC(fromUID: uid),
+           let states = snapshot.byMAC[mac]
+        {
+            return states
+        }
+        let key = Self.batteryMatchKey(deviceName)
+        return snapshot.byNameKey[key] ?? []
+    }
+
+    private func bluetoothVendorIDFromBluetoothSnapshot(
+        deviceName: String,
+        uid: String,
+        snapshot: BluetoothBatterySnapshot
+    ) -> Int? {
+        if let mac = Self.bluetoothMAC(fromUID: uid),
+           let vendorID = snapshot.vendorIDByMAC[mac]
+        {
+            return vendorID
+        }
+        let key = Self.batteryMatchKey(deviceName)
+        return snapshot.vendorIDByNameKey[key]
+    }
+
+    private func bluetoothProductIDFromBluetoothSnapshot(
+        deviceName: String,
+        uid: String,
+        snapshot: BluetoothBatterySnapshot
+    ) -> Int? {
+        if let mac = Self.bluetoothMAC(fromUID: uid),
+           let productID = snapshot.productIDByMAC[mac]
+        {
+            return productID
+        }
+        let key = Self.batteryMatchKey(deviceName)
+        return snapshot.productIDByNameKey[key]
+    }
+
+    private func bluetoothMinorTypeFromBluetoothSnapshot(
+        deviceName: String,
+        uid: String,
+        snapshot: BluetoothBatterySnapshot
+    ) -> String? {
+        if let mac = Self.bluetoothMAC(fromUID: uid),
+           let minor = snapshot.minorTypeByMAC[mac]
+        {
+            return minor
+        }
+        let key = Self.batteryMatchKey(deviceName)
+        return snapshot.minorTypeByNameKey[key]
+    }
+
+    private static func bluetoothMAC(fromUID uid: String) -> String? {
+        // UID format for BT devices: "2C-32-6A-E9-E9-65:output"
+        let parts = uid.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: true)
+        guard let first = parts.first else { return nil }
+        let macDash = String(first).lowercased()
+        guard macDash.count == 17, macDash.filter({ $0 == "-" }).count == 5 else { return nil }
+        return macDash.replacingOccurrences(of: "-", with: ":")
+    }
+
+    private static func batteryStatesFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> [AudioDevice.BatteryState] {
+        let candidates: [(String, AudioDevice.BatteryState.Kind)] = [
+            ("device_batteryLevelLeft", .left),
+            ("device_batteryLevelRight", .right),
+            ("device_batteryLevelCase", .case),
+            ("device_batteryLevelMain", .device),
+            ("device_batteryLevelSingle", .device),
+            ("device_batteryLevel", .device),
+        ]
+
+        var states: [AudioDevice.BatteryState] = []
+        for (key, kind) in candidates {
+            guard let raw = info[key], let level = parseBatteryPercentFraction(raw) else { continue }
+            states.append(.init(kind: kind, level: level, sourceName: "Bluetooth"))
+        }
+        return normalizedBatteryStates(states)
+    }
+
+    private static func vendorIDFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> Int? {
+        guard let raw = info["device_vendorID"] else { return nil }
+        if let s = raw as? String {
+            let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.hasPrefix("0x") { return Int(trimmed.dropFirst(2), radix: 16) }
+            return Int(trimmed)
+        }
+        if let n = raw as? NSNumber {
+            return n.intValue
+        }
+        return nil
+    }
+
+    private static func productIDFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> Int? {
+        guard let raw = info["device_productID"] else { return nil }
+        if let s = raw as? String {
+            let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.hasPrefix("0x") { return Int(trimmed.dropFirst(2), radix: 16) }
+            return Int(trimmed)
+        }
+        if let n = raw as? NSNumber {
+            return n.intValue
+        }
+        return nil
+    }
+
+    private static func minorTypeFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> String? {
+        guard let s = info["device_minorType"] as? String else { return nil }
+        let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private static func parseBatteryPercentFraction(_ value: Any) -> Float? {
+        if let n = value as? NSNumber {
+            let f = n.floatValue
+            if f <= 1 { return f.clamped(to: 0 ... 1) }
+            return (f / 100).clamped(to: 0 ... 1)
+        }
+        guard let s = value as? String else { return nil }
+        let digits = s.filter(\.isNumber)
+        guard let pct = Int(digits) else { return nil }
+        return Float(pct).clamped(to: 0 ... 100) / 100
+    }
+
     /// Reads all external power sources via the public IOPowerSources API — the same source
     /// that macOS Control Center uses to show AirPods battery.
     ///
-    /// Returns a map of lowercased device name → battery fraction [0…1].
-    /// Devices with multiple cells (AirPods left / right / case) are merged by keeping
-    /// the minimum so we show the most-critical value.
-    private func fetchPowerSourceBatteries() -> [String: Float] {
+    /// Returns a list of power source names and their battery fraction [0…1].
+    private struct PowerSourceBattery {
+        let name: String
+        let level: Float
+    }
+
+    private func fetchPowerSourceBatteries() -> [PowerSourceBattery] {
         guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
               let list = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef]
-        else { return [:] }
+        else { return [] }
 
-        var result: [String: Float] = [:]
+        var result: [PowerSourceBattery] = []
         for source in list {
             guard
                 let desc = IOPSGetPowerSourceDescription(snapshot, source)?.takeUnretainedValue() as? [String: Any],
@@ -364,20 +670,107 @@ final class AudioManager: ObservableObject {
                 let maxCap = desc["Max Capacity"] as? Int, maxCap > 0
             else { continue }
             let level = Float(current).clamped(to: 0 ... Float(maxCap)) / Float(maxCap)
-            let key = name.lowercased()
-            result[key] = min(result[key] ?? level, level) // keep the lowest cell
+            result.append(PowerSourceBattery(name: name, level: level))
         }
-        return result
+        // De-duplicate identical names (keep the lowest reading).
+        var best: [String: PowerSourceBattery] = [:]
+        for item in result {
+            let key = item.name.lowercased()
+            if let existing = best[key] {
+                if item.level < existing.level { best[key] = item }
+            } else {
+                best[key] = item
+            }
+        }
+        return best.values.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
-    /// Matches a CoreAudio device name against the IOPowerSources map.
-    /// Tries exact match first, then substring containment in either direction —
-    /// handles renamed AirPods (e.g. "[Yuna] ClayWave" ↔ original BT name).
-    private func batteryFromPowerSources(_ deviceName: String, _ ps: [String: Float]) -> Float? {
-        guard !ps.isEmpty else { return nil }
-        let lower = deviceName.lowercased()
-        if let exact = ps[lower] { return exact }
-        return ps.first { k, _ in lower.contains(k) || k.contains(lower) }?.value
+    /// Matches a CoreAudio device name against the IOPowerSources list.
+    /// Returns 0…N battery states (AirPods often have left/right/case).
+    private func batteryStatesFromPowerSources(
+        _ deviceName: String,
+        _ ps: [PowerSourceBattery]
+    ) -> [AudioDevice.BatteryState] {
+        guard !ps.isEmpty else { return [] }
+        let deviceLower = deviceName.lowercased()
+        let deviceKey = Self.batteryMatchKey(deviceName)
+        guard deviceKey.count >= 3 else { return [] }
+
+        let matches = ps.filter { source in
+            let sourceLower = source.name.lowercased()
+            if sourceLower == deviceLower { return true }
+            let sourceKey = Self.batteryMatchKey(source.name)
+            guard !sourceKey.isEmpty else { return false }
+            return deviceKey.contains(sourceKey) || sourceKey.contains(deviceKey)
+        }
+
+        var states = matches.map { source in
+            AudioDevice.BatteryState(
+                kind: Self.inferBatteryKind(from: source.name),
+                level: source.level,
+                sourceName: source.name
+            )
+        }
+        states = Self.normalizedBatteryStates(states)
+        return states
+    }
+
+    private static func inferBatteryKind(from name: String) -> AudioDevice.BatteryState.Kind {
+        let n = name.lowercased()
+        if n.contains("left") { return .left }
+        if n.contains("right") { return .right }
+        if n.contains("case") { return .case }
+        return .device
+    }
+
+    private static func batteryMatchKey(_ s: String) -> String {
+        var out = s.lowercased()
+        let removeTokens = [
+            // AirPods / multi-cell naming
+            "left",
+            "right",
+            "case",
+            "charging case",
+            // Bluetooth profile suffixes
+            "hands-free",
+            "hands free",
+            "handsfree",
+            "headset",
+            "hfp",
+            "ag audio",
+            "audio gateway",
+        ]
+        for token in removeTokens {
+            out = out.replacingOccurrences(of: token, with: "")
+        }
+        out = out.replacingOccurrences(of: "[-–—_()\\[\\]]", with: " ", options: .regularExpression)
+        out = out.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+        return out.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func normalizedBatteryStates(_ states: [AudioDevice.BatteryState]) -> [AudioDevice.BatteryState] {
+        guard !states.isEmpty else { return [] }
+        var bestByKind: [AudioDevice.BatteryState.Kind: AudioDevice.BatteryState] = [:]
+        for state in states {
+            if let existing = bestByKind[state.kind] {
+                if state.level < existing.level { bestByKind[state.kind] = state }
+            } else {
+                bestByKind[state.kind] = state
+            }
+        }
+        let order: [AudioDevice.BatteryState.Kind: Int] = [
+            .left: 0,
+            .right: 1,
+            .device: 2,
+            .other: 3,
+            .case: 4,
+        ]
+        return bestByKind.values.sorted { a, b in
+            let l = order[a.kind] ?? 99
+            let r = order[b.kind] ?? 99
+            if l != r { return l < r }
+            return (a.sourceName ?? "").localizedCaseInsensitiveCompare(b.sourceName ?? "") == .orderedAscending
+        }
     }
 
     // MARK: – IOKit HID battery (last-resort fallback for third-party BT HID headsets)
@@ -486,7 +879,11 @@ final class AudioManager: ObservableObject {
         if let existing { return existing }
         // Device connected and became default before the device-list listener fired
         let powerSources = fetchPowerSourceBatteries()
-        return makeDevice(from: devID, powerSources: powerSources)
+        return makeDevice(
+            from: devID,
+            powerSources: powerSources,
+            bluetoothBatterySnapshot: bluetoothBatterySnapshot
+        )
     }
 
     // MARK: – Helpers
@@ -496,12 +893,21 @@ final class AudioManager: ObservableObject {
             mSelector: selector, mScope: kAudioObjectPropertyScopeGlobal,
             mElement: kAudioObjectPropertyElementMain
         )
+        guard AudioObjectHasProperty(id, &addr) else { return nil }
+
+        var dataSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(id, &addr, 0, nil, &dataSize) == noErr else { return nil }
+
+        // Some CoreAudio string properties (notably manufacturer on newer macOS versions)
+        // can return raw C-string bytes instead of a CFString pointer. Only accept the
+        // pointer-sized CFStringRef representation here to avoid bad-pointer crashes.
+        let expected = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
+        guard dataSize == expected else { return nil }
+
         var cfRef: Unmanaged<CFString>? = nil
-        var size = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
+        var size = dataSize
         let status = withUnsafeMutablePointer(to: &cfRef) { ptr in
-            ptr.withMemoryRebound(to: UInt8.self, capacity: Int(size)) { raw in
-                AudioObjectGetPropertyData(id, &addr, 0, nil, &size, raw)
-            }
+            AudioObjectGetPropertyData(id, &addr, 0, nil, &size, ptr)
         }
         guard status == noErr, let ref = cfRef else { return nil }
         return ref.takeRetainedValue() as String
@@ -522,21 +928,91 @@ final class AudioManager: ObservableObject {
         let sys = AudioObjectID(kAudioObjectSystemObject)
         addListener(on: sys, selector: kAudioHardwarePropertyDevices) { [weak self] in
             self?.refreshDevices()
+            self?.refreshBluetoothBatterySnapshotIfNeeded(force: true)
             NotificationCenter.default.post(name: .audioDevicesChanged, object: self)
         }
         addListener(on: sys, selector: kAudioHardwarePropertyDefaultOutputDevice) { [weak self] in
             guard let self else { return }
             defaultOutput = fetchDefaultDevice(input: false)
             refreshVolumes()
+            rebuildVolumeListenersIfNeeded()
+            refreshBluetoothBatterySnapshotIfNeeded(force: true)
         }
         addListener(on: sys, selector: kAudioHardwarePropertyDefaultInputDevice) { [weak self] in
             guard let self else { return }
             inputLevel = 0 // reset immediately
             defaultInput = fetchDefaultDevice(input: true)
             refreshVolumes()
+            rebuildVolumeListenersIfNeeded()
+            refreshBluetoothBatterySnapshotIfNeeded(force: true)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.startInputLevelMonitor() // reattach tap to new device
+                guard let self, isInputLevelMonitoringEnabled else { return }
+                startInputLevelMonitor() // reattach tap to new device
             }
+        }
+    }
+
+    // MARK: – Volume listeners (default devices)
+
+    private struct ListenerToken {
+        let objectID: AudioObjectID
+        var address: AudioObjectPropertyAddress
+        let block: AudioObjectPropertyListenerBlock
+    }
+
+    private func rebuildVolumeListenersIfNeeded() {
+        let outID = defaultOutput?.id ?? kAudioObjectUnknown
+        let inID = defaultInput?.id ?? kAudioObjectUnknown
+        guard outID != volumeListenerOutputID || inID != volumeListenerInputID else { return }
+
+        removeVolumeListeners()
+        if let out = defaultOutput { installVolumeListeners(for: out, isOutput: true) }
+        if let inp = defaultInput { installVolumeListeners(for: inp, isOutput: false) }
+        volumeListenerOutputID = outID
+        volumeListenerInputID = inID
+    }
+
+    private func removeVolumeListeners() {
+        for token in volumeListeners {
+            var addr = token.address
+            AudioObjectRemovePropertyListenerBlock(token.objectID, &addr, .main, token.block)
+        }
+        volumeListeners.removeAll()
+        volumeListenerOutputID = kAudioObjectUnknown
+        volumeListenerInputID = kAudioObjectUnknown
+    }
+
+    private func installVolumeListeners(for device: AudioDevice, isOutput: Bool) {
+        let deviceObjectID = AudioObjectID(device.id)
+        let scope: AudioObjectPropertyScope = isOutput
+            ? kAudioObjectPropertyScopeOutput
+            : kAudioObjectPropertyScopeInput
+        let elements: [UInt32] = [kAudioObjectPropertyElementMain, 1, 2]
+
+        for element in elements {
+            var addr = AudioObjectPropertyAddress(
+                mSelector: kAudioDevicePropertyVolumeScalar,
+                mScope: scope,
+                mElement: element
+            )
+            guard AudioObjectHasProperty(device.id, &addr) else { continue }
+            let block: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
+                DispatchQueue.main.async { self?.refreshVolumeFromSystem(isOutput: isOutput) }
+            }
+            AudioObjectAddPropertyListenerBlock(deviceObjectID, &addr, .main, block)
+            volumeListeners.append(ListenerToken(objectID: deviceObjectID, address: addr, block: block))
+        }
+    }
+
+    private func refreshVolumeFromSystem(isOutput: Bool) {
+        if isOutput {
+            guard let out = defaultOutput else { return }
+            let newValue = volume(for: out, isOutput: true) ?? outputVolume
+            if abs(newValue - outputVolume) > 0.005 { outputVolume = newValue }
+        } else {
+            guard let inp = defaultInput else { return }
+            let newValue = volume(for: inp, isOutput: false) ?? inputVolume
+            if abs(newValue - inputVolume) > 0.005 { inputVolume = newValue }
         }
     }
 

@@ -28,6 +28,12 @@ A lightweight macOS menu bar app that automatically switches between audio devic
 ### Option B — Build from source
 See [Building from source](#building-from-source) below.
 
+### Option C — Homebrew
+```bash
+brew tap yunabraska/tap
+brew install --cask sentrio
+```
+
 ---
 
 ## Quick Start

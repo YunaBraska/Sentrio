@@ -61,6 +61,15 @@ jobs:
           cd build
           zip -r --symlinks "Sentrio-${{ steps.version.outputs.tag }}.zip" Sentrio.app
 
+      - name: Compute SHA256 (for Homebrew)
+        id: sha
+        shell: bash
+        run: |
+          set -euo pipefail
+          zip="build/Sentrio-${{ steps.version.outputs.tag }}.zip"
+          sha="$(shasum -a 256 "${zip}" | awk '{print $1}')"
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -73,3 +82,49 @@ jobs:
           files: build/Sentrio-${{ steps.version.outputs.tag }}.zip
           draft: false
           prerelease: false
+
+      - name: Checkout Homebrew tap
+        if: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
+        uses: actions/checkout@v4
+        with:
+          repository: YunaBraska/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+
+      - name: Update Homebrew cask
+        if: ${{ secrets.HOMEBREW_TAP_TOKEN != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.tag }}"
+          sha="${{ steps.sha.outputs.sha }}"
+
+          cask="homebrew-tap/Casks/sentrio.rb"
+          mkdir -p "$(dirname "${cask}")"
+          cat > "${cask}" <<EOF
+          cask "sentrio" do
+            version "${version}"
+            sha256 "${sha}"
+
+            url "https://github.com/YunaBraska/Sentrio/releases/download/#{version}/Sentrio-#{version}.zip",
+                verified: "github.com/YunaBraska/Sentrio/"
+            name "Sentrio"
+            desc "macOS menu bar app that auto-switches audio devices"
+            homepage "https://github.com/YunaBraska/Sentrio"
+
+            depends_on macos: ">= :ventura"
+
+            app "Sentrio.app"
+          end
+          EOF
+
+          cd homebrew-tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/sentrio.rb
+          if git diff --cached --quiet; then
+            echo "Homebrew cask already up to date."
+            exit 0
+          fi
+          git commit -m "sentrio: ${version}"
+          git push

@@ -43,3 +43,4 @@ No SwiftLint/SwiftFormat config is currently enforced—use Xcode formatting and
 - Use the PR template in `.github/PULL_REQUEST_TEMPLATE.md` (summary, type, linked issue, testing checklist).
 - Commit messages follow `type: short summary` (e.g., `fix: …`, `feat: …`, `test: …`, `docs: …`), present tense.
 - Releases are created via **Actions → Release → Run workflow**; version tags are UTC timestamps (`YYYY.MM.DDDHHMM`).
+- Homebrew: the Release workflow updates the cask in `YunaBraska/homebrew-tap` (requires `HOMEBREW_TAP_TOKEN` secret).

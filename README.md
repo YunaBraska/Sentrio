@@ -27,15 +27,8 @@ A lightweight macOS menu bar app that automatically switches between audio devic
 
 ## Screenshots
 
-Add screenshots to `docs/screenshots/` using these filenames (the README will auto-render them once you add the files):
-
-- `docs/screenshots/menu-bar.png`
-- `docs/screenshots/preferences-output.png`
-- `docs/screenshots/preferences-general.png`
-
-![Menu bar panel](docs/screenshots/menu-bar.png)
-![Preferences (Output)](docs/screenshots/preferences-output.png)
-![Preferences (General)](docs/screenshots/preferences-general.png)
+![Menu bar panel](docs/screenshots/bar_menu.png)
+![Preferences](docs/screenshots/preferences.png)
 
 ## Install
 

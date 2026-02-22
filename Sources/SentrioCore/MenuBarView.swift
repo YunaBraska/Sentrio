@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 // MARK: – Root
@@ -60,7 +61,9 @@ struct MenuBarView: View {
                         audio.outputVolume = v
                         if let d = audio.defaultOutput { audio.setVolume(v, for: d, isOutput: true) }
                     }
-                )
+                ),
+                playAction: { SoundLibrary.play(settings.testSound) },
+                onEditingEnded: { SoundLibrary.play(settings.testSound) }
             )
             VolumeRow(
                 icon: "mic",
@@ -78,8 +81,12 @@ struct MenuBarView: View {
                 label: "Alert",
                 volume: Binding(
                     get: { audio.alertVolume },
-                    set: { v in audio.setAlertVolume(v) }
-                )
+                    set: { v in
+                        audio.setAlertVolume(v)
+                    }
+                ),
+                playAction: { SoundLibrary.play(settings.alertSound) },
+                onEditingEnded: { SoundLibrary.play(settings.alertSound) }
             )
         }
         .padding(.horizontal, 16)
@@ -101,7 +108,7 @@ struct MenuBarView: View {
                 .padding(.bottom, 2)
 
             if devices.isEmpty {
-                Text("No devices found")
+                Text("Silence detected. How… peaceful.")
                     .font(.caption).foregroundStyle(.tertiary)
                     .padding(.horizontal, 16).padding(.bottom, 8)
             } else {
@@ -119,19 +126,26 @@ struct MenuBarView: View {
     // MARK: – Footer
 
     private var footerRow: some View {
-        HStack(spacing: 0) {
-            Button("Preferences…") { appState.openPreferences() }
-                .buttonStyle(.plain).foregroundStyle(.secondary)
-            Spacer()
-            Button("Sound Settings…") {
-                if let url = URL(string: "x-apple.systempreferences:com.apple.preference.sound") {
-                    NSWorkspace.shared.open(url)
-                }
+        VStack(alignment: .leading, spacing: 6) {
+            if EasterEggs.audioDaemonStirs() {
+                Text("The audio daemon stirs.")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
-            .buttonStyle(.plain).foregroundStyle(.secondary)
-            Spacer()
-            Button("Quit") { NSApp.terminate(nil) }
+            HStack(spacing: 0) {
+                Button("Preferences…") { appState.openPreferences() }
+                    .buttonStyle(.plain).foregroundStyle(.secondary)
+                Spacer()
+                Button("Sound Settings…") {
+                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.sound") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
                 .buttonStyle(.plain).foregroundStyle(.secondary)
+                Spacer()
+                Button("Quit") { NSApp.terminate(nil) }
+                    .buttonStyle(.plain).foregroundStyle(.secondary)
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
@@ -152,6 +166,8 @@ struct VolumeRow: View {
     let icon: String
     let label: String
     @Binding var volume: Float
+    var playAction: (() -> Void)?
+    var onEditingEnded: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 10) {
@@ -159,11 +175,28 @@ struct VolumeRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(width: 16)
-            Slider(value: $volume, in: 0 ... 1)
+            Slider(
+                value: $volume,
+                in: 0 ... 1,
+                onEditingChanged: { editing in
+                    if !editing { onEditingEnded?() }
+                }
+            )
             Image(systemName: "\(icon).fill")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(width: 16)
+
+            if let playAction {
+                Button(action: playAction) {
+                    Image(systemName: "play.circle")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 16)
+                }
+                .buttonStyle(.plain)
+                .help("Play sound")
+            }
         }
     }
 }
@@ -202,24 +235,13 @@ private struct MenuDeviceRow: View {
                     HStack(spacing: 4) {
                         Text(device.transportType.label)
                             .font(.caption2).foregroundStyle(.tertiary)
-                        if let bat = device.batterySystemImage {
-                            Image(systemName: bat)
-                                .font(.caption2).foregroundStyle(.tertiary)
+                        if !device.batteryStates.isEmpty {
+                            BatteryIconsInlineView(states: device.batteryStates)
                         }
                     }
                 }
 
                 Spacer()
-
-                // Mini level bar — only for the active device
-                // Output: shows configured volume. Input: shows live RMS level.
-                if isDefault {
-                    MiniLevelBar(
-                        level: isInput ? audio.inputLevel : audio.outputVolume,
-                        isOutput: !isInput
-                    )
-                    .frame(width: 32, height: 8)
-                }
 
                 // Priority rank
                 if let rank = priorityRank {
@@ -236,8 +258,26 @@ private struct MenuDeviceRow: View {
         .contextMenu {
             iconPickerMenu
             Divider()
+            if isAirPodsFamily {
+                Button("Bluetooth Settings…") { openBluetoothSettings() }
+                Divider()
+            }
             Button("Disable Device") { settings.disableDevice(uid: device.uid, isOutput: !isInput) }
         }
+    }
+
+    private var isAirPodsFamily: Bool {
+        switch device.deviceTypeSystemImage {
+        case "airpods", "airpodspro", "airpodsmax":
+            true
+        default:
+            false
+        }
+    }
+
+    private func openBluetoothSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.BluetoothSettings") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     private var priorityRank: Int? {

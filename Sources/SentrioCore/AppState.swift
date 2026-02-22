@@ -33,11 +33,25 @@ final class AppState: ObservableObject {
 
     // MARK: – Dynamic menu bar icon
 
+    private var activeLowestNonCaseBatteryLevel: Float? {
+        [audio.defaultOutput?.lowestNonCaseBatteryLevel, audio.defaultInput?.lowestNonCaseBatteryLevel]
+            .compactMap { $0 }
+            .min()
+    }
+
+    var isMenuBarLowBatteryWarning: Bool {
+        guard let level = activeLowestNonCaseBatteryLevel else { return false }
+        return level < 0.15
+    }
+
     /// The SF Symbol name shown as the menu bar icon.
     /// Tracks the current default output device's icon; falls back to input, then waveform.
     /// If the icon is a standard speaker symbol it adapts to the current volume level,
     /// mirroring the macOS System Settings sound icon behaviour.
     var currentMenuBarIconName: String {
+        if let level = activeLowestNonCaseBatteryLevel, level < 0.15 {
+            return AudioDevice.batterySystemImage(for: level)
+        }
         if let out = audio.defaultOutput {
             let base = settings.iconName(for: out, isOutput: true)
             return AudioDevice.volumeAdaptedIcon(base, volume: audio.outputVolume)

@@ -19,9 +19,9 @@ public struct SentrioApp: App {
                 .environmentObject(appState.audio)
                 .environmentObject(appState)
         } label: {
-            // Icon dynamically reflects the current active output device (or input)
             Image(systemName: appState.currentMenuBarIconName)
                 .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(appState.isMenuBarLowBatteryWarning ? Color.red : Color.primary)
         }
         .menuBarExtraStyle(.window)
     }

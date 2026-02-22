@@ -1,5 +1,4 @@
 import AppKit
-import AudioToolbox
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -9,18 +8,101 @@ struct PreferencesView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var appState: AppState
+    @State private var isWindowActive = false
 
     var body: some View {
-        TabView {
-            PriorityTab(isOutput: true)
-                .tabItem { Label("Output", systemImage: "speaker.wave.2") }
-            PriorityTab(isOutput: false)
-                .tabItem { Label("Input", systemImage: "mic") }
-            GeneralTab()
-                .tabItem { Label("General", systemImage: "gear") }
+        VStack(spacing: 0) {
+            TabView {
+                PriorityTab(isOutput: true)
+                    .tabItem { Label("Output", systemImage: "speaker.wave.2") }
+                PriorityTab(isOutput: false)
+                    .tabItem { Label("Input", systemImage: "mic") }
+                GeneralTab()
+                    .tabItem { Label("General", systemImage: "gear") }
+            }
+            .padding()
+
+            Divider()
+            PreferencesFooterView()
+                .environmentObject(settings)
         }
         .frame(width: 540, height: 680)
-        .padding()
+        .background(
+            WindowActivityObserver { active in
+                isWindowActive = active
+                updateInputLevelMonitoringDemand()
+            }
+        )
+        .onChange(of: settings.showInputLevelMeter) { _ in updateInputLevelMonitoringDemand() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
+    }
+
+    private func updateInputLevelMonitoringDemand() {
+        audio.setInputLevelMonitoringDemand(
+            isWindowActive && settings.showInputLevelMeter,
+            token: "prefs"
+        )
+    }
+}
+
+// MARK: – Preferences footer
+
+private struct PreferencesFooterView: View {
+    @EnvironmentObject var settings: AppSettings
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if EasterEggs.audioDaemonStirs() {
+                Text("The audio daemon stirs.")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+
+            HStack(spacing: 16) {
+                HStack(spacing: 6) {
+                    Text("Milliseconds Saved")
+                    Text(settings.millisecondsSaved, format: .number)
+                        .monospacedDigit()
+                }
+
+                Spacer()
+
+                HStack(spacing: 6) {
+                    Text("Auto-switches")
+                    Text(settings.autoSwitchCount, format: .number)
+                        .monospacedDigit()
+                }
+
+                Spacer()
+
+                HStack(spacing: 6) {
+                    Text("Signal Integrity Score")
+                    Text(settings.signalIntegrityScore, format: .number)
+                        .monospacedDigit()
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+
+            if let milestone = milestoneMessage {
+                Text(milestone)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(NSColor.windowBackgroundColor))
+    }
+
+    private var milestoneMessage: String? {
+        let ms = settings.millisecondsSaved
+        if ms >= 86_400_000 { return "You have defeated inefficiency." }
+        if ms >= 3_600_000 { return "You have outlived one coffee break." }
+        if ms >= 10000 { return "You have reclaimed 10 seconds of your life." }
+        return nil
     }
 }
 
@@ -133,7 +215,8 @@ private struct PriorityTab: View {
                                 if let d = audio.defaultInput { audio.setVolume(v, for: d, isOutput: false) }
                             }
                         ),
-                    onRelease: { NSSound(named: NSSound.Name("Tink"))?.play() }
+                    playAction: isOutput ? { SoundLibrary.play(settings.testSound) } : nil,
+                    onEditingEnded: isOutput ? { SoundLibrary.play(settings.testSound) } : nil
                 )
                 if isOutput {
                     sliderRow(
@@ -141,9 +224,12 @@ private struct PriorityTab: View {
                         label: "Alert",
                         volume: Binding(
                             get: { audio.alertVolume },
-                            set: { v in audio.setAlertVolume(v) }
+                            set: { v in
+                                audio.setAlertVolume(v)
+                            }
                         ),
-                        onRelease: { AudioServicesPlayAlertSound(kSystemSoundID_UserPreferredAlert) }
+                        playAction: { SoundLibrary.play(settings.alertSound) },
+                        onEditingEnded: { SoundLibrary.play(settings.alertSound) }
                     )
                 }
             }
@@ -159,18 +245,34 @@ private struct PriorityTab: View {
         icon: String,
         label: String,
         volume: Binding<Float>,
-        onRelease: @escaping () -> Void
+        playAction: (() -> Void)? = nil,
+        onEditingEnded: (() -> Void)? = nil
     ) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.caption).foregroundStyle(.secondary).frame(width: 16)
             Text(label)
                 .font(.caption).foregroundStyle(.secondary).frame(width: 44, alignment: .leading)
-            Slider(value: volume, in: 0 ... 1) { editing in
-                if !editing { onRelease() }
-            }
+            Slider(
+                value: volume,
+                in: 0 ... 1,
+                onEditingChanged: { editing in
+                    if !editing { onEditingEnded?() }
+                }
+            )
             Image(systemName: "\(icon).fill")
                 .font(.caption).foregroundStyle(.secondary).frame(width: 16)
+
+            if let playAction {
+                Button(action: playAction) {
+                    Image(systemName: "play.circle")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 16)
+                }
+                .buttonStyle(.plain)
+                .help("Play sound")
+            }
         }
     }
 
@@ -326,9 +428,8 @@ private struct PriorityRow: View {
                     if let dev = device {
                         Text(dev.transportType.label)
                             .font(.caption2).foregroundStyle(.tertiary)
-                        if let bat = dev.batterySystemImage {
-                            Image(systemName: bat)
-                                .font(.caption2).foregroundStyle(.tertiary)
+                        if !dev.batteryStates.isEmpty {
+                            BatteryStatesInlineView(states: dev.batteryStates)
                         }
                     } else {
                         Text("Disconnected")
@@ -344,13 +445,13 @@ private struct PriorityRow: View {
             Spacer()
 
             // Mini level bar — only for the active device
-            if isOutput
-                ? device?.uid == audio.defaultOutput?.uid
-                : device?.uid == audio.defaultInput?.uid
+            if !isOutput,
+               device?.uid == audio.defaultInput?.uid,
+               settings.showInputLevelMeter
             {
                 MiniLevelBar(
-                    level: isOutput ? audio.outputVolume : audio.inputLevel,
-                    isOutput: isOutput
+                    level: audio.inputLevel,
+                    isOutput: false
                 )
                 .frame(width: 36, height: 8)
             }
@@ -382,7 +483,8 @@ private struct PriorityRow: View {
 
     private var effectiveIcon: String {
         guard let dev = device else {
-            return settings.deviceIcons[uid]?[isOutput ? "output" : "input"] ?? "questionmark.circle"
+            return settings.deviceIcons[uid]?[isOutput ? "output" : "input"]
+                ?? settings.defaultIconName(for: uid, isOutput: isOutput)
         }
         return settings.iconName(for: dev, isOutput: isOutput)
     }
@@ -451,6 +553,9 @@ private struct DisabledRow: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
 
+    @State private var showRenamePopover = false
+    @State private var pendingName = ""
+
     private var device: AudioDevice? {
         (isOutput ? audio.outputDevices : audio.inputDevices).first { $0.uid == uid }
     }
@@ -463,7 +568,7 @@ private struct DisabledRow: View {
     private var iconName: String {
         if let dev = device { return settings.iconName(for: dev, isOutput: isOutput) }
         return settings.deviceIcons[uid]?[isOutput ? "output" : "input"]
-            ?? (isOutput ? "speaker.wave.2" : "mic")
+            ?? settings.defaultIconName(for: uid, isOutput: isOutput)
     }
 
     var body: some View {
@@ -483,14 +588,41 @@ private struct DisabledRow: View {
                 .frame(width: 24, height: 24)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(settings.displayName(for: uid, isOutput: isOutput))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                Text(isConnected ? "Connected" : "Disconnected")
-                    .font(.caption2)
-                    .foregroundStyle(isConnected
-                        ? AnyShapeStyle(.green.opacity(0.8))
-                        : AnyShapeStyle(.tertiary))
+                HStack(spacing: 4) {
+                    Text(settings.displayName(for: uid, isOutput: isOutput))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Button {
+                        pendingName = settings.displayName(for: uid, isOutput: isOutput)
+                        showRenamePopover = true
+                    } label: {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 9))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Rename for this \(isOutput ? "output" : "input") role")
+                    .popover(isPresented: $showRenamePopover, arrowEdge: .trailing) {
+                        RenamePopover(
+                            uid: uid, isOutput: isOutput,
+                            originalName: settings.knownDevices[uid] ?? uid,
+                            name: $pendingName,
+                            isPresented: $showRenamePopover
+                        )
+                        .environmentObject(settings)
+                        .padding(14)
+                    }
+                }
+                HStack(spacing: 6) {
+                    Text(isConnected ? "Connected" : "Disconnected")
+                        .font(.caption2)
+                        .foregroundStyle(isConnected
+                            ? AnyShapeStyle(.green.opacity(0.8))
+                            : AnyShapeStyle(.tertiary))
+                    if let dev = device, !dev.batteryStates.isEmpty {
+                        BatteryStatesInlineView(states: dev.batteryStates)
+                    }
+                }
             }
 
             Spacer()
@@ -584,6 +716,9 @@ private struct GeneralTab: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
     @State private var launchAtLogin = false
+    @State private var importExportStatus: String?
+    @State private var importExportStatusIsError = false
+    @State private var lastExportURL: URL?
 
     var body: some View {
         Form {
@@ -608,6 +743,33 @@ private struct GeneralTab: View {
                 Button("Open Sound Settings…") {
                     openSite("x-apple.systempreferences:com.apple.preference.sound")
                 }
+            }
+
+            // ── Privacy ─────────────────────────────────────────────
+            Section("Privacy") {
+                Toggle("Show live input level meter (Preferences)", isOn: $settings.showInputLevelMeter)
+                Text("If enabled, Sentrio monitors the default input device only while Preferences is open. macOS will show the microphone‑in‑use indicator during that time.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            // ── Import / export ─────────────────────────────────────
+            Section("Settings") {
+                Button("Export Settings…") { exportSettings() }
+                Button("Import Settings…") { importSettings() }
+                if let importExportStatus {
+                    Text(importExportStatus)
+                        .font(.caption)
+                        .foregroundStyle(importExportStatusIsError ? .red : .secondary)
+                }
+                if let lastExportURL {
+                    Button("Show in Finder") {
+                        NSWorkspace.shared.activateFileViewerSelecting([lastExportURL])
+                    }
+                }
+                Text("Export includes priority lists, disabled devices, custom names/icons, and volume memory.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             // ── Volume memory ────────────────────────────────────────
@@ -656,11 +818,53 @@ private struct GeneralTab: View {
             }
         }
         .formStyle(.grouped)
-        .onAppear { launchAtLogin = settings.isLaunchAtLoginEnabled }
+        .onAppear {
+            launchAtLogin = settings.isLaunchAtLoginEnabled
+        }
     }
 
     private func openSite(_ urlString: String) {
         guard let url = URL(string: urlString) else { return }
         NSWorkspace.shared.open(url)
+    }
+
+    private func exportSettings() {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.nameFieldStringValue = "sentrio-settings.json"
+        panel.canCreateDirectories = true
+        panel.isExtensionHidden = false
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try settings.exportSettings(to: url)
+            lastExportURL = url
+            setImportExportStatus("Exported settings.", isError: false)
+        } catch {
+            lastExportURL = nil
+            setImportExportStatus("Export failed: \(error.localizedDescription)", isError: true)
+        }
+    }
+
+    private func importSettings() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try settings.importSettings(from: url)
+            setImportExportStatus("Imported settings.", isError: false)
+        } catch {
+            setImportExportStatus("Import failed: \(error.localizedDescription)", isError: true)
+        }
+    }
+
+    private func setImportExportStatus(_ message: String, isError: Bool) {
+        importExportStatus = message
+        importExportStatusIsError = isError
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [message] in
+            if importExportStatus == message { importExportStatus = nil }
+        }
     }
 }

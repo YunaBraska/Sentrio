@@ -148,7 +148,8 @@ final class AudioDeviceTests: XCTestCase {
     func test_unknownDeviceFallsBackToTransportIcon() {
         let device = AudioDevice(uid: "X", name: "Mystery Device",
                                  hasInput: true, hasOutput: true, transportType: .usb)
-        XCTAssertEqual(device.deviceTypeSystemImage, AudioDevice.TransportType.usb.connectionSystemImage)
+        XCTAssertEqual(device.deviceTypeSystemImage, "headphones",
+                       "Devices that are both input+output should fall back to a headset icon before transport")
     }
 
     func test_unknownNameUnknownTransportFallsBackToQuestionMark() {
@@ -223,16 +224,17 @@ final class AudioDeviceTests: XCTestCase {
     // C-string bytes into the buffer instead of a CFString pointer, causing a bad-pointer crash.
     // isAppleMade is derived from the icon URL path (Apple icons live in Apple framework bundles).
 
-    func test_appleBTDeviceWithCustomNameFallsBackToAirpods() {
+    func test_appleBTDeviceWithCustomNameUsesModelUIDForSpecificIcon() {
         // Simulates AirPods renamed by the user — name contains no "airpods" keyword,
-        // but isAppleMade=true (icon URL was in an Apple framework path) and transport is Bluetooth.
+        // but modelUID exposes stable Apple vendor+product IDs.
         let device = AudioDevice(uid: "2C-32-6A-E9-E9-65:output",
                                  name: "[Yuna] ClayWave",
                                  hasInput: false, hasOutput: true,
                                  transportType: .bluetooth,
+                                 modelUID: "2014 4c",
                                  isAppleMade: true)
-        XCTAssertEqual(device.deviceTypeSystemImage, "airpods",
-                       "Apple BT device with renamed name must fall back to 'airpods'")
+        XCTAssertEqual(device.deviceTypeSystemImage, "airpodspro",
+                       "Apple BT device with renamed name should still get a specific AirPods icon when modelUID is available")
     }
 
     func test_nonAppleBTDeviceDoesNotGetAirpodsIcon() {
@@ -280,27 +282,45 @@ final class AudioDeviceTests: XCTestCase {
     // MARK: – Battery
 
     func test_batteryIconFullCharge() {
-        let d = AudioDevice(uid: "X", name: "X", hasInput: false, hasOutput: true,
-                            batteryLevel: 0.95)
-        XCTAssertEqual(d.batterySystemImage, "battery.100percent")
+        XCTAssertEqual(AudioDevice.batterySystemImage(for: 0.95), "battery.100percent")
     }
 
     func test_batteryIconLow() {
-        let d = AudioDevice(uid: "X", name: "X", hasInput: false, hasOutput: true,
-                            batteryLevel: 0.10)
-        XCTAssertEqual(d.batterySystemImage, "battery.0percent")
+        XCTAssertEqual(AudioDevice.batterySystemImage(for: 0.10), "battery.0percent")
     }
 
     func test_batteryIconNilWhenNoBattery() {
         let d = AudioDevice(uid: "X", name: "X", hasInput: false, hasOutput: true)
-        XCTAssertNil(d.batterySystemImage)
+        XCTAssertNil(d.lowestNonCaseBatteryLevel)
+    }
+
+    func test_lowestNonCaseBatteryExcludesCase() {
+        let original = AudioDevice(
+            uid: "X",
+            name: "X",
+            hasInput: false,
+            hasOutput: true,
+            batteryStates: [
+                .init(kind: .left, level: 0.8),
+                .init(kind: .case, level: 0.1),
+                .init(kind: .right, level: 0.7),
+            ]
+        )
+        XCTAssertEqual(original.lowestNonCaseBatteryLevel ?? 0, 0.7, accuracy: 0.001)
     }
 
     func test_batteryNotPersistedInCodable() throws {
-        let original = AudioDevice(uid: "X", name: "X", hasInput: false, hasOutput: true,
-                                   batteryLevel: 0.8)
+        let original = AudioDevice(
+            uid: "X",
+            name: "X",
+            hasInput: false,
+            hasOutput: true,
+            batteryStates: [
+                .init(kind: .device, level: 0.8),
+            ]
+        )
         let decoded = try JSONDecoder().decode(AudioDevice.self, from: JSONEncoder().encode(original))
-        XCTAssertNil(decoded.batteryLevel, "batteryLevel must not be persisted")
+        XCTAssertTrue(decoded.batteryStates.isEmpty, "batteryStates must not be persisted")
     }
 
     // MARK: – Codable roundtrip

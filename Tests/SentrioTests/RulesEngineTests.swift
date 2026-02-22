@@ -1,8 +1,7 @@
-import XCTest
 @testable import SentrioCore
+import XCTest
 
 final class RulesEngineTests: XCTestCase {
-
     // MARK: – selectDevice (core logic)
 
     func test_selectsHighestPriorityConnected() {
@@ -41,18 +40,20 @@ final class RulesEngineTests: XCTestCase {
 
     func test_airPodsScenario_outputAirPodsInputMic() {
         // AirPods connects, but mic is top-priority for input → mic wins for input
-        let mic     = d("mic-uid")
+        let mic = d("mic-uid")
         let airPods = d("airpods-uid")
         let builtIn = d("builtin-uid")
 
         let outputResult = RulesEngine.selectDevice(
             from: [airPods, builtIn],
-            priority: ["airpods-uid", "builtin-uid"])
+            priority: ["airpods-uid", "builtin-uid"]
+        )
         XCTAssertEqual(outputResult?.uid, "airpods-uid")
 
         let inputResult = RulesEngine.selectDevice(
             from: [mic],
-            priority: ["mic-uid", "airpods-uid"])
+            priority: ["mic-uid", "airpods-uid"]
+        )
         XCTAssertEqual(inputResult?.uid, "mic-uid",
                        "Mic should win for input even though AirPods has higher output priority")
     }
@@ -61,7 +62,7 @@ final class RulesEngineTests: XCTestCase {
 
     func test_disabledDeviceNotSelected() {
         // "A" is highest priority but disabled → B wins
-        let eligible = [d("B"), d("C")]  // A is excluded before calling selectDevice
+        let eligible = [d("B"), d("C")] // A is excluded before calling selectDevice
         let result = RulesEngine.selectDevice(from: eligible, priority: ["A", "B", "C"])
         XCTAssertEqual(result?.uid, "B")
     }

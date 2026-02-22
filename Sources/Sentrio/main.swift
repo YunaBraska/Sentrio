@@ -1,2 +1,3 @@
 import SentrioCore
+
 SentrioApp.main()

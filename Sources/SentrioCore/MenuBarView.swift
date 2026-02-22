@@ -4,7 +4,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var audio:    AudioManager
+    @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var appState: AppState
 
     var body: some View {
@@ -16,13 +16,15 @@ struct MenuBarView: View {
             deviceSection(title: "Output", systemImage: "speaker.wave.2",
                           devices: sorted(
                               audio.outputDevices.filter { !settings.disabledOutputDevices.contains($0.uid) },
-                              by: settings.outputPriority),
+                              by: settings.outputPriority
+                          ),
                           defaultUID: audio.defaultOutput?.uid, isInput: false)
             Divider()
             deviceSection(title: "Input", systemImage: "mic",
                           devices: sorted(
                               audio.inputDevices.filter { !settings.disabledInputDevices.contains($0.uid) },
-                              by: settings.inputPriority),
+                              by: settings.inputPriority
+                          ),
                           defaultUID: audio.defaultInput?.uid, isInput: true)
             Divider()
             footerRow
@@ -138,7 +140,7 @@ struct MenuBarView: View {
     // MARK: – Sort helpers
 
     private func sorted(_ devices: [AudioDevice], by priority: [String]) -> [AudioDevice] {
-        let ranked   = priority.compactMap { uid in devices.first { $0.uid == uid } }
+        let ranked = priority.compactMap { uid in devices.first { $0.uid == uid } }
         let unranked = devices.filter { !priority.contains($0.uid) }
         return ranked + unranked
     }
@@ -157,7 +159,7 @@ struct VolumeRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(width: 16)
-            Slider(value: $volume, in: 0...1)
+            Slider(value: $volume, in: 0 ... 1)
             Image(systemName: "\(icon).fill")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -174,7 +176,7 @@ private struct MenuDeviceRow: View {
     let isInput: Bool
 
     @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var audio:    AudioManager
+    @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var appState: AppState
 
     var body: some View {
@@ -196,7 +198,7 @@ private struct MenuDeviceRow: View {
 
                 VStack(alignment: .leading, spacing: 1) {
                     Text(settings.displayName(for: device.uid, isOutput: !isInput))
-                            .lineLimit(1).truncationMode(.tail)
+                        .lineLimit(1).truncationMode(.tail)
                     HStack(spacing: 4) {
                         Text(device.transportType.label)
                             .font(.caption2).foregroundStyle(.tertiary)
@@ -244,7 +246,7 @@ private struct MenuDeviceRow: View {
         return idx + 1
     }
 
-    // Context menu: icon picker
+    /// Context menu: icon picker
     private var iconPickerMenu: some View {
         Menu("Set Icon…") {
             Button("Reset to default") { settings.clearIcon(for: device.uid, isOutput: !isInput) }
@@ -263,8 +265,8 @@ private struct MenuDeviceRow: View {
 // MARK: – Mini level bar
 
 struct MiniLevelBar: View {
-    let level: Float    // 0…1 — outputVolume for output, RMS for input
-    let isOutput: Bool  // true → accent colour (volume); false → traffic-light (RMS)
+    let level: Float // 0…1 — outputVolume for output, RMS for input
+    let isOutput: Bool // true → accent colour (volume); false → traffic-light (RMS)
 
     var body: some View {
         GeometryReader { geo in

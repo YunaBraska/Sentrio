@@ -1,8 +1,7 @@
-import Foundation
 import Combine
+import Foundation
 
 final class RulesEngine {
-
     private let audio: AudioManager
     private let settings: AppSettings
     private var cancellables = Set<AnyCancellable>()
@@ -38,28 +37,34 @@ final class RulesEngine {
     // MARK: – Rules application
 
     private func onDevicesChanged() {
-        for d in audio.outputDevices { settings.registerDevice(uid: d.uid, name: d.name, isOutput: true)  }
-        for d in audio.inputDevices  { settings.registerDevice(uid: d.uid, name: d.name, isOutput: false) }
+        for d in audio.outputDevices {
+            settings.registerDevice(uid: d.uid, name: d.name, isOutput: true)
+        }
+        for d in audio.inputDevices {
+            settings.registerDevice(uid: d.uid, name: d.name, isOutput: false)
+        }
         guard settings.isAutoMode else { return }
         applyRules()
     }
 
-    func applyRules() { applyOutputRules(); applyInputRules() }
+    func applyRules() {
+        applyOutputRules(); applyInputRules()
+    }
 
     private func applyOutputRules() {
-        apply(priority:   settings.outputPriority,
-              disabled:   settings.disabledOutputDevices,
-              connected:  audio.outputDevices,
-              current:    audio.defaultOutput,
-              isInput:    false)
+        apply(priority: settings.outputPriority,
+              disabled: settings.disabledOutputDevices,
+              connected: audio.outputDevices,
+              current: audio.defaultOutput,
+              isInput: false)
     }
 
     private func applyInputRules() {
-        apply(priority:   settings.inputPriority,
-              disabled:   settings.disabledInputDevices,
-              connected:  audio.inputDevices,
-              current:    audio.defaultInput,
-              isInput:    true)
+        apply(priority: settings.inputPriority,
+              disabled: settings.disabledInputDevices,
+              connected: audio.inputDevices,
+              current: audio.defaultInput,
+              isInput: true)
     }
 
     private func apply(
@@ -89,11 +94,11 @@ final class RulesEngine {
         // Restore incoming device volumes
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             guard let self else { return }
-            if let vol = self.settings.savedVolume(for: target.uid, isOutput: isOutput) {
-                self.audio.setVolume(vol, for: target, isOutput: isOutput)
+            if let vol = settings.savedVolume(for: target.uid, isOutput: isOutput) {
+                audio.setVolume(vol, for: target, isOutput: isOutput)
             }
-            if !isInput, let alertVol = self.settings.savedAlertVolume(for: target.uid) {
-                self.audio.setAlertVolume(alertVol)
+            if !isInput, let alertVol = settings.savedAlertVolume(for: target.uid) {
+                audio.setAlertVolume(alertVol)
             }
         }
     }
@@ -120,11 +125,11 @@ final class RulesEngine {
         audio.setDefault(device, isInput: isInput)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
             guard let self else { return }
-            if let vol = self.settings.savedVolume(for: device.uid, isOutput: isOutput) {
-                self.audio.setVolume(vol, for: device, isOutput: isOutput)
+            if let vol = settings.savedVolume(for: device.uid, isOutput: isOutput) {
+                audio.setVolume(vol, for: device, isOutput: isOutput)
             }
-            if !isInput, let alertVol = self.settings.savedAlertVolume(for: device.uid) {
-                self.audio.setAlertVolume(alertVol)
+            if !isInput, let alertVol = settings.savedAlertVolume(for: device.uid) {
+                audio.setAlertVolume(alertVol)
             }
         }
     }

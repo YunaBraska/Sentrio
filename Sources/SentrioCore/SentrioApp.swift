@@ -1,8 +1,7 @@
-import SwiftUI
 import AppKit
+import SwiftUI
 
 public struct SentrioApp: App {
-
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var appState = AppState()
 
@@ -29,15 +28,16 @@ public struct SentrioApp: App {
 }
 
 public class AppDelegate: NSObject, NSApplicationDelegate {
-    public func applicationDidFinishLaunching(_ notification: Notification) {
+    public func applicationDidFinishLaunching(_: Notification) {
         NSApp.setActivationPolicy(.accessory)
     }
-    public func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+
+    public func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
         NotificationCenter.default.post(name: .reopenApp, object: nil)
         return true
     }
 }
 
-extension Notification.Name {
-    public static let reopenApp = Notification.Name("Sentrio.reopenApp")
+public extension Notification.Name {
+    static let reopenApp = Notification.Name("Sentrio.reopenApp")
 }

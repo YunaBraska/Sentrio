@@ -30,7 +30,10 @@ open Package.swift          # Open in Xcode (optional)
 - Prefer `let` and small types; use `final class` for shared state containers (`AppState`, managers).
 - Naming: types `UpperCamelCase`, members `lowerCamelCase`, tests `*Tests` with methods named `test_*`.
 
-No SwiftLint/SwiftFormat config is currently enforced—use Xcode formatting and keep diffs tidy.
+Formatting is enforced with **SwiftFormat**.
+
+- Format: `bash scripts/format.sh`
+- Lint + tests: `bash scripts/check.sh`
 
 ## Testing Guidelines
 

@@ -56,7 +56,6 @@ priority rules with per-device volume memory.
 
 ### Phase 7 — Future / Nice-to-have  ⬜ NOT STARTED
 - [ ] Custom app icon (design a waveform + shield logo)
-- [ ] Notifications when auto-switch fires ("Switched output to AirPods")
 - [ ] Import/export of priority rules as JSON
 - [ ] Code-signing & notarisation for Gatekeeper-clean distribution
 - [ ] Real-time output level meter (requires CoreAudio IOProc tap)

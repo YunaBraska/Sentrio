@@ -20,6 +20,6 @@ let package = Package(
             name: "SentrioTests",
             dependencies: ["SentrioCore"],
             path: "Tests/SentrioTests"
-        )
+        ),
     ]
 )

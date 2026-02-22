@@ -1,26 +1,33 @@
-import Foundation
 import Combine
+import Foundation
 import ServiceManagement
 
 final class AppSettings: ObservableObject {
-
     // MARK: – Priority lists (enabled devices, in order)
 
-    @Published var outputPriority: [String] { didSet { save("outputPriority", outputPriority) } }
-    @Published var inputPriority:  [String] { didSet { save("inputPriority",  inputPriority)  } }
+    @Published var outputPriority: [String] {
+        didSet { save("outputPriority", outputPriority) }
+    }
+
+    @Published var inputPriority: [String] {
+        didSet { save("inputPriority", inputPriority) }
+    }
 
     // MARK: – Disabled device sets (not used as fallbacks)
 
     @Published var disabledOutputDevices: Set<String> {
         didSet { save("disabledOutputDevices", Array(disabledOutputDevices)) }
     }
+
     @Published var disabledInputDevices: Set<String> {
         didSet { save("disabledInputDevices", Array(disabledInputDevices)) }
     }
 
     // MARK: – Volume memory   [uid: ["output": Float, "input": Float, "alert": Float]]
 
-    @Published var volumeMemory: [String: [String: Float]] { didSet { save("volumeMemory", volumeMemory) } }
+    @Published var volumeMemory: [String: [String: Float]] {
+        didSet { save("volumeMemory", volumeMemory) }
+    }
 
     // MARK: – Per-device custom names   [uid: ["output": name, "input": name]]
 
@@ -30,17 +37,22 @@ final class AppSettings: ObservableObject {
 
     // MARK: – Per-device custom icons   [uid: ["output": symbolName, "input": symbolName]]
 
-    @Published var deviceIcons: [String: [String: String]] { didSet { save("deviceIcons", deviceIcons) } }
+    @Published var deviceIcons: [String: [String: String]] {
+        didSet { save("deviceIcons", deviceIcons) }
+    }
 
     // MARK: – Known devices (uid → name, persists across disconnections)
 
-    @Published var knownDevices: [String: String] { didSet { save("knownDevices", knownDevices) } }
+    @Published var knownDevices: [String: String] {
+        didSet { save("knownDevices", knownDevices) }
+    }
 
     // MARK: – General
 
     @Published var isAutoMode: Bool {
         didSet { defaults.set(isAutoMode, forKey: "isAutoMode") }
     }
+
     @Published var hideMenuBarIcon: Bool {
         didSet { defaults.set(hideMenuBarIcon, forKey: "hideMenuBarIcon") }
     }
@@ -52,17 +64,17 @@ final class AppSettings: ObservableObject {
     // MARK: – Init (injectable for testing)
 
     init(defaults: UserDefaults = .standard) {
-        self.defaults            = defaults
-        outputPriority           = defaults.jsonStringArray(forKey: "outputPriority")         ?? []
-        inputPriority            = defaults.jsonStringArray(forKey: "inputPriority")          ?? []
-        disabledOutputDevices    = Set(defaults.jsonStringArray(forKey: "disabledOutputDevices") ?? [])
-        disabledInputDevices     = Set(defaults.jsonStringArray(forKey: "disabledInputDevices")  ?? [])
-        isAutoMode               = defaults.object(forKey: "isAutoMode")      as? Bool ?? true
-        hideMenuBarIcon          = defaults.object(forKey: "hideMenuBarIcon") as? Bool ?? false
-        volumeMemory             = defaults.jsonDecode([String: [String: Float]].self,   forKey: "volumeMemory")         ?? [:]
-        deviceIcons              = defaults.jsonDecode([String: [String: String]].self,  forKey: "deviceIcons")          ?? [:]
-        customDeviceNames        = defaults.jsonDecode([String: [String: String]].self,  forKey: "customDeviceNames")    ?? [:]
-        knownDevices             = defaults.jsonDecode([String: String].self,            forKey: "knownDevices")         ?? [:]
+        self.defaults = defaults
+        outputPriority = defaults.jsonStringArray(forKey: "outputPriority") ?? []
+        inputPriority = defaults.jsonStringArray(forKey: "inputPriority") ?? []
+        disabledOutputDevices = Set(defaults.jsonStringArray(forKey: "disabledOutputDevices") ?? [])
+        disabledInputDevices = Set(defaults.jsonStringArray(forKey: "disabledInputDevices") ?? [])
+        isAutoMode = defaults.object(forKey: "isAutoMode") as? Bool ?? true
+        hideMenuBarIcon = defaults.object(forKey: "hideMenuBarIcon") as? Bool ?? false
+        volumeMemory = defaults.jsonDecode([String: [String: Float]].self, forKey: "volumeMemory") ?? [:]
+        deviceIcons = defaults.jsonDecode([String: [String: String]].self, forKey: "deviceIcons") ?? [:]
+        customDeviceNames = defaults.jsonDecode([String: [String: String]].self, forKey: "customDeviceNames") ?? [:]
+        knownDevices = defaults.jsonDecode([String: String].self, forKey: "knownDevices") ?? [:]
     }
 
     // MARK: – Volume memory
@@ -96,36 +108,36 @@ final class AppSettings: ObservableObject {
     /// Note: "bluetooth" is a restricted Apple-internal symbol that renders empty — "wave.3.right" is used instead.
     static let iconOptions: [(symbol: String, label: String)] = [
         // ── Audio output ────────────────────────────────────────────
-        ("speaker.wave.2",                    "Speaker"),
-        ("speaker.wave.3",                    "Speaker (loud)"),
-        ("hifispeaker",                       "Hi-Fi Speaker"),
-        ("waveform",                          "Waveform"),
+        ("speaker.wave.2", "Speaker"),
+        ("speaker.wave.3", "Speaker (loud)"),
+        ("hifispeaker", "Hi-Fi Speaker"),
+        ("waveform", "Waveform"),
         // ── Audio input ─────────────────────────────────────────────
-        ("mic",                               "Microphone"),
-        ("mic.fill",                          "Microphone (filled)"),
-        ("ear",                               "Ear"),
+        ("mic", "Microphone"),
+        ("mic.fill", "Microphone (filled)"),
+        ("ear", "Ear"),
         // ── Headphones / earbuds ────────────────────────────────────
-        ("headphones",                        "Headphones"),
-        ("earbuds",                           "EarPods"),
-        ("airpodspro",                        "AirPods Pro"),
-        ("airpods",                           "AirPods"),
+        ("headphones", "Headphones"),
+        ("earbuds", "EarPods"),
+        ("airpodspro", "AirPods Pro"),
+        ("airpods", "AirPods"),
         // ── Apple devices ───────────────────────────────────────────
-        ("homepod",                           "HomePod"),
-        ("homepodmini",                       "HomePod mini"),
-        ("iphone",                            "iPhone"),
-        ("ipad",                              "iPad"),
-        ("applewatch",                        "Apple Watch"),
-        ("laptopcomputer",                    "MacBook"),
-        ("macmini",                           "Mac mini"),
-        ("display",                           "Display / Monitor"),
+        ("homepod", "HomePod"),
+        ("homepodmini", "HomePod mini"),
+        ("iphone", "iPhone"),
+        ("ipad", "iPad"),
+        ("applewatch", "Apple Watch"),
+        ("laptopcomputer", "MacBook"),
+        ("macmini", "Mac mini"),
+        ("display", "Display / Monitor"),
         // ── Music ───────────────────────────────────────────────────
-        ("music.note",                        "Music"),
+        ("music.note", "Music"),
         // ── Connection / transport type ─────────────────────────────
-        ("internaldrive",                     "Built-in"),
-        ("cable.connector",                   "USB"),
-        ("bolt",                              "Thunderbolt"),
-        ("wave.3.right",                      "Wireless / BT"),
-        ("airplayaudio",                      "AirPlay"),
+        ("internaldrive", "Built-in"),
+        ("cable.connector", "USB"),
+        ("bolt", "Thunderbolt"),
+        ("wave.3.right", "Wireless / BT"),
+        ("airplayaudio", "AirPlay"),
         ("antenna.radiowaves.left.and.right", "Radio"),
     ]
 
@@ -141,11 +153,11 @@ final class AppSettings: ObservableObject {
     /// Passing an empty or whitespace-only string clears the custom name.
     func setCustomName(_ name: String, for uid: String, isOutput: Bool) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        var entry   = customDeviceNames[uid] ?? [:]
-        let key     = isOutput ? "output" : "input"
+        var entry = customDeviceNames[uid] ?? [:]
+        let key = isOutput ? "output" : "input"
         if trimmed.isEmpty { entry.removeValue(forKey: key) } else { entry[key] = trimmed }
         if entry.isEmpty { customDeviceNames.removeValue(forKey: uid) }
-        else             { customDeviceNames[uid] = entry }
+        else { customDeviceNames[uid] = entry }
     }
 
     func clearCustomName(for uid: String, isOutput: Bool) {
@@ -182,7 +194,7 @@ final class AppSettings: ObservableObject {
         let list = isOutput ? outputPriority : inputPriority
         guard !list.contains(uid) else { return }
         if isOutput { outputPriority.append(uid) }
-        else        { inputPriority.append(uid)  }
+        else { inputPriority.append(uid) }
     }
 
     func disableDevice(uid: String, isOutput: Bool) {
@@ -198,8 +210,8 @@ final class AppSettings: ObservableObject {
     /// Permanently removes a device from all lists, known devices, and memory.
     /// It will reappear automatically if it reconnects (registered fresh).
     func deleteDevice(uid: String) {
-        outputPriority.removeAll        { $0 == uid }
-        inputPriority.removeAll         { $0 == uid }
+        outputPriority.removeAll { $0 == uid }
+        inputPriority.removeAll { $0 == uid }
         disabledOutputDevices.remove(uid)
         disabledInputDevices.remove(uid)
         knownDevices.removeValue(forKey: uid)
@@ -220,18 +232,20 @@ final class AppSettings: ObservableObject {
 
     // MARK: – Launch at login
 
-    var isLaunchAtLoginEnabled: Bool { SMAppService.mainApp.status == .enabled }
+    var isLaunchAtLoginEnabled: Bool {
+        SMAppService.mainApp.status == .enabled
+    }
 
     func setLaunchAtLogin(_ enabled: Bool) {
         do {
             if enabled { try SMAppService.mainApp.register() }
-            else       { try SMAppService.mainApp.unregister() }
+            else { try SMAppService.mainApp.unregister() }
         } catch { print("Launch-at-login error: \(error)") }
     }
 
     // MARK: – Persistence
 
-    private func save<T: Encodable>(_ key: String, _ value: T) {
+    private func save(_ key: String, _ value: some Encodable) {
         if let data = try? JSONEncoder().encode(value) { defaults.set(data, forKey: key) }
     }
 }
@@ -243,6 +257,7 @@ private extension UserDefaults {
         if let arr = array(forKey: key) as? [String] { return arr }
         return jsonDecode([String].self, forKey: key)
     }
+
     func jsonDecode<T: Decodable>(_ type: T.Type, forKey key: String) -> T? {
         guard let data = data(forKey: key) else { return nil }
         return try? JSONDecoder().decode(type, from: data)

@@ -1,9 +1,8 @@
-import XCTest
 import CoreAudio
 @testable import SentrioCore
+import XCTest
 
 final class AudioDeviceTests: XCTestCase {
-
     // MARK: – Equality / Hashing
 
     func test_equalityByUID() {
@@ -31,7 +30,7 @@ final class AudioDeviceTests: XCTestCase {
     func test_allTransportTypesHaveConnectionImage() {
         for t in AudioDevice.TransportType.allCases {
             XCTAssertFalse(t.connectionSystemImage.isEmpty, "\(t) has empty connectionSystemImage")
-            XCTAssertFalse(t.label.isEmpty,                 "\(t) has empty label")
+            XCTAssertFalse(t.label.isEmpty, "\(t) has empty label")
         }
     }
 
@@ -207,7 +206,7 @@ final class AudioDeviceTests: XCTestCase {
                                    hasInput: true, hasOutput: true,
                                    transportType: .bluetooth,
                                    iconBaseName: "airpodspro")
-        let decoded  = try JSONDecoder().decode(AudioDevice.self, from: JSONEncoder().encode(original))
+        let decoded = try JSONDecoder().decode(AudioDevice.self, from: JSONEncoder().encode(original))
         XCTAssertNil(decoded.iconBaseName, "iconBaseName must not be persisted — it is live-only data")
         // Name heuristic must still give the right answer after decode
         XCTAssertEqual(decoded.deviceTypeSystemImage, "airpodspro")
@@ -300,7 +299,7 @@ final class AudioDeviceTests: XCTestCase {
     func test_batteryNotPersistedInCodable() throws {
         let original = AudioDevice(uid: "X", name: "X", hasInput: false, hasOutput: true,
                                    batteryLevel: 0.8)
-        let decoded  = try JSONDecoder().decode(AudioDevice.self, from: JSONEncoder().encode(original))
+        let decoded = try JSONDecoder().decode(AudioDevice.self, from: JSONEncoder().encode(original))
         XCTAssertNil(decoded.batteryLevel, "batteryLevel must not be persisted")
     }
 
@@ -309,19 +308,19 @@ final class AudioDeviceTests: XCTestCase {
     func test_codableRoundtrip() throws {
         let original = AudioDevice(id: 42, uid: "uid-test", name: "Test Mic",
                                    hasInput: true, hasOutput: false, transportType: .usb)
-        let decoded  = try JSONDecoder().decode(AudioDevice.self, from: JSONEncoder().encode(original))
-        XCTAssertEqual(decoded.uid,           original.uid)
-        XCTAssertEqual(decoded.name,          original.name)
-        XCTAssertEqual(decoded.hasInput,      original.hasInput)
-        XCTAssertEqual(decoded.hasOutput,     original.hasOutput)
+        let decoded = try JSONDecoder().decode(AudioDevice.self, from: JSONEncoder().encode(original))
+        XCTAssertEqual(decoded.uid, original.uid)
+        XCTAssertEqual(decoded.name, original.name)
+        XCTAssertEqual(decoded.hasInput, original.hasInput)
+        XCTAssertEqual(decoded.hasOutput, original.hasOutput)
         XCTAssertEqual(decoded.transportType, original.transportType)
-        XCTAssertEqual(decoded.id,            kAudioObjectUnknown)
+        XCTAssertEqual(decoded.id, kAudioObjectUnknown)
     }
 
     func test_codableRoundtripBluetoothDevice() throws {
         let original = AudioDevice(id: 5, uid: "bt-001", name: "BT Speaker",
                                    hasInput: false, hasOutput: true, transportType: .bluetooth)
-        let decoded  = try JSONDecoder().decode(AudioDevice.self, from: JSONEncoder().encode(original))
+        let decoded = try JSONDecoder().decode(AudioDevice.self, from: JSONEncoder().encode(original))
         XCTAssertEqual(decoded.transportType, .bluetooth)
     }
 
@@ -330,6 +329,7 @@ final class AudioDeviceTests: XCTestCase {
     private func d(_ uid: String) -> AudioDevice {
         AudioDevice(uid: uid, name: uid, hasInput: true, hasOutput: true)
     }
+
     private func dev(_ name: String) -> AudioDevice {
         AudioDevice(uid: name, name: name, hasInput: true, hasOutput: true)
     }

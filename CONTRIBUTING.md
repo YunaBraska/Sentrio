@@ -26,6 +26,10 @@ By participating you agree to uphold its standards.
 git clone https://github.com/YunaBraska/Sentrio.git
 cd Sentrio
 
+# Formatting (required)
+brew install swiftformat
+bash scripts/check.sh
+
 # Build (debug)
 swift build
 

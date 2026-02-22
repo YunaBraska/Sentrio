@@ -33,6 +33,12 @@ jobs:
           fi
           echo "tag=${tag}" >> "$GITHUB_OUTPUT"
 
+      - name: Install SwiftFormat
+        run: brew install swiftformat
+
+      - name: Format check and tests
+        run: bash scripts/check.sh
+
       - name: Build distributable
         run: bash build.sh "${{ steps.version.outputs.tag }}"
 

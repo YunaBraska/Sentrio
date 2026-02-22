@@ -1,13 +1,13 @@
-import SwiftUI
 import AppKit
 import AudioToolbox
+import SwiftUI
 import UniformTypeIdentifiers
 
 // MARK: – Root
 
 struct PreferencesView: View {
     @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var audio:    AudioManager
+    @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var appState: AppState
 
     var body: some View {
@@ -30,7 +30,7 @@ private struct PriorityTab: View {
     let isOutput: Bool
 
     @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var audio:    AudioManager
+    @EnvironmentObject var audio: AudioManager
 
     /// UID currently being dragged — shared down to each row's drag handle.
     @State private var draggedUID: String?
@@ -38,15 +38,18 @@ private struct PriorityTab: View {
     private var priority: Binding<[String]> {
         isOutput ? $settings.outputPriority : $settings.inputPriority
     }
+
     private var disabled: Set<String> {
         isOutput ? settings.disabledOutputDevices : settings.disabledInputDevices
     }
+
     private var allKnownUIDs: [String] {
         let enabled = priority.wrappedValue
-        let extra   = (isOutput ? audio.outputDevices : audio.inputDevices)
+        let extra = (isOutput ? audio.outputDevices : audio.inputDevices)
             .map(\.uid).filter { !enabled.contains($0) && !disabled.contains($0) }
         return enabled + extra
     }
+
     private var disabledUIDs: [String] {
         disabled.filter { settings.knownDevices[$0] != nil }
             .sorted { (settings.knownDevices[$0] ?? $0) < (settings.knownDevices[$1] ?? $1) }
@@ -55,8 +58,8 @@ private struct PriorityTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(isOutput
-                 ? "Drag rows to order preferred output devices. Sentrio activates the top-ranked connected device."
-                 : "Drag rows to order preferred input devices. Sentrio activates the top-ranked connected device.")
+                ? "Drag rows to order preferred output devices. Sentrio activates the top-ranked connected device."
+                : "Drag rows to order preferred input devices. Sentrio activates the top-ranked connected device.")
                 .foregroundStyle(.secondary).font(.callout)
 
             // ── Volume for this role ───────────────────────────────────────
@@ -73,13 +76,14 @@ private struct PriorityTab: View {
                             ForEach(allKnownUIDs, id: \.self) { uid in
                                 PriorityRow(uid: uid, isOutput: isOutput, draggedUID: $draggedUID)
                                     .background(uid == draggedUID
-                                                ? Color.accentColor.opacity(0.06)
-                                                : Color.clear)
+                                        ? Color.accentColor.opacity(0.06)
+                                        : Color.clear)
                                     .onDrop(of: [.plainText],
                                             delegate: PriorityDropDelegate(
                                                 targetUID: uid,
                                                 items: priority,
-                                                draggedUID: $draggedUID))
+                                                draggedUID: $draggedUID
+                                            ))
                                 Divider().padding(.leading, 52)
                             }
                         }
@@ -107,7 +111,6 @@ private struct PriorityTab: View {
 
     // MARK: Volume section
 
-    @ViewBuilder
     private var volumeSection: some View {
         GroupBox {
             VStack(spacing: 6) {
@@ -121,13 +124,15 @@ private struct PriorityTab: View {
                             set: { v in
                                 audio.outputVolume = v
                                 if let d = audio.defaultOutput { audio.setVolume(v, for: d, isOutput: true) }
-                            })
+                            }
+                        )
                         : Binding(
                             get: { audio.inputVolume },
                             set: { v in
                                 audio.inputVolume = v
                                 if let d = audio.defaultInput { audio.setVolume(v, for: d, isOutput: false) }
-                            }),
+                            }
+                        ),
                     onRelease: { NSSound(named: NSSound.Name("Tink"))?.play() }
                 )
                 if isOutput {
@@ -136,7 +141,8 @@ private struct PriorityTab: View {
                         label: "Alert",
                         volume: Binding(
                             get: { audio.alertVolume },
-                            set: { v in audio.setAlertVolume(v) }),
+                            set: { v in audio.setAlertVolume(v) }
+                        ),
                         onRelease: { AudioServicesPlayAlertSound(kSystemSoundID_UserPreferredAlert) }
                     )
                 }
@@ -160,7 +166,7 @@ private struct PriorityTab: View {
                 .font(.caption).foregroundStyle(.secondary).frame(width: 16)
             Text(label)
                 .font(.caption).foregroundStyle(.secondary).frame(width: 44, alignment: .leading)
-            Slider(value: volume, in: 0...1) { editing in
+            Slider(value: volume, in: 0 ... 1) { editing in
                 if !editing { onRelease() }
             }
             Image(systemName: "\(icon).fill")
@@ -190,33 +196,34 @@ private struct PriorityTab: View {
 }
 
 // MARK: – Drag-and-drop delegate
+
 //
 // Items reorder in real time as the drag crosses row boundaries (dropEntered),
 // so the user sees immediate visual feedback and doesn't need to release at
 // a precise location — this is far more reliable than List.onMove on macOS.
 
 private struct PriorityDropDelegate: DropDelegate {
-    let targetUID:          String
-    @Binding var items:     [String]
+    let targetUID: String
+    @Binding var items: [String]
     @Binding var draggedUID: String?
 
-    func dropEntered(info: DropInfo) {
+    func dropEntered(info _: DropInfo) {
         guard
             let source = draggedUID, source != targetUID,
-            let from   = items.firstIndex(of: source),
-            let to     = items.firstIndex(of: targetUID)
+            let from = items.firstIndex(of: source),
+            let to = items.firstIndex(of: targetUID)
         else { return }
         withAnimation(.easeInOut(duration: 0.18)) {
             items.move(fromOffsets: IndexSet(integer: from),
-                       toOffset:   to > from ? to + 1 : to)
+                       toOffset: to > from ? to + 1 : to)
         }
     }
 
-    func dropUpdated(info: DropInfo) -> DropProposal? {
+    func dropUpdated(info _: DropInfo) -> DropProposal? {
         DropProposal(operation: .move)
     }
 
-    func performDrop(info: DropInfo) -> Bool {
+    func performDrop(info _: DropInfo) -> Bool {
         draggedUID = nil
         return true
     }
@@ -225,25 +232,31 @@ private struct PriorityDropDelegate: DropDelegate {
 // MARK: – Priority Row (enabled)
 
 private struct PriorityRow: View {
-    let uid:     String
+    let uid: String
     let isOutput: Bool
     @Binding var draggedUID: String?
 
     @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var audio:    AudioManager
+    @EnvironmentObject var audio: AudioManager
 
-    @State private var showIconPicker   = false
+    @State private var showIconPicker = false
     @State private var showRenamePopover = false
-    @State private var pendingName      = ""
+    @State private var pendingName = ""
 
-    private var name: String { settings.displayName(for: uid, isOutput: isOutput) }
+    private var name: String {
+        settings.displayName(for: uid, isOutput: isOutput)
+    }
+
     private var device: AudioDevice? {
         (isOutput ? audio.outputDevices : audio.inputDevices).first { $0.uid == uid }
     }
-    private var isConnected: Bool { device != nil }
+
+    private var isConnected: Bool {
+        device != nil
+    }
+
     var body: some View {
         HStack(spacing: 8) {
-
             // ── Drag handle ──────────────────────────────────────────
             Image(systemName: "line.3.horizontal")
                 .font(.system(size: 11, weight: .medium))
@@ -274,7 +287,7 @@ private struct PriorityRow: View {
             }
             .buttonStyle(.plain)
             .help(device.flatMap(\.iconBaseName).map { "CoreAudio icon file: \($0)\nClick to override" }
-                  ?? "Click to change icon")
+                ?? "Click to change icon")
             .popover(isPresented: $showIconPicker, arrowEdge: .trailing) {
                 IconPickerPopover(uid: uid, isOutput: isOutput)
                     .environmentObject(settings)
@@ -302,7 +315,8 @@ private struct PriorityRow: View {
                             uid: uid, isOutput: isOutput,
                             originalName: settings.knownDevices[uid] ?? uid,
                             name: $pendingName,
-                            isPresented: $showRenamePopover)
+                            isPresented: $showRenamePopover
+                        )
                         .environmentObject(settings)
                         .padding(14)
                     }
@@ -332,10 +346,12 @@ private struct PriorityRow: View {
             // Mini level bar — only for the active device
             if isOutput
                 ? device?.uid == audio.defaultOutput?.uid
-                : device?.uid == audio.defaultInput?.uid {
+                : device?.uid == audio.defaultInput?.uid
+            {
                 MiniLevelBar(
                     level: isOutput ? audio.outputVolume : audio.inputLevel,
-                    isOutput: isOutput)
+                    isOutput: isOutput
+                )
                 .frame(width: 36, height: 8)
             }
 
@@ -375,8 +391,8 @@ private struct PriorityRow: View {
 // MARK: – Rename Popover
 
 private struct RenamePopover: View {
-    let uid:          String
-    let isOutput:     Bool
+    let uid: String
+    let isOutput: Bool
     let originalName: String
     @Binding var name: String
     @Binding var isPresented: Bool
@@ -423,21 +439,25 @@ private struct RenamePopover: View {
 }
 
 // MARK: – Disabled Row
+
 //
 // Column layout mirrors PriorityRow exactly so both sections feel like one list:
 //   [drag placeholder 20] [dot 7] [icon 24] [name VStack] [Spacer] [Enable] [Trash?]
 
 private struct DisabledRow: View {
-    let uid:      String
+    let uid: String
     let isOutput: Bool
 
     @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var audio:    AudioManager
+    @EnvironmentObject var audio: AudioManager
 
     private var device: AudioDevice? {
         (isOutput ? audio.outputDevices : audio.inputDevices).first { $0.uid == uid }
     }
-    private var isConnected: Bool { device != nil }
+
+    private var isConnected: Bool {
+        device != nil
+    }
 
     /// Best-effort icon: live device → custom stored → generic fallback.
     private var iconName: String {
@@ -469,8 +489,8 @@ private struct DisabledRow: View {
                 Text(isConnected ? "Connected" : "Disconnected")
                     .font(.caption2)
                     .foregroundStyle(isConnected
-                                     ? AnyShapeStyle(.green.opacity(0.8))
-                                     : AnyShapeStyle(.tertiary))
+                        ? AnyShapeStyle(.green.opacity(0.8))
+                        : AnyShapeStyle(.tertiary))
             }
 
             Spacer()
@@ -499,7 +519,7 @@ private struct DisabledRow: View {
 // MARK: – Icon Picker Popover
 
 struct IconPickerPopover: View {
-    let uid:      String
+    let uid: String
     let isOutput: Bool
 
     @EnvironmentObject var settings: AppSettings
@@ -541,8 +561,8 @@ struct IconPickerPopover: View {
                         .background(
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(isCurrent
-                                      ? Color.accentColor.opacity(0.15)
-                                      : Color.secondary.opacity(0.06))
+                                    ? Color.accentColor.opacity(0.15)
+                                    : Color.secondary.opacity(0.06))
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
@@ -562,7 +582,7 @@ struct IconPickerPopover: View {
 
 private struct GeneralTab: View {
     @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var audio:    AudioManager
+    @EnvironmentObject var audio: AudioManager
     @State private var launchAtLogin = false
 
     var body: some View {
@@ -607,7 +627,7 @@ private struct GeneralTab: View {
                     Text("Version")
                     Spacer()
                     let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
-                    let build   = Bundle.main.infoDictionary?["CFBundleVersion"]            as? String ?? "—"
+                    let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
                     let display = (build == "—" || build.isEmpty || build == version)
                         ? version
                         : "\(version) (\(build))"

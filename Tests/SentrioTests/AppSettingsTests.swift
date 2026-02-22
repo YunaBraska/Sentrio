@@ -1,14 +1,13 @@
-import XCTest
 @testable import SentrioCore
+import XCTest
 
 final class AppSettingsTests: XCTestCase {
-
     var settings: AppSettings!
     var suiteName: String!
 
     override func setUp() {
         suiteName = "SentrioTests.\(UUID().uuidString)"
-        settings  = AppSettings(defaults: UserDefaults(suiteName: suiteName)!)
+        settings = AppSettings(defaults: UserDefaults(suiteName: suiteName)!)
     }
 
     override func tearDown() {
@@ -18,15 +17,23 @@ final class AppSettingsTests: XCTestCase {
 
     // MARK: – Defaults
 
-    func test_autoModeDefaultIsTrue()       { XCTAssertTrue(settings.isAutoMode) }
-    func test_hideMenuBarIconDefaultIsFalse() { XCTAssertFalse(settings.hideMenuBarIcon) }
-    func test_priorityListsStartEmpty()    { XCTAssertTrue(settings.outputPriority.isEmpty) }
+    func test_autoModeDefaultIsTrue() {
+        XCTAssertTrue(settings.isAutoMode)
+    }
+
+    func test_hideMenuBarIconDefaultIsFalse() {
+        XCTAssertFalse(settings.hideMenuBarIcon)
+    }
+
+    func test_priorityListsStartEmpty() {
+        XCTAssertTrue(settings.outputPriority.isEmpty)
+    }
 
     // MARK: – registerDevice
 
     func test_registerAddsToCorrectList() {
         settings.registerDevice(uid: "A", name: "Speaker A", isOutput: true)
-        settings.registerDevice(uid: "M", name: "Mic M",     isOutput: false)
+        settings.registerDevice(uid: "M", name: "Mic M", isOutput: false)
         XCTAssertTrue(settings.outputPriority.contains("A"))
         XCTAssertTrue(settings.inputPriority.contains("M"))
         XCTAssertFalse(settings.inputPriority.contains("A"))
@@ -79,7 +86,7 @@ final class AppSettingsTests: XCTestCase {
 
     func test_enableDoesNotDuplicateInPriority() {
         settings.outputPriority = ["A", "B"]
-        settings.disabledOutputDevices = ["A"]  // Simulate inconsistent state
+        settings.disabledOutputDevices = ["A"] // Simulate inconsistent state
         settings.enableDevice(uid: "A", isOutput: true)
         XCTAssertEqual(settings.outputPriority.filter { $0 == "A" }.count, 1)
     }
@@ -88,7 +95,7 @@ final class AppSettingsTests: XCTestCase {
         settings.registerDevice(uid: "A", name: "A", isOutput: true)
         settings.registerDevice(uid: "A", name: "A", isOutput: false)
         settings.disableDevice(uid: "A", isOutput: false)
-        XCTAssertTrue(settings.outputPriority.contains("A"),   "Output list must be unaffected")
+        XCTAssertTrue(settings.outputPriority.contains("A"), "Output list must be unaffected")
         XCTAssertTrue(settings.disabledInputDevices.contains("A"))
     }
 
@@ -102,19 +109,24 @@ final class AppSettingsTests: XCTestCase {
     func test_inputAndOutputVolumeStoredSeparately() {
         settings.saveVolume(0.8, for: "A", isOutput: true)
         settings.saveVolume(0.3, for: "A", isOutput: false)
-        XCTAssertEqual(settings.savedVolume(for: "A", isOutput: true)  ?? 0, 0.8, accuracy: 0.001)
+        XCTAssertEqual(settings.savedVolume(for: "A", isOutput: true) ?? 0, 0.8, accuracy: 0.001)
         XCTAssertEqual(settings.savedVolume(for: "A", isOutput: false) ?? 0, 0.3, accuracy: 0.001)
     }
 
     func test_alertVolumeStoredSeparately() {
-        settings.saveVolume(0.8,   for: "A", isOutput: true)
+        settings.saveVolume(0.8, for: "A", isOutput: true)
         settings.saveAlertVolume(0.4, for: "A")
-        XCTAssertEqual(settings.savedVolume(for: "A",      isOutput: true) ?? 0, 0.8, accuracy: 0.001)
-        XCTAssertEqual(settings.savedAlertVolume(for: "A") ?? 0,           0.4, accuracy: 0.001)
+        XCTAssertEqual(settings.savedVolume(for: "A", isOutput: true) ?? 0, 0.8, accuracy: 0.001)
+        XCTAssertEqual(settings.savedAlertVolume(for: "A") ?? 0, 0.4, accuracy: 0.001)
     }
 
-    func test_savedVolumeReturnsNilForUnknown() { XCTAssertNil(settings.savedVolume(for: "X", isOutput: true)) }
-    func test_savedAlertVolumeReturnsNilForUnknown() { XCTAssertNil(settings.savedAlertVolume(for: "X")) }
+    func test_savedVolumeReturnsNilForUnknown() {
+        XCTAssertNil(settings.savedVolume(for: "X", isOutput: true))
+    }
+
+    func test_savedAlertVolumeReturnsNilForUnknown() {
+        XCTAssertNil(settings.savedAlertVolume(for: "X"))
+    }
 
     // MARK: – Per-device icons
 
@@ -133,11 +145,11 @@ final class AppSettingsTests: XCTestCase {
     }
 
     func test_inputAndOutputIconsStoredSeparately() {
-        settings.setIcon("mic",          for: "A", isOutput: false)
+        settings.setIcon("mic", for: "A", isOutput: false)
         settings.setIcon("speaker.wave.2", for: "A", isOutput: true)
         let d = AudioDevice(uid: "A", name: "X", hasInput: true, hasOutput: true)
         XCTAssertEqual(settings.iconName(for: d, isOutput: false), "mic")
-        XCTAssertEqual(settings.iconName(for: d, isOutput: true),  "speaker.wave.2")
+        XCTAssertEqual(settings.iconName(for: d, isOutput: true), "speaker.wave.2")
     }
 
     // MARK: – hideMenuBarIcon
@@ -159,7 +171,7 @@ final class AppSettingsTests: XCTestCase {
 
     // MARK: – Persistence round-trip
 
-    func test_settingsPersistAcrossReinit() {
+    func test_settingsPersistAcrossReinit() throws {
         settings.registerDevice(uid: "X", name: "Device X", isOutput: true)
         settings.saveVolume(0.65, for: "X", isOutput: true)
         settings.saveAlertVolume(0.3, for: "X")
@@ -168,10 +180,10 @@ final class AppSettingsTests: XCTestCase {
         settings.disableDevice(uid: "X", isOutput: true)
         settings.setIcon("mic", for: "X", isOutput: true)
 
-        let s2 = AppSettings(defaults: UserDefaults(suiteName: suiteName)!)
+        let s2 = try AppSettings(defaults: XCTUnwrap(UserDefaults(suiteName: suiteName)))
         XCTAssertEqual(s2.knownDevices["X"], "Device X")
-        XCTAssertEqual(s2.savedVolume(for: "X",      isOutput: true) ?? 0, 0.65, accuracy: 0.001)
-        XCTAssertEqual(s2.savedAlertVolume(for: "X") ?? 0,            0.3,  accuracy: 0.001)
+        XCTAssertEqual(s2.savedVolume(for: "X", isOutput: true) ?? 0, 0.65, accuracy: 0.001)
+        XCTAssertEqual(s2.savedAlertVolume(for: "X") ?? 0, 0.3, accuracy: 0.001)
         XCTAssertFalse(s2.isAutoMode)
         XCTAssertTrue(s2.hideMenuBarIcon)
         XCTAssertTrue(s2.disabledOutputDevices.contains("X"))
@@ -253,7 +265,7 @@ final class AppSettingsTests: XCTestCase {
     func test_iconOptionsAllNonEmpty() {
         for opt in AppSettings.iconOptions {
             XCTAssertFalse(opt.symbol.isEmpty, "Empty symbol in iconOptions")
-            XCTAssertFalse(opt.label.isEmpty,  "Empty label for symbol '\(opt.symbol)'")
+            XCTAssertFalse(opt.label.isEmpty, "Empty label for symbol '\(opt.symbol)'")
         }
     }
 
@@ -294,8 +306,8 @@ final class AppSettingsTests: XCTestCase {
 
     func test_customNameIsRoleSpecific() {
         settings.setCustomName("Studio Out", for: "A", isOutput: true)
-        settings.setCustomName("USB Mic In",  for: "A", isOutput: false)
-        XCTAssertEqual(settings.displayName(for: "A", isOutput: true),  "Studio Out")
+        settings.setCustomName("USB Mic In", for: "A", isOutput: false)
+        XCTAssertEqual(settings.displayName(for: "A", isOutput: true), "Studio Out")
         XCTAssertEqual(settings.displayName(for: "A", isOutput: false), "USB Mic In")
     }
 
@@ -309,20 +321,20 @@ final class AppSettingsTests: XCTestCase {
     func test_setEmptyCustomNameActsAsClear() {
         settings.knownDevices["A"] = "My Speaker"
         settings.setCustomName("Custom", for: "A", isOutput: true)
-        settings.setCustomName("   ", for: "A", isOutput: true)   // whitespace-only
+        settings.setCustomName("   ", for: "A", isOutput: true) // whitespace-only
         XCTAssertEqual(settings.displayName(for: "A", isOutput: true), "My Speaker")
     }
 
     func test_deleteDeviceRemovesCustomNames() {
         settings.setCustomName("Custom Out", for: "A", isOutput: true)
-        settings.setCustomName("Custom In",  for: "A", isOutput: false)
+        settings.setCustomName("Custom In", for: "A", isOutput: false)
         settings.deleteDevice(uid: "A")
         XCTAssertNil(settings.customDeviceNames["A"])
     }
 
-    func test_customNamesPersistedAcrossReinit() {
+    func test_customNamesPersistedAcrossReinit() throws {
         settings.setCustomName("My AirPods", for: "X", isOutput: true)
-        let s2 = AppSettings(defaults: UserDefaults(suiteName: suiteName)!)
+        let s2 = try AppSettings(defaults: XCTUnwrap(UserDefaults(suiteName: suiteName)))
         XCTAssertEqual(s2.displayName(for: "X", isOutput: true), "My AirPods")
     }
 

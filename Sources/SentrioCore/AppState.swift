@@ -1,12 +1,11 @@
 import AppKit
-import SwiftUI
 import Combine
+import SwiftUI
 
 @MainActor
 final class AppState: ObservableObject {
-
-    let settings   = AppSettings()
-    let audio      = AudioManager()
+    let settings = AppSettings()
+    let audio = AudioManager()
     lazy var rules = RulesEngine(audio: audio, settings: settings)
 
     private var preferencesWindow: NSWindow?
@@ -28,7 +27,8 @@ final class AppState: ObservableObject {
         // Listen for reopen (Launchpad click) to open Preferences
         NotificationCenter.default.addObserver(
             self, selector: #selector(reopenApp),
-            name: .reopenApp, object: nil)
+            name: .reopenApp, object: nil
+        )
     }
 
     // MARK: – Dynamic menu bar icon
@@ -42,7 +42,7 @@ final class AppState: ObservableObject {
             let base = settings.iconName(for: out, isOutput: true)
             return AudioDevice.volumeAdaptedIcon(base, volume: audio.outputVolume)
         }
-        if let inp = audio.defaultInput  { return settings.iconName(for: inp, isOutput: false) }
+        if let inp = audio.defaultInput { return settings.iconName(for: inp, isOutput: false) }
         return "waveform"
     }
 
@@ -67,5 +67,7 @@ final class AppState: ObservableObject {
         NSApp.activate(ignoringOtherApps: true)
     }
 
-    @objc private func reopenApp() { openPreferences() }
+    @objc private func reopenApp() {
+        openPreferences()
+    }
 }

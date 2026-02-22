@@ -13,7 +13,7 @@ A lightweight macOS menu bar app that automatically switches between audio devic
 - **Auto-switches** your default output and input device when devices connect or disconnect
 - **Remembers volume** for each device and restores it when that device becomes active
 - **Priority order** — you decide which device wins (e.g. AirPods over built-in speakers, studio mic over AirPods mic)
-- **Alert/notification volume** is also saved and restored per output device
+- **Alert (system beep) volume** is also saved and restored per output device
 - Lives quietly in the menu bar — no Dock icon, no clutter
 
 ---

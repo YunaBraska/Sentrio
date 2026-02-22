@@ -1,5 +1,5 @@
-import CoreAudio
 import AVFoundation
+import CoreAudio
 import Foundation
 import IOKit
 import IOKit.ps
@@ -9,12 +9,11 @@ extension Notification.Name {
 }
 
 final class AudioManager: ObservableObject {
-
     // MARK: – Published
 
-    @Published var inputDevices:  [AudioDevice] = []
+    @Published var inputDevices: [AudioDevice] = []
     @Published var outputDevices: [AudioDevice] = []
-    @Published var defaultInput:  AudioDevice?
+    @Published var defaultInput: AudioDevice?
     @Published var defaultOutput: AudioDevice?
 
     /// Live RMS input level [0…1] for the current default input device
@@ -45,23 +44,23 @@ final class AudioManager: ObservableObject {
     // MARK: – Device refresh
 
     func refreshDevices() {
-        let all        = fetchAllDevices()                        // includes battery from power sources
-        let defaultIn  = resolveDefaultID(input: true)
+        let all = fetchAllDevices() // includes battery from power sources
+        let defaultIn = resolveDefaultID(input: true)
         let defaultOut = resolveDefaultID(input: false)
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.inputDevices  = all.filter(\.hasInput)
-            self.outputDevices = all.filter(\.hasOutput)
+            inputDevices = all.filter(\.hasInput)
+            outputDevices = all.filter(\.hasOutput)
             // Reuse the already-created device objects so battery data is preserved
-            self.defaultInput  = all.first { $0.id == defaultIn  }
-            self.defaultOutput = all.first { $0.id == defaultOut }
-            self.refreshVolumes()
+            defaultInput = all.first { $0.id == defaultIn }
+            defaultOutput = all.first { $0.id == defaultOut }
+            refreshVolumes()
         }
     }
 
     func refreshVolumes() {
         if let out = defaultOutput { outputVolume = volume(for: out, isOutput: true) ?? outputVolume }
-        if let inp = defaultInput  { inputVolume  = volume(for: inp, isOutput: false) ?? inputVolume }
+        if let inp = defaultInput { inputVolume = volume(for: inp, isOutput: false) ?? inputVolume }
         alertVolume = Self.readAlertVolume()
     }
 
@@ -73,16 +72,18 @@ final class AudioManager: ObservableObject {
             : kAudioHardwarePropertyDefaultOutputDevice
         var addr = AudioObjectPropertyAddress(
             mSelector: selector,
-            mScope:    kAudioObjectPropertyScopeGlobal,
-            mElement:  kAudioObjectPropertyElementMain)
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
         var devID = device.id
         AudioObjectSetPropertyData(
             AudioObjectID(kAudioObjectSystemObject),
             &addr, 0, nil,
-            UInt32(MemoryLayout<AudioDeviceID>.size), &devID)
+            UInt32(MemoryLayout<AudioDeviceID>.size), &devID
+        )
         DispatchQueue.main.async { [weak self] in
-            if isInput { self?.defaultInput  = device }
-            else       { self?.defaultOutput = device }
+            if isInput { self?.defaultInput = device }
+            else { self?.defaultOutput = device }
             self?.refreshVolumes()
         }
         // Level monitor restart is handled by the defaultInputDevice listener below
@@ -96,7 +97,8 @@ final class AudioManager: ObservableObject {
         for element: UInt32 in [kAudioObjectPropertyElementMain, 1] {
             var addr = AudioObjectPropertyAddress(
                 mSelector: kAudioDevicePropertyVolumeScalar,
-                mScope: scope, mElement: element)
+                mScope: scope, mElement: element
+            )
             guard AudioObjectHasProperty(device.id, &addr) else { continue }
             var vol: Float32 = 0
             var size = UInt32(MemoryLayout<Float32>.size)
@@ -111,12 +113,13 @@ final class AudioManager: ObservableObject {
             ? kAudioObjectPropertyScopeOutput : kAudioObjectPropertyScopeInput
         var addr = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyVolumeScalar,
-            mScope: scope, mElement: kAudioObjectPropertyElementMain)
+            mScope: scope, mElement: kAudioObjectPropertyElementMain
+        )
         if AudioObjectHasProperty(device.id, &addr) {
             var vol = volume
             AudioObjectSetPropertyData(device.id, &addr, 0, nil, UInt32(MemoryLayout<Float32>.size), &vol)
             if isOutput { DispatchQueue.main.async { self.outputVolume = volume } }
-            else        { DispatchQueue.main.async { self.inputVolume  = volume } }
+            else { DispatchQueue.main.async { self.inputVolume = volume } }
             return
         }
         for ch: UInt32 in [1, 2] {
@@ -127,7 +130,7 @@ final class AudioManager: ObservableObject {
             }
         }
         if isOutput { DispatchQueue.main.async { self.outputVolume = volume } }
-        else        { DispatchQueue.main.async { self.inputVolume  = volume } }
+        else { DispatchQueue.main.async { self.inputVolume = volume } }
     }
 
     // MARK: – Alert volume
@@ -149,8 +152,9 @@ final class AudioManager: ObservableObject {
     func isDeviceActive(_ device: AudioDevice) -> Bool {
         var addr = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyDeviceIsRunningSomewhere,
-            mScope:    kAudioObjectPropertyScopeGlobal,
-            mElement:  kAudioObjectPropertyElementMain)
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
         var running: UInt32 = 0
         var size = UInt32(MemoryLayout<UInt32>.size)
         return AudioObjectGetPropertyData(device.id, &addr, 0, nil, &size, &running) == noErr && running != 0
@@ -183,12 +187,12 @@ final class AudioManager: ObservableObject {
     }
 
     private func pollVolumes() {
-        let newOut   = defaultOutput.flatMap { volume(for: $0, isOutput: true)  } ?? outputVolume
-        let newIn    = defaultInput.flatMap  { volume(for: $0, isOutput: false) } ?? inputVolume
+        let newOut = defaultOutput.flatMap { volume(for: $0, isOutput: true) } ?? outputVolume
+        let newIn = defaultInput.flatMap { volume(for: $0, isOutput: false) } ?? inputVolume
         let newAlert = Self.readAlertVolume()
-        if abs(newOut   - outputVolume) > 0.005 { outputVolume = newOut   }
-        if abs(newIn    - inputVolume)  > 0.005 { inputVolume  = newIn    }
-        if abs(newAlert - alertVolume)  > 0.005 { alertVolume  = newAlert }
+        if abs(newOut - outputVolume) > 0.005 { outputVolume = newOut }
+        if abs(newIn - inputVolume) > 0.005 { inputVolume = newIn }
+        if abs(newAlert - alertVolume) > 0.005 { alertVolume = newAlert }
     }
 
     // MARK: – Input level (AVAudioEngine)
@@ -196,7 +200,7 @@ final class AudioManager: ObservableObject {
     private func startInputLevelMonitor() {
         stopInputLevelMonitor()
         let engine = AVAudioEngine()
-        let input  = engine.inputNode
+        let input = engine.inputNode
         // Guard: no input channels means no active input device — nothing to tap.
         guard input.outputFormat(forBus: 0).channelCount > 0 else { return }
         // Pass nil so AVAudioEngine picks its own compatible format.
@@ -207,8 +211,12 @@ final class AudioManager: ObservableObject {
             let ch = Int(buffer.format.channelCount)
             let fr = Int(buffer.frameLength)
             var sum: Float = 0
-            for c in 0..<ch { let p = data[c]; for f in 0..<fr { sum += p[f] * p[f] } }
-            let rms   = sqrt(sum / Float(ch * max(fr, 1)))
+            for c in 0 ..< ch {
+                let p = data[c]; for f in 0 ..< fr {
+                    sum += p[f] * p[f]
+                }
+            }
+            let rms = sqrt(sum / Float(ch * max(fr, 1)))
             let level = min(rms * 6, 1.0)
             DispatchQueue.main.async { self?.inputLevel = level }
         }
@@ -227,16 +235,19 @@ final class AudioManager: ObservableObject {
     private func fetchAllDevices() -> [AudioDevice] {
         var addr = AudioObjectPropertyAddress(
             mSelector: kAudioHardwarePropertyDevices,
-            mScope:    kAudioObjectPropertyScopeGlobal,
-            mElement:  kAudioObjectPropertyElementMain)
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
         var size: UInt32 = 0
         guard AudioObjectGetPropertyDataSize(
-            AudioObjectID(kAudioObjectSystemObject), &addr, 0, nil, &size) == noErr
+            AudioObjectID(kAudioObjectSystemObject), &addr, 0, nil, &size
+        ) == noErr
         else { return [] }
         let count = Int(size) / MemoryLayout<AudioDeviceID>.size
         var ids = [AudioDeviceID](repeating: 0, count: count)
         guard AudioObjectGetPropertyData(
-            AudioObjectID(kAudioObjectSystemObject), &addr, 0, nil, &size, &ids) == noErr
+            AudioObjectID(kAudioObjectSystemObject), &addr, 0, nil, &size, &ids
+        ) == noErr
         else { return [] }
         let powerSources = fetchPowerSourceBatteries()
         return ids.compactMap { makeDevice(from: $0, powerSources: powerSources) }
@@ -244,7 +255,7 @@ final class AudioManager: ObservableObject {
 
     private func makeDevice(from id: AudioDeviceID, powerSources: [String: Float] = [:]) -> AudioDevice? {
         guard
-            let uid  = stringProperty(id, kAudioDevicePropertyDeviceUID),
+            let uid = stringProperty(id, kAudioDevicePropertyDeviceUID),
             let name = stringProperty(id, kAudioDevicePropertyDeviceNameCFString)
         else { return nil }
 
@@ -255,7 +266,7 @@ final class AudioManager: ObservableObject {
         // as well as user-created aggregate devices from Audio MIDI Setup.
         if transport == .aggregate { return nil }
 
-        let hasIn  = hasStreams(id, scope: kAudioObjectPropertyScopeInput)
+        let hasIn = hasStreams(id, scope: kAudioObjectPropertyScopeInput)
         let hasOut = hasStreams(id, scope: kAudioObjectPropertyScopeOutput)
         guard hasIn || hasOut else { return nil }
 
@@ -271,9 +282,9 @@ final class AudioManager: ObservableObject {
         return AudioDevice(id: id, uid: uid, name: name,
                            hasInput: hasIn, hasOutput: hasOut,
                            transportType: transport,
-                           iconBaseName:  iconBase,
-                           isAppleMade:   isApple,
-                           batteryLevel:  battery)
+                           iconBaseName: iconBase,
+                           isAppleMade: isApple,
+                           batteryLevel: battery)
     }
 
     /// kAudioDevicePropertyIcon → (lowercased filename stem, isAppleMade).
@@ -288,8 +299,9 @@ final class AudioManager: ObservableObject {
     private func fetchIconInfo(_ id: AudioDeviceID) -> (baseName: String?, isAppleMade: Bool) {
         var addr = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyIcon,
-            mScope:    kAudioObjectPropertyScopeGlobal,
-            mElement:  kAudioObjectPropertyElementMain)
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
         var urlRef: Unmanaged<CFURL>? = nil
         var size = UInt32(MemoryLayout<Unmanaged<CFURL>?>.size)
         let status = withUnsafeMutablePointer(to: &urlRef) { ptr in
@@ -300,15 +312,15 @@ final class AudioManager: ObservableObject {
         guard status == noErr, let url = urlRef?.takeRetainedValue() as URL? else {
             return (nil, false)
         }
-        let baseName  = url.deletingPathExtension().lastPathComponent.lowercased()
-        let isApple   = url.path.lowercased().contains("apple")
+        let baseName = url.deletingPathExtension().lastPathComponent.lowercased()
+        let isApple = url.path.lowercased().contains("apple")
         return (baseName, isApple)
     }
 
     /// kAudioDevicePropertyBatteryLevel ('batt') — [0…1], nil if not reported.
     /// Tries Global, Output, and Input scopes; uses AudioObjectHasProperty before each read.
     private func fetchBatteryLevel(_ id: AudioDeviceID) -> Float? {
-        let kBatteryLevel: AudioObjectPropertySelector = 0x62617474  // 'batt'
+        let kBatteryLevel: AudioObjectPropertySelector = 0x6261_7474 // 'batt'
         let scopes: [AudioObjectPropertyScope] = [
             kAudioObjectPropertyScopeGlobal,
             kAudioObjectPropertyScopeOutput,
@@ -317,7 +329,8 @@ final class AudioManager: ObservableObject {
         for scope in scopes {
             var addr = AudioObjectPropertyAddress(
                 mSelector: kBatteryLevel, mScope: scope,
-                mElement:  kAudioObjectPropertyElementMain)
+                mElement: kAudioObjectPropertyElementMain
+            )
             guard AudioObjectHasProperty(id, &addr) else { continue }
             var level: Float32 = 0
             var size = UInt32(MemoryLayout<Float32>.size)
@@ -344,15 +357,15 @@ final class AudioManager: ObservableObject {
         var result: [String: Float] = [:]
         for source in list {
             guard
-                let desc    = IOPSGetPowerSourceDescription(snapshot, source)?.takeUnretainedValue() as? [String: Any],
-                let present = desc["Is Present"]       as? Bool, present,
-                let name    = desc["Name"]              as? String, !name.isEmpty,
+                let desc = IOPSGetPowerSourceDescription(snapshot, source)?.takeUnretainedValue() as? [String: Any],
+                let present = desc["Is Present"] as? Bool, present,
+                let name = desc["Name"] as? String, !name.isEmpty,
                 let current = desc["Current Capacity"] as? Int,
-                let maxCap  = desc["Max Capacity"]     as? Int, maxCap > 0
+                let maxCap = desc["Max Capacity"] as? Int, maxCap > 0
             else { continue }
-            let level = Float(current).clamped(to: 0...Float(maxCap)) / Float(maxCap)
-            let key   = name.lowercased()
-            result[key] = min(result[key] ?? level, level)  // keep the lowest cell
+            let level = Float(current).clamped(to: 0 ... Float(maxCap)) / Float(maxCap)
+            let key = name.lowercased()
+            result[key] = min(result[key] ?? level, level) // keep the lowest cell
         }
         return result
     }
@@ -381,12 +394,13 @@ final class AudioManager: ObservableObject {
         guard macWithDashes.count == 17,
               macWithDashes.filter({ $0 == "-" }).count == 5 else { return nil }
 
-        let macDash  = macWithDashes.lowercased()
+        let macDash = macWithDashes.lowercased()
         let macColon = macDash.replacingOccurrences(of: "-", with: ":")
 
         for serviceClass in ["IOBluetoothHIDDriver", "AppleBluetoothHIDDriver"] {
             if let level = ioKitHIDBattery(service: serviceClass,
-                                           macDash: macDash, macColon: macColon) {
+                                           macDash: macDash, macColon: macColon)
+            {
                 return level
             }
         }
@@ -396,7 +410,8 @@ final class AudioManager: ObservableObject {
     private func ioKitHIDBattery(service: String, macDash: String, macColon: String) -> Float? {
         var iter: io_iterator_t = 0
         guard IOServiceGetMatchingServices(
-                kIOMainPortDefault, IOServiceMatching(service), &iter) == KERN_SUCCESS
+            kIOMainPortDefault, IOServiceMatching(service), &iter
+        ) == KERN_SUCCESS
         else { return nil }
         defer { IOObjectRelease(iter) }
 
@@ -405,16 +420,17 @@ final class AudioManager: ObservableObject {
             defer { IOObjectRelease(entry); entry = IOIteratorNext(iter) }
             var propRef: Unmanaged<CFMutableDictionary>? = nil
             guard IORegistryEntryCreateCFProperties(
-                    entry, &propRef, kCFAllocatorDefault, 0) == KERN_SUCCESS,
-                  let dict = propRef?.takeRetainedValue() as? [String: Any] else { continue }
+                entry, &propRef, kCFAllocatorDefault, 0
+            ) == KERN_SUCCESS,
+                let dict = propRef?.takeRetainedValue() as? [String: Any] else { continue }
 
             let strings = dict.values.compactMap { $0 as? String }.map { $0.lowercased() }
             guard strings.contains(where: { $0.contains(macDash) || $0.contains(macColon) })
             else { continue }
 
-            if let pct = dict["BatteryPercent"]    as? Int { return Float(pct).clamped(to: 0...100) / 100 }
-            if let pct = dict["BatteryPercentRaw"] as? Int { return Float(pct).clamped(to: 0...100) / 100 }
-            if let lvl = dict["BatteryLevel"]      as? Int { return Float(lvl).clamped(to: 0...100) / 100 }
+            if let pct = dict["BatteryPercent"] as? Int { return Float(pct).clamped(to: 0 ... 100) / 100 }
+            if let pct = dict["BatteryPercentRaw"] as? Int { return Float(pct).clamped(to: 0 ... 100) / 100 }
+            if let lvl = dict["BatteryLevel"] as? Int { return Float(lvl).clamped(to: 0 ... 100) / 100 }
         }
         return nil
     }
@@ -422,22 +438,23 @@ final class AudioManager: ObservableObject {
     private func fetchTransportType(_ id: AudioDeviceID) -> AudioDevice.TransportType {
         var addr = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyTransportType,
-            mScope:    kAudioObjectPropertyScopeGlobal,
-            mElement:  kAudioObjectPropertyElementMain)
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
         var raw: UInt32 = 0; var size = UInt32(MemoryLayout<UInt32>.size)
         guard AudioObjectGetPropertyData(id, &addr, 0, nil, &size, &raw) == noErr else { return .unknown }
         switch raw {
-        case kAudioDeviceTransportTypeBuiltIn:                               return .builtIn
+        case kAudioDeviceTransportTypeBuiltIn: return .builtIn
         case kAudioDeviceTransportTypeBluetooth, kAudioDeviceTransportTypeBluetoothLE: return .bluetooth
-        case kAudioDeviceTransportTypeUSB:                                   return .usb
-        case kAudioDeviceTransportTypeAirPlay:                               return .airPlay
-        case kAudioDeviceTransportTypeThunderbolt:                           return .thunderbolt
-        case kAudioDeviceTransportTypeHDMI:                                  return .hdmi
-        case kAudioDeviceTransportTypeDisplayPort:                           return .displayPort
+        case kAudioDeviceTransportTypeUSB: return .usb
+        case kAudioDeviceTransportTypeAirPlay: return .airPlay
+        case kAudioDeviceTransportTypeThunderbolt: return .thunderbolt
+        case kAudioDeviceTransportTypeHDMI: return .hdmi
+        case kAudioDeviceTransportTypeDisplayPort: return .displayPort
         case kAudioDeviceTransportTypeAggregate, kAudioDeviceTransportTypeAutoAggregate: return .aggregate
-        case kAudioDeviceTransportTypeVirtual:                               return .virtual
-        case kAudioDeviceTransportTypePCI:                                   return .pci
-        default:                                                             return .unknown
+        case kAudioDeviceTransportTypeVirtual: return .virtual
+        case kAudioDeviceTransportTypePCI: return .pci
+        default: return .unknown
         }
     }
 
@@ -448,11 +465,13 @@ final class AudioManager: ObservableObject {
             : kAudioHardwarePropertyDefaultOutputDevice
         var addr = AudioObjectPropertyAddress(
             mSelector: selector, mScope: kAudioObjectPropertyScopeGlobal,
-            mElement: kAudioObjectPropertyElementMain)
+            mElement: kAudioObjectPropertyElementMain
+        )
         var devID: AudioDeviceID = kAudioObjectUnknown
         var size = UInt32(MemoryLayout<AudioDeviceID>.size)
         guard AudioObjectGetPropertyData(
-            AudioObjectID(kAudioObjectSystemObject), &addr, 0, nil, &size, &devID) == noErr
+            AudioObjectID(kAudioObjectSystemObject), &addr, 0, nil, &size, &devID
+        ) == noErr
         else { return kAudioObjectUnknown }
         return devID
     }
@@ -475,7 +494,8 @@ final class AudioManager: ObservableObject {
     private func stringProperty(_ id: AudioDeviceID, _ selector: AudioObjectPropertySelector) -> String? {
         var addr = AudioObjectPropertyAddress(
             mSelector: selector, mScope: kAudioObjectPropertyScopeGlobal,
-            mElement: kAudioObjectPropertyElementMain)
+            mElement: kAudioObjectPropertyElementMain
+        )
         var cfRef: Unmanaged<CFString>? = nil
         var size = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
         let status = withUnsafeMutablePointer(to: &cfRef) { ptr in
@@ -490,7 +510,8 @@ final class AudioManager: ObservableObject {
     private func hasStreams(_ id: AudioDeviceID, scope: AudioObjectPropertyScope) -> Bool {
         var addr = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyStreams, mScope: scope,
-            mElement: kAudioObjectPropertyElementMain)
+            mElement: kAudioObjectPropertyElementMain
+        )
         var size: UInt32 = 0
         return AudioObjectGetPropertyDataSize(id, &addr, 0, nil, &size) == noErr && size > 0
     }
@@ -505,16 +526,16 @@ final class AudioManager: ObservableObject {
         }
         addListener(on: sys, selector: kAudioHardwarePropertyDefaultOutputDevice) { [weak self] in
             guard let self else { return }
-            self.defaultOutput = self.fetchDefaultDevice(input: false)
-            self.refreshVolumes()
+            defaultOutput = fetchDefaultDevice(input: false)
+            refreshVolumes()
         }
         addListener(on: sys, selector: kAudioHardwarePropertyDefaultInputDevice) { [weak self] in
             guard let self else { return }
-            self.inputLevel = 0                                     // reset immediately
-            self.defaultInput = self.fetchDefaultDevice(input: true)
-            self.refreshVolumes()
+            inputLevel = 0 // reset immediately
+            defaultInput = fetchDefaultDevice(input: true)
+            refreshVolumes()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.startInputLevelMonitor()                       // reattach tap to new device
+                self?.startInputLevelMonitor() // reattach tap to new device
             }
         }
     }
@@ -526,7 +547,8 @@ final class AudioManager: ObservableObject {
     ) {
         var addr = AudioObjectPropertyAddress(
             mSelector: selector, mScope: kAudioObjectPropertyScopeGlobal,
-            mElement: kAudioObjectPropertyElementMain)
+            mElement: kAudioObjectPropertyElementMain
+        )
         let block: AudioObjectPropertyListenerBlock = { _, _ in DispatchQueue.main.async { handler() } }
         AudioObjectAddPropertyListenerBlock(objectID, &addr, .main, block)
         listeners.append(block)

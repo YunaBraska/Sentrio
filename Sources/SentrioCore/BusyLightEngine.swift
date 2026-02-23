@@ -184,6 +184,16 @@ final class BusyLightEngine: ObservableObject {
         recentEvents.removeAll()
     }
 
+    // MARK: - External control (App Intents / future integrations)
+
+    func enableAutoControl(source: String) {
+        setAutoMode(source: source)
+    }
+
+    func setManualControl(action: BusyLightAction, source: String) {
+        setManualAction(action, source: source)
+    }
+
     // MARK: - Rules / control mode
 
     private func applyFromSettings(source: String) {

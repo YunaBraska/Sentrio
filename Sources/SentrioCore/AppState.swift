@@ -15,6 +15,7 @@ final class AppState: ObservableObject {
     init() {
         _ = rules
         _ = busyLight
+        BusyLightIntegrationBridge.shared.bind(engine: busyLight)
 
         // ── Forward changes from nested ObservableObjects so App.body re-evaluates ──
         // This is what makes the dynamic menu bar icon and hideMenuBarIcon work.

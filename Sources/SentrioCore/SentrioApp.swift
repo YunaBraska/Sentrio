@@ -30,6 +30,9 @@ public struct SentrioApp: App {
 public class AppDelegate: NSObject, NSApplicationDelegate {
     public func applicationDidFinishLaunching(_: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        if #available(macOS 13.0, *) {
+            BusyLightAppShortcuts.updateAppShortcutParameters()
+        }
     }
 
     public func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {

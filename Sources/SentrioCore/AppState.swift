@@ -24,6 +24,11 @@ final class AppState: ObservableObject {
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
 
+        // Keep window chrome in sync with localization changes
+        settings.$appLanguage
+            .sink { [weak self] _ in self?.preferencesWindow?.title = L10n.tr("prefs.window.title") }
+            .store(in: &cancellables)
+
         // Listen for reopen (Launchpad click) to open Preferences
         NotificationCenter.default.addObserver(
             self, selector: #selector(reopenApp),
@@ -70,7 +75,7 @@ final class AppState: ObservableObject {
                 .environmentObject(self)
             let controller = NSHostingController(rootView: view)
             let win = NSWindow(contentViewController: controller)
-            win.title = "Sentrio Preferences"
+            win.title = L10n.tr("prefs.window.title")
             win.setContentSize(NSSize(width: 520, height: 620))
             win.styleMask = [.titled, .closable, .miniaturizable]
             win.center()

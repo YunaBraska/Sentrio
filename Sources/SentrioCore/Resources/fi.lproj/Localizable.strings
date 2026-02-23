@@ -1,0 +1,167 @@
+/* Yleiset otsikot */
+"label.output" = "Lähtö";
+"label.input" = "Tulo";
+"label.alert" = "Hälytys";
+"label.general" = "Yleiset";
+"label.auto" = "Auto";
+"label.volume" = "Äänenvoimakkuus";
+"label.inputGain" = "Tulovahvistus";
+
+/* Yleiset toiminnot */
+"action.preferences" = "Asetukset…";
+"action.soundSettings" = "Ääniasetukset…";
+"action.bluetoothSettings" = "Bluetooth-asetukset…";
+"action.quit" = "Lopeta";
+"action.playSound" = "Toista ääni";
+"action.disableDevice" = "Poista laite käytöstä";
+"action.enable" = "Ota käyttöön";
+"action.reset" = "Nollaa";
+"action.resetToDefault" = "Palauta oletuksiin";
+"action.rename" = "Nimeä uudelleen";
+"action.cancel" = "Peruuta";
+"action.save" = "Tallenna";
+"action.chooseIcon" = "Valitse kuvake";
+"action.setIcon" = "Aseta kuvake…";
+"action.openSoundSettings" = "Avaa ääniasetukset…";
+"action.exportSettings" = "Vie asetukset…";
+"action.importSettings" = "Tuo asetukset…";
+"action.showInFinder" = "Näytä Finderissa";
+"action.clearVolumeMemory" = "Tyhjennä äänenvoimakkuusmuisti";
+"action.viewSourceOnGitHub" = "Näytä lähdekoodi GitHubissa";
+"action.buyMeCoffee" = "☕  Osta minulle kahvi";
+"action.reportIssue" = "Ilmoita ongelmasta";
+
+/* Yleiset tilat */
+"status.connected" = "Yhdistetty";
+"status.disconnected" = "Katkaistu";
+"status.exportedSettings" = "Asetukset viety.";
+"status.importedSettings" = "Asetukset tuotu.";
+
+/* Virhemuodot */
+"error.exportFailedFormat" = "Vienti epäonnistui: %@";
+"error.importFailedFormat" = "Tuonti epäonnistui: %@";
+
+/* Valikkopalkki */
+"menu.autoHelp" = "Vaihda laitteita automaattisesti prioriteettisääntöjen mukaan";
+"menu.noDevices" = "Hiljaisuus havaittu. Kuinka… rauhallista.";
+"menu.deviceRow.autoModeHelp" = "Automaattinen vaihto on päällä — sammuta valitaksesi käsin";
+
+/* Easter eggs */
+"easter.audioDaemonStirs" = "Äänidemoni heräilee.";
+
+/* Asetusten alatunniste */
+"prefs.footer.millisecondsSaved" = "Säästetyt millisekunnit";
+"prefs.footer.autoSwitches" = "Automaattivaihdot";
+"prefs.footer.signalIntegrityScore" = "Signaalin eheyspisteet";
+"prefs.footer.milestone.tenSeconds" = "Olet saanut takaisin 10 sekuntia elämästäsi.";
+"prefs.footer.milestone.coffeeBreak" = "Olet selvinnyt kahvitauosta.";
+"prefs.footer.milestone.defeatedInefficiency" = "Olet voittanut tehottomuuden.";
+
+/* Asetukset: prioriteettivälilehdet */
+"prefs.priority.output.description" = "Vedä rivejä järjestääksesi ensisijaiset lähtölaitteet. Sentrio aktivoi korkeimmalle sijoitetun yhdistetyn laitteen.";
+"prefs.priority.input.description" = "Vedä rivejä järjestääksesi ensisijaiset tulolaitteet. Sentrio aktivoi korkeimmalle sijoitetun yhdistetyn laitteen.";
+"prefs.priority.section.title" = "Prioriteettijärjestys";
+"prefs.priority.section.hint" = "Tartu ≡ ja järjestä uudelleen";
+"prefs.disabled.section.title" = "Poistetut käytöstä (ei käytetä varalaitteena)";
+
+/* Asetukset: rivit */
+"prefs.dragToReorder" = "Vedä järjestääksesi uudelleen";
+"prefs.iconHelp.withCoreAudioFormat" = "CoreAudio-kuvaketiedosto: %@\nNapsauta korvataksesi";
+"prefs.iconHelp.noCoreAudio" = "Napsauta vaihtaaksesi kuvaketta";
+"prefs.renameHelp.output" = "Nimeä uudelleen tälle lähtöroolille";
+"prefs.renameHelp.input" = "Nimeä uudelleen tälle tuloroolille";
+"prefs.savedVolumeFormat" = "· Vol %d%%";
+"prefs.disableHelp" = "Poista käytöstä — poistaa automaattisesta vaihdosta. Voidaan ottaa käyttöön uudelleen alempana.";
+"prefs.removePermanentlyHelp" = "Poista pysyvästi — ilmestyy automaattisesti uudelleen, jos laite yhdistyy uudelleen";
+"prefs.removePermanentlyShort" = "Poista pysyvästi";
+
+/* Asetukset: nimeä uudelleen */
+"prefs.rename.subtitle.output" = "Mukautettu nimi vain tälle lähtöroolille.";
+"prefs.rename.subtitle.input" = "Mukautettu nimi vain tälle tuloroolille.";
+"prefs.rename.deviceNamePlaceholder" = "Laitteen nimi";
+
+/* Asetukset: Yleiset */
+"prefs.general.enableAutoSwitching" = "Ota automaattinen vaihto käyttöön";
+"prefs.general.enableAutoSwitching.description" = "Aktivoi automaattisesti korkeimmalle sijoitetun yhdistetyn laitteen, kun laitteet yhdistyvät tai katkeavat, tai kun järjestät prioriteettilistaa uudelleen.";
+"prefs.general.visibility" = "Näkyvyys";
+"prefs.general.hideMenuBarIcon" = "Piilota valikkopalkin kuvake";
+"prefs.general.hideMenuBarIcon.description" = "Kun kuvake on piilotettu, avaa Asetukset käynnistämällä Sentrio uudelleen Launchpadista.";
+"prefs.general.system" = "Järjestelmä";
+"prefs.general.launchAtLogin" = "Käynnistä kirjautuessa";
+"prefs.general.privacy" = "Tietosuoja";
+"prefs.general.showInputLevelMeter" = "Näytä reaaliaikainen tulotason mittari (Asetukset)";
+"prefs.general.showInputLevelMeter.description" = "Jos käytössä, Sentrio seuraa oletustulolaitetta vain, kun Asetukset on auki. macOS näyttää mikrofonin käytössä -ilmaisimen tuona aikana.";
+"prefs.general.settings" = "Asetukset";
+"prefs.general.settings.description" = "Vienti sisältää prioriteettilistat, käytöstä poistetut laitteet, mukautetut nimet/kuvakkeet ja äänenvoimakkuusmuistin.";
+"prefs.general.volumeMemory" = "Äänenvoimakkuusmuisti";
+"prefs.general.volumeMemory.description" = "Äänenvoimakkuudet tallennetaan laitekohtaisesti ja palautetaan automaattisesti, kun laite aktivoituu.";
+"prefs.language.title" = "Kieli";
+"prefs.language.system" = "Järjestelmä (Automaattinen)";
+"prefs.language.description" = "Oletuksena käytetään macOS:n kieltä. Voit vaihtaa sen tästä.";
+"prefs.general.about" = "Tietoja";
+"prefs.general.about.description" = "Sentrio on kevyt macOS:n valikkopalkkisovellus äänen tulo- ja lähtölaitteiden hallintaan — automaattisella vaihdolla prioriteettisääntöjen mukaan, laitekohtaisella äänenvoimakkuusmuistilla ja live-akunäytöllä.";
+"prefs.general.about.version" = "Versio";
+"prefs.general.about.author" = "Tekijä";
+"prefs.general.about.license" = "Lisenssi";
+"prefs.general.about.licenseValue" = "MIT Open Source";
+
+/* Ikkunan otsikot */
+"prefs.window.title" = "Sentrio-asetukset";
+
+/* Tuo / vie */
+"error.importExport.invalidFile" = "Tämä tiedosto ei näytä Sentrion asetusten vientitiedostolta.";
+"error.importExport.unsupportedSchemaFormat" = "Asetusten skeemaversiota ei tueta: %d.";
+
+/* Äänet */
+"sound.none" = "Ei mitään";
+"sound.systemDefault" = "Järjestelmän oletus";
+
+/* Kuljetustavat */
+"transport.builtIn" = "Sisäinen";
+"transport.bluetooth" = "Bluetooth";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "Aggregaatti";
+"transport.virtual" = "Virtuaalinen";
+"transport.pci" = "PCI";
+"transport.unknown" = "Tuntematon";
+
+/* Kuvakevalitsin */
+"icon.speaker" = "Kaiutin";
+"icon.speakerQuiet" = "Kaiutin (hiljainen)";
+"icon.speakerLoud" = "Kaiutin (kova)";
+"icon.muted" = "Mykistetty";
+"icon.hiFiSpeaker" = "Hi‑Fi-kaiutin";
+"icon.waveform" = "Aaltomuoto";
+"icon.microphone" = "Mikrofoni";
+"icon.microphoneFilled" = "Mikrofoni (täytetty)";
+"icon.ear" = "Korva";
+"icon.headphones" = "Kuulokkeet";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Desktop";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "Näyttö / Monitori";
+"icon.music" = "Musiikki";
+"icon.builtIn" = "Sisäinen";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "Langaton / BT";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "Radio";
+"icon.linkedAggregate" = "Linkitetty / Aggregaatti";
+"icon.virtual" = "Virtuaalinen";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "Tuntematon";

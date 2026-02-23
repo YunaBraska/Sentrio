@@ -1,0 +1,167 @@
+/* Common labels */
+"label.output" = "Output";
+"label.input" = "Input";
+"label.alert" = "Alert";
+"label.general" = "General";
+"label.auto" = "Auto";
+"label.volume" = "Volume";
+"label.inputGain" = "Input Gain";
+
+/* Common actions */
+"action.preferences" = "Preferences…";
+"action.soundSettings" = "Sound Settings…";
+"action.bluetoothSettings" = "Bluetooth Settings…";
+"action.quit" = "Quit";
+"action.playSound" = "Play sound";
+"action.disableDevice" = "Disable Device";
+"action.enable" = "Enable";
+"action.reset" = "Reset";
+"action.resetToDefault" = "Reset to default";
+"action.rename" = "Rename";
+"action.cancel" = "Cancel";
+"action.save" = "Save";
+"action.chooseIcon" = "Choose Icon";
+"action.setIcon" = "Set Icon…";
+"action.openSoundSettings" = "Open Sound Settings…";
+"action.exportSettings" = "Export Settings…";
+"action.importSettings" = "Import Settings…";
+"action.showInFinder" = "Show in Finder";
+"action.clearVolumeMemory" = "Clear Volume Memory";
+"action.viewSourceOnGitHub" = "View Source on GitHub";
+"action.buyMeCoffee" = "☕  Buy Me a Coffee";
+"action.reportIssue" = "Report an Issue";
+
+/* Common statuses */
+"status.connected" = "Connected";
+"status.disconnected" = "Disconnected";
+"status.exportedSettings" = "Exported settings.";
+"status.importedSettings" = "Imported settings.";
+
+/* Error formats */
+"error.exportFailedFormat" = "Export failed: %@";
+"error.importFailedFormat" = "Import failed: %@";
+
+/* Menu bar */
+"menu.autoHelp" = "Automatically switch devices based on priority rules";
+"menu.noDevices" = "Silence detected. How… peaceful.";
+"menu.deviceRow.autoModeHelp" = "Auto-switch is on — turn it off to select manually";
+
+/* Easter eggs */
+"easter.audioDaemonStirs" = "The audio daemon stirs.";
+
+/* Preferences footer */
+"prefs.footer.millisecondsSaved" = "Milliseconds Saved";
+"prefs.footer.autoSwitches" = "Auto-switches";
+"prefs.footer.signalIntegrityScore" = "Signal Integrity Score";
+"prefs.footer.milestone.tenSeconds" = "You have reclaimed 10 seconds of your life.";
+"prefs.footer.milestone.coffeeBreak" = "You have outlived one coffee break.";
+"prefs.footer.milestone.defeatedInefficiency" = "You have defeated inefficiency.";
+
+/* Preferences: priority tabs */
+"prefs.priority.output.description" = "Drag rows to order preferred output devices. Sentrio activates the top-ranked connected device.";
+"prefs.priority.input.description" = "Drag rows to order preferred input devices. Sentrio activates the top-ranked connected device.";
+"prefs.priority.section.title" = "Priority order";
+"prefs.priority.section.hint" = "Grab ≡ to reorder";
+"prefs.disabled.section.title" = "Disabled (not used as fallback)";
+
+/* Preferences: rows */
+"prefs.dragToReorder" = "Drag to reorder";
+"prefs.iconHelp.withCoreAudioFormat" = "CoreAudio icon file: %@\nClick to override";
+"prefs.iconHelp.noCoreAudio" = "Click to change icon";
+"prefs.renameHelp.output" = "Rename for this output role";
+"prefs.renameHelp.input" = "Rename for this input role";
+"prefs.savedVolumeFormat" = "· Vol %d%%";
+"prefs.disableHelp" = "Disable — remove from auto-switching. Can be re-enabled below.";
+"prefs.removePermanentlyHelp" = "Remove permanently — reappears automatically if device reconnects";
+"prefs.removePermanentlyShort" = "Remove permanently";
+
+/* Preferences: rename popover */
+"prefs.rename.subtitle.output" = "Custom label for this output role only.";
+"prefs.rename.subtitle.input" = "Custom label for this input role only.";
+"prefs.rename.deviceNamePlaceholder" = "Device name";
+
+/* Preferences: general tab */
+"prefs.general.enableAutoSwitching" = "Enable auto-switching";
+"prefs.general.enableAutoSwitching.description" = "Automatically activates the top-ranked connected device whenever devices connect or disconnect, or when you reorder the priority list.";
+"prefs.general.visibility" = "Visibility";
+"prefs.general.hideMenuBarIcon" = "Hide menu bar icon";
+"prefs.general.hideMenuBarIcon.description" = "When hidden, open Preferences by launching Sentrio again from Launchpad.";
+"prefs.general.system" = "System";
+"prefs.general.launchAtLogin" = "Launch at login";
+"prefs.general.privacy" = "Privacy";
+"prefs.general.showInputLevelMeter" = "Show live input level meter (Preferences)";
+"prefs.general.showInputLevelMeter.description" = "If enabled, Sentrio monitors the default input device only while Preferences is open. macOS will show the microphone‑in‑use indicator during that time.";
+"prefs.general.settings" = "Settings";
+"prefs.general.settings.description" = "Export includes priority lists, disabled devices, custom names/icons, and volume memory.";
+"prefs.general.volumeMemory" = "Volume Memory";
+"prefs.general.volumeMemory.description" = "Volume levels are saved per device and restored automatically when that device becomes active.";
+"prefs.language.title" = "Language";
+"prefs.language.system" = "System (Automatic)";
+"prefs.language.description" = "Defaults to your macOS language. You can override it here.";
+"prefs.general.about" = "About";
+"prefs.general.about.description" = "Sentrio is a lightweight macOS menu bar app for managing audio input and output devices — with automatic switching based on priority rules, per-device volume memory, and live battery display.";
+"prefs.general.about.version" = "Version";
+"prefs.general.about.author" = "Author";
+"prefs.general.about.license" = "License";
+"prefs.general.about.licenseValue" = "MIT Open Source";
+
+/* Window titles */
+"prefs.window.title" = "Sentrio Preferences";
+
+/* Import / export */
+"error.importExport.invalidFile" = "That file doesn’t look like a Sentrio settings export.";
+"error.importExport.unsupportedSchemaFormat" = "Unsupported settings schema version: %d.";
+
+/* Sounds */
+"sound.none" = "None";
+"sound.systemDefault" = "System default";
+
+/* Transport labels */
+"transport.builtIn" = "Built-in";
+"transport.bluetooth" = "Bluetooth";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "Aggregate";
+"transport.virtual" = "Virtual";
+"transport.pci" = "PCI";
+"transport.unknown" = "Unknown";
+
+/* Icon picker labels */
+"icon.speaker" = "Speaker";
+"icon.speakerQuiet" = "Speaker (quiet)";
+"icon.speakerLoud" = "Speaker (loud)";
+"icon.muted" = "Muted";
+"icon.hiFiSpeaker" = "Hi-Fi Speaker";
+"icon.waveform" = "Waveform";
+"icon.microphone" = "Microphone";
+"icon.microphoneFilled" = "Microphone (filled)";
+"icon.ear" = "Ear";
+"icon.headphones" = "Headphones";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Desktop";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "Display / Monitor";
+"icon.music" = "Music";
+"icon.builtIn" = "Built-in";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "Wireless / BT";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "Radio";
+"icon.linkedAggregate" = "Linked / Aggregate";
+"icon.virtual" = "Virtual";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "Unknown";

@@ -77,6 +77,16 @@ final class AppSettings: ObservableObject {
 
     // MARK: – General
 
+    /// App language override:
+    /// - "system" → follow macOS language
+    /// - otherwise → one of `L10n.supportedLocalizations`
+    @Published var appLanguage: String {
+        didSet {
+            defaults.set(appLanguage, forKey: "appLanguage")
+            L10n.overrideLocalization = appLanguage == "system" ? nil : appLanguage
+        }
+    }
+
     @Published var isAutoMode: Bool {
         didSet { defaults.set(isAutoMode, forKey: "isAutoMode") }
     }
@@ -125,6 +135,14 @@ final class AppSettings: ObservableObject {
         inputPriority = defaults.jsonStringArray(forKey: "inputPriority") ?? []
         disabledOutputDevices = Set(defaults.jsonStringArray(forKey: "disabledOutputDevices") ?? [])
         disabledInputDevices = Set(defaults.jsonStringArray(forKey: "disabledInputDevices") ?? [])
+
+        let storedLanguage = defaults.string(forKey: "appLanguage") ?? "system"
+        if storedLanguage == "system" || L10n.supportedLocalizations.contains(storedLanguage) {
+            appLanguage = storedLanguage
+        } else {
+            appLanguage = "system"
+        }
+
         isAutoMode = defaults.object(forKey: "isAutoMode") as? Bool ?? true
         hideMenuBarIcon = defaults.object(forKey: "hideMenuBarIcon") as? Bool ?? false
         showInputLevelMeter = defaults.object(forKey: "showInputLevelMeter") as? Bool ?? true
@@ -142,6 +160,9 @@ final class AppSettings: ObservableObject {
         knownDeviceBluetoothMinorTypes = defaults.jsonDecode([String: String].self, forKey: "knownDeviceBluetoothMinorTypes") ?? [:]
         testSound = defaults.jsonDecode(AppSound.self, forKey: "testSound") ?? .defaultTestSound
         alertSound = defaults.jsonDecode(AppSound.self, forKey: "alertSound") ?? .defaultAlertSound
+
+        // Property observers do not fire during init.
+        L10n.overrideLocalization = appLanguage == "system" ? nil : appLanguage
     }
 
     // MARK: – Volume memory
@@ -173,48 +194,48 @@ final class AppSettings: ObservableObject {
     /// because macOS can auto-detect and display all of them — the user should be able to pick any.
     /// Only uses SF Symbols confirmed available on macOS 13+.
     /// Note: "bluetooth" is a restricted Apple-internal symbol that renders empty — "wave.3.right" is used instead.
-    static let iconOptions: [(symbol: String, label: String)] = [
+    static let iconOptions: [(symbol: String, labelKey: String)] = [
         // ── Audio output ────────────────────────────────────────────
-        ("speaker.wave.2", "Speaker"),
-        ("speaker.wave.1", "Speaker (quiet)"),
-        ("speaker.wave.3", "Speaker (loud)"),
-        ("speaker.slash", "Muted"),
-        ("hifispeaker", "Hi-Fi Speaker"),
-        ("waveform", "Waveform"),
+        ("speaker.wave.2", "icon.speaker"),
+        ("speaker.wave.1", "icon.speakerQuiet"),
+        ("speaker.wave.3", "icon.speakerLoud"),
+        ("speaker.slash", "icon.muted"),
+        ("hifispeaker", "icon.hiFiSpeaker"),
+        ("waveform", "icon.waveform"),
         // ── Audio input ─────────────────────────────────────────────
-        ("mic", "Microphone"),
-        ("mic.fill", "Microphone (filled)"),
-        ("ear", "Ear"),
+        ("mic", "icon.microphone"),
+        ("mic.fill", "icon.microphoneFilled"),
+        ("ear", "icon.ear"),
         // ── Headphones / earbuds ────────────────────────────────────
-        ("headphones", "Headphones"),
-        ("earbuds", "EarPods"),
-        ("airpodspro", "AirPods Pro"),
-        ("airpods", "AirPods"),
-        ("airpodsmax", "AirPods Max"),
+        ("headphones", "icon.headphones"),
+        ("earbuds", "icon.earpods"),
+        ("airpodspro", "icon.airpodsPro"),
+        ("airpods", "icon.airpods"),
+        ("airpodsmax", "icon.airpodsMax"),
         // ── Apple devices ───────────────────────────────────────────
-        ("homepod", "HomePod"),
-        ("homepodmini", "HomePod mini"),
-        ("iphone", "iPhone"),
-        ("ipad", "iPad"),
-        ("applewatch", "Apple Watch"),
-        ("laptopcomputer", "MacBook"),
-        ("macmini", "Mac mini"),
-        ("desktopcomputer", "iMac / Desktop"),
-        ("appletv", "Apple TV"),
-        ("display", "Display / Monitor"),
+        ("homepod", "icon.homepod"),
+        ("homepodmini", "icon.homepodMini"),
+        ("iphone", "icon.iphone"),
+        ("ipad", "icon.ipad"),
+        ("applewatch", "icon.appleWatch"),
+        ("laptopcomputer", "icon.macbook"),
+        ("macmini", "icon.macMini"),
+        ("desktopcomputer", "icon.imacDesktop"),
+        ("appletv", "icon.appleTV"),
+        ("display", "icon.displayMonitor"),
         // ── Music ───────────────────────────────────────────────────
-        ("music.note", "Music"),
+        ("music.note", "icon.music"),
         // ── Connection / transport type ─────────────────────────────
-        ("internaldrive", "Built-in"),
-        ("cable.connector", "USB"),
-        ("bolt", "Thunderbolt"),
-        ("wave.3.right", "Wireless / BT"),
-        ("airplayaudio", "AirPlay"),
-        ("antenna.radiowaves.left.and.right", "Radio"),
-        ("link", "Linked / Aggregate"),
-        ("waveform.path", "Virtual"),
-        ("cpu", "PCI / CPU"),
-        ("questionmark.circle", "Unknown"),
+        ("internaldrive", "icon.builtIn"),
+        ("cable.connector", "icon.usb"),
+        ("bolt", "icon.thunderbolt"),
+        ("wave.3.right", "icon.wirelessBt"),
+        ("airplayaudio", "icon.airPlay"),
+        ("antenna.radiowaves.left.and.right", "icon.radio"),
+        ("link", "icon.linkedAggregate"),
+        ("waveform.path", "icon.virtual"),
+        ("cpu", "icon.pciCpu"),
+        ("questionmark.circle", "icon.unknown"),
     ]
 
     // MARK: – Custom device names
@@ -387,6 +408,7 @@ final class AppSettings: ObservableObject {
         var knownDeviceModelUIDs: [String: String]?
         var knownDeviceBluetoothMinorTypes: [String: String]?
 
+        var appLanguage: String?
         var isAutoMode: Bool
         var hideMenuBarIcon: Bool
         var showInputLevelMeter: Bool?
@@ -402,9 +424,9 @@ final class AppSettings: ObservableObject {
         var errorDescription: String? {
             switch self {
             case .invalidFile:
-                "That file doesn’t look like a Sentrio settings export."
+                L10n.tr("error.importExport.invalidFile")
             case let .unsupportedSchema(v):
-                "Unsupported settings schema version: \(v)."
+                L10n.format("error.importExport.unsupportedSchemaFormat", v)
             }
         }
     }
@@ -426,6 +448,7 @@ final class AppSettings: ObservableObject {
             knownDeviceIsAppleMade: knownDeviceIsAppleMade,
             knownDeviceModelUIDs: knownDeviceModelUIDs,
             knownDeviceBluetoothMinorTypes: knownDeviceBluetoothMinorTypes,
+            appLanguage: appLanguage,
             isAutoMode: isAutoMode,
             hideMenuBarIcon: hideMenuBarIcon,
             showInputLevelMeter: showInputLevelMeter,
@@ -477,6 +500,14 @@ final class AppSettings: ObservableObject {
         knownDeviceIsAppleMade = export.knownDeviceIsAppleMade ?? [:]
         knownDeviceModelUIDs = export.knownDeviceModelUIDs ?? [:]
         knownDeviceBluetoothMinorTypes = export.knownDeviceBluetoothMinorTypes ?? [:]
+
+        let importedLanguage = export.appLanguage ?? "system"
+        if importedLanguage == "system" || L10n.supportedLocalizations.contains(importedLanguage) {
+            appLanguage = importedLanguage
+        } else {
+            appLanguage = "system"
+        }
+
         isAutoMode = export.isAutoMode
         hideMenuBarIcon = export.hideMenuBarIcon
         showInputLevelMeter = export.showInputLevelMeter ?? true

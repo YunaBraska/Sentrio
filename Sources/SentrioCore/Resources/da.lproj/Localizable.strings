@@ -1,0 +1,167 @@
+/* Almindelige etiketter */
+"label.output" = "Udgang";
+"label.input" = "Indgang";
+"label.alert" = "Alarm";
+"label.general" = "Generelt";
+"label.auto" = "Auto";
+"label.volume" = "Lydstyrke";
+"label.inputGain" = "Indgangsforstærkning";
+
+/* Almindelige handlinger */
+"action.preferences" = "Indstillinger…";
+"action.soundSettings" = "Lydindstillinger…";
+"action.bluetoothSettings" = "Bluetooth-indstillinger…";
+"action.quit" = "Afslut";
+"action.playSound" = "Afspil lyd";
+"action.disableDevice" = "Deaktivér enhed";
+"action.enable" = "Aktivér";
+"action.reset" = "Nulstil";
+"action.resetToDefault" = "Nulstil til standard";
+"action.rename" = "Omdøb";
+"action.cancel" = "Annuller";
+"action.save" = "Gem";
+"action.chooseIcon" = "Vælg ikon";
+"action.setIcon" = "Angiv ikon…";
+"action.openSoundSettings" = "Åbn lydindstillinger…";
+"action.exportSettings" = "Eksportér indstillinger…";
+"action.importSettings" = "Importér indstillinger…";
+"action.showInFinder" = "Vis i Finder";
+"action.clearVolumeMemory" = "Ryd lydstyrkehukommelse";
+"action.viewSourceOnGitHub" = "Se kildekode på GitHub";
+"action.buyMeCoffee" = "☕  Køb mig en kaffe";
+"action.reportIssue" = "Rapportér et problem";
+
+/* Almindelige statusser */
+"status.connected" = "Forbundet";
+"status.disconnected" = "Frakoblet";
+"status.exportedSettings" = "Indstillinger eksporteret.";
+"status.importedSettings" = "Indstillinger importeret.";
+
+/* Fejlformater */
+"error.exportFailedFormat" = "Eksport mislykkedes: %@";
+"error.importFailedFormat" = "Import mislykkedes: %@";
+
+/* Menulinje */
+"menu.autoHelp" = "Skift enheder automatisk efter prioritetsregler";
+"menu.noDevices" = "Stilhed registreret. Hvor… fredeligt.";
+"menu.deviceRow.autoModeHelp" = "Automatisk skift er slået til — slå fra for at vælge manuelt";
+
+/* Easter eggs */
+"easter.audioDaemonStirs" = "Lyddaemonen rører på sig.";
+
+/* Indstillinger: footer */
+"prefs.footer.millisecondsSaved" = "Sparrede millisekunder";
+"prefs.footer.autoSwitches" = "Automatiske skift";
+"prefs.footer.signalIntegrityScore" = "Signalintegritetsscore";
+"prefs.footer.milestone.tenSeconds" = "Du har genvundet 10 sekunder af dit liv.";
+"prefs.footer.milestone.coffeeBreak" = "Du har overlevet en kaffepause.";
+"prefs.footer.milestone.defeatedInefficiency" = "Du har besejret ineffektivitet.";
+
+/* Indstillinger: prioritet */
+"prefs.priority.output.description" = "Træk rækker for at sortere foretrukne udgangsenheder. Sentrio aktiverer den højest rangerede forbundne enhed.";
+"prefs.priority.input.description" = "Træk rækker for at sortere foretrukne indgangsenheder. Sentrio aktiverer den højest rangerede forbundne enhed.";
+"prefs.priority.section.title" = "Prioritetsrækkefølge";
+"prefs.priority.section.hint" = "Træk ≡ for at omarrangere";
+"prefs.disabled.section.title" = "Deaktiveret (bruges ikke som fallback)";
+
+/* Indstillinger: rækker */
+"prefs.dragToReorder" = "Træk for at omarrangere";
+"prefs.iconHelp.withCoreAudioFormat" = "CoreAudio-ikonfil: %@\nKlik for at erstatte";
+"prefs.iconHelp.noCoreAudio" = "Klik for at ændre ikon";
+"prefs.renameHelp.output" = "Omdøb for denne udgangsrolle";
+"prefs.renameHelp.input" = "Omdøb for denne indgangsrolle";
+"prefs.savedVolumeFormat" = "· Vol %d%%";
+"prefs.disableHelp" = "Deaktivér — fjern fra automatisk skift. Kan aktiveres igen nedenfor.";
+"prefs.removePermanentlyHelp" = "Fjern permanent — vises automatisk igen, hvis enheden forbindes igen";
+"prefs.removePermanentlyShort" = "Fjern permanent";
+
+/* Indstillinger: omdøb */
+"prefs.rename.subtitle.output" = "Brugerdefineret etiket kun for denne udgangsrolle.";
+"prefs.rename.subtitle.input" = "Brugerdefineret etiket kun for denne indgangsrolle.";
+"prefs.rename.deviceNamePlaceholder" = "Enhedsnavn";
+
+/* Indstillinger: Generelt */
+"prefs.general.enableAutoSwitching" = "Aktivér automatisk skift";
+"prefs.general.enableAutoSwitching.description" = "Aktiverer automatisk den højest rangerede forbundne enhed, når enheder forbinder eller afbryder, eller når du omarrangerer prioritetslisten.";
+"prefs.general.visibility" = "Synlighed";
+"prefs.general.hideMenuBarIcon" = "Skjul menulinjeikon";
+"prefs.general.hideMenuBarIcon.description" = "Når den er skjult, åbnes Indstillinger ved at starte Sentrio igen fra Launchpad.";
+"prefs.general.system" = "System";
+"prefs.general.launchAtLogin" = "Start ved login";
+"prefs.general.privacy" = "Privatliv";
+"prefs.general.showInputLevelMeter" = "Vis live input-niveaumåler (Indstillinger)";
+"prefs.general.showInputLevelMeter.description" = "Hvis aktiveret overvåger Sentrio standardindgangsenheden kun, mens Indstillinger er åben. macOS viser mikrofonindikatoren i den periode.";
+"prefs.general.settings" = "Indstillinger";
+"prefs.general.settings.description" = "Eksporten inkluderer prioritetslister, deaktiverede enheder, brugerdefinerede navne/ikoner og lydstyrkehukommelse.";
+"prefs.general.volumeMemory" = "Lydstyrkehukommelse";
+"prefs.general.volumeMemory.description" = "Lydstyrken gemmes pr. enhed og gendannes automatisk, når den enhed bliver aktiv.";
+"prefs.language.title" = "Sprog";
+"prefs.language.system" = "System (Automatisk)";
+"prefs.language.description" = "Som standard bruges macOS-sproget. Du kan ændre det her.";
+"prefs.general.about" = "Om";
+"prefs.general.about.description" = "Sentrio er en let macOS-menulinjeapp til at administrere lydindgang og -udgang — med automatisk skift baseret på prioritetsregler, lydstyrkehukommelse pr. enhed og live batterivisning.";
+"prefs.general.about.version" = "Version";
+"prefs.general.about.author" = "Forfatter";
+"prefs.general.about.license" = "Licens";
+"prefs.general.about.licenseValue" = "MIT Open Source";
+
+/* Vinduestitler */
+"prefs.window.title" = "Sentrio-indstillinger";
+
+/* Import / eksport */
+"error.importExport.invalidFile" = "Den fil ligner ikke en eksport af Sentrio-indstillinger.";
+"error.importExport.unsupportedSchemaFormat" = "Ikke-understøttet skemaversion for indstillinger: %d.";
+
+/* Lyde */
+"sound.none" = "Ingen";
+"sound.systemDefault" = "Systemstandard";
+
+/* Transportetiketter */
+"transport.builtIn" = "Indbygget";
+"transport.bluetooth" = "Bluetooth";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "Aggregat";
+"transport.virtual" = "Virtuel";
+"transport.pci" = "PCI";
+"transport.unknown" = "Ukendt";
+
+/* Ikonvælger */
+"icon.speaker" = "Højttaler";
+"icon.speakerQuiet" = "Højttaler (lav)";
+"icon.speakerLoud" = "Højttaler (høj)";
+"icon.muted" = "Lydløs";
+"icon.hiFiSpeaker" = "Hi‑Fi-højttaler";
+"icon.waveform" = "Bølgeform";
+"icon.microphone" = "Mikrofon";
+"icon.microphoneFilled" = "Mikrofon (fyldt)";
+"icon.ear" = "Øre";
+"icon.headphones" = "Hovedtelefoner";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Desktop";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "Skærm / Monitor";
+"icon.music" = "Musik";
+"icon.builtIn" = "Indbygget";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "Trådløs / BT";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "Radio";
+"icon.linkedAggregate" = "Sammenkædet / Aggregat";
+"icon.virtual" = "Virtuel";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "Ukendt";

@@ -29,6 +29,13 @@ mkdir -p "$CONTENTS/Resources"
 
 cp "$BINARY" "$CONTENTS/MacOS/$APP_NAME"
 
+# ── SwiftPM resources (.bundle) ───────────────────────────────────────────────
+echo "→ Copying SwiftPM resources…"
+BINARY_DIR="$(cd "$(dirname "$BINARY")" && pwd)"
+find "$BINARY_DIR" -maxdepth 1 -name "*.bundle" -print0 | while IFS= read -r -d '' bundle; do
+    cp -R "$bundle" "$CONTENTS/Resources/"
+done
+
 # ── Info.plist ─────────────────────────────────────────────────────────────────
 cat > "$CONTENTS/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -38,6 +45,8 @@ cat > "$CONTENTS/Info.plist" << EOF
 <dict>
     <key>CFBundleName</key>
     <string>Sentrio</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
     <key>CFBundleIdentifier</key>
     <string>com.sentrio.app</string>
     <key>CFBundleIconFile</key>

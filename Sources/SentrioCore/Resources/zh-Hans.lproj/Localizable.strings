@@ -1,0 +1,167 @@
+/* 通用标签 */
+"label.output" = "输出";
+"label.input" = "输入";
+"label.alert" = "提醒";
+"label.general" = "通用";
+"label.auto" = "自动";
+"label.volume" = "音量";
+"label.inputGain" = "输入增益";
+
+/* 通用操作 */
+"action.preferences" = "偏好设置…";
+"action.soundSettings" = "声音设置…";
+"action.bluetoothSettings" = "蓝牙设置…";
+"action.quit" = "退出";
+"action.playSound" = "播放声音";
+"action.disableDevice" = "停用设备";
+"action.enable" = "启用";
+"action.reset" = "重置";
+"action.resetToDefault" = "恢复默认";
+"action.rename" = "重命名";
+"action.cancel" = "取消";
+"action.save" = "保存";
+"action.chooseIcon" = "选择图标";
+"action.setIcon" = "设置图标…";
+"action.openSoundSettings" = "打开声音设置…";
+"action.exportSettings" = "导出设置…";
+"action.importSettings" = "导入设置…";
+"action.showInFinder" = "在 Finder 中显示";
+"action.clearVolumeMemory" = "清除音量记忆";
+"action.viewSourceOnGitHub" = "在 GitHub 查看源码";
+"action.buyMeCoffee" = "☕  请我喝咖啡";
+"action.reportIssue" = "报告问题";
+
+/* 通用状态 */
+"status.connected" = "已连接";
+"status.disconnected" = "未连接";
+"status.exportedSettings" = "已导出设置。";
+"status.importedSettings" = "已导入设置。";
+
+/* 错误格式 */
+"error.exportFailedFormat" = "导出失败：%@";
+"error.importFailedFormat" = "导入失败：%@";
+
+/* 菜单栏 */
+"menu.autoHelp" = "按优先级规则自动切换设备";
+"menu.noDevices" = "检测到静默。多么…平和。";
+"menu.deviceRow.autoModeHelp" = "自动切换已开启 — 关闭后可手动选择";
+
+/* 彩蛋 */
+"easter.audioDaemonStirs" = "音频守护进程苏醒了。";
+
+/* 偏好设置底栏 */
+"prefs.footer.millisecondsSaved" = "节省的毫秒";
+"prefs.footer.autoSwitches" = "自动切换次数";
+"prefs.footer.signalIntegrityScore" = "信号完整性得分";
+"prefs.footer.milestone.tenSeconds" = "你夺回了生命中的 10 秒。";
+"prefs.footer.milestone.coffeeBreak" = "你熬过了一次咖啡休息。";
+"prefs.footer.milestone.defeatedInefficiency" = "你击败了低效。";
+
+/* 偏好设置：优先级标签页 */
+"prefs.priority.output.description" = "拖动行以排序首选输出设备。Sentrio 会启用优先级最高的已连接设备。";
+"prefs.priority.input.description" = "拖动行以排序首选输入设备。Sentrio 会启用优先级最高的已连接设备。";
+"prefs.priority.section.title" = "优先级顺序";
+"prefs.priority.section.hint" = "拖动 ≡ 以重新排序";
+"prefs.disabled.section.title" = "已停用（不作为后备）";
+
+/* 偏好设置：行 */
+"prefs.dragToReorder" = "拖动以重新排序";
+"prefs.iconHelp.withCoreAudioFormat" = "CoreAudio 图标文件：%@\n点击以覆盖";
+"prefs.iconHelp.noCoreAudio" = "点击以更改图标";
+"prefs.renameHelp.output" = "为此输出角色重命名";
+"prefs.renameHelp.input" = "为此输入角色重命名";
+"prefs.savedVolumeFormat" = "· 音量 %d%%";
+"prefs.disableHelp" = "停用 — 从自动切换中移除。可在下方重新启用。";
+"prefs.removePermanentlyHelp" = "永久移除 — 设备重新连接时会自动再次出现";
+"prefs.removePermanentlyShort" = "永久移除";
+
+/* 偏好设置：重命名 */
+"prefs.rename.subtitle.output" = "仅对该输出角色使用的自定义标签。";
+"prefs.rename.subtitle.input" = "仅对该输入角色使用的自定义标签。";
+"prefs.rename.deviceNamePlaceholder" = "设备名称";
+
+/* 偏好设置：通用标签页 */
+"prefs.general.enableAutoSwitching" = "启用自动切换";
+"prefs.general.enableAutoSwitching.description" = "当设备连接或断开，或当你重新排序优先级列表时，自动启用优先级最高的已连接设备。";
+"prefs.general.visibility" = "可见性";
+"prefs.general.hideMenuBarIcon" = "隐藏菜单栏图标";
+"prefs.general.hideMenuBarIcon.description" = "隐藏后，可通过从启动台再次启动 Sentrio 来打开偏好设置。";
+"prefs.general.system" = "系统";
+"prefs.general.launchAtLogin" = "登录时启动";
+"prefs.general.privacy" = "隐私";
+"prefs.general.showInputLevelMeter" = "显示实时输入电平表（偏好设置）";
+"prefs.general.showInputLevelMeter.description" = "启用后，Sentrio 仅在偏好设置打开时监测默认输入设备。macOS 会在此期间显示麦克风使用指示器。";
+"prefs.general.settings" = "设置";
+"prefs.general.settings.description" = "导出内容包括优先级列表、已停用设备、自定义名称/图标以及音量记忆。";
+"prefs.general.volumeMemory" = "音量记忆";
+"prefs.general.volumeMemory.description" = "音量会按设备保存，并在该设备变为活动设备时自动恢复。";
+"prefs.language.title" = "语言";
+"prefs.language.system" = "系统（自动）";
+"prefs.language.description" = "默认使用 macOS 语言。你可以在此处覆盖设置。";
+"prefs.general.about" = "关于";
+"prefs.general.about.description" = "Sentrio 是一款轻量级 macOS 菜单栏应用，用于管理音频输入与输出设备 — 支持基于优先级规则的自动切换、按设备记忆音量以及实时电量显示。";
+"prefs.general.about.version" = "版本";
+"prefs.general.about.author" = "作者";
+"prefs.general.about.license" = "许可证";
+"prefs.general.about.licenseValue" = "MIT 开源";
+
+/* 窗口标题 */
+"prefs.window.title" = "Sentrio 偏好设置";
+
+/* 导入/导出 */
+"error.importExport.invalidFile" = "该文件似乎不是 Sentrio 设置导出文件。";
+"error.importExport.unsupportedSchemaFormat" = "不支持的设置架构版本：%d。";
+
+/* 声音 */
+"sound.none" = "无";
+"sound.systemDefault" = "系统默认";
+
+/* 传输标签 */
+"transport.builtIn" = "内置";
+"transport.bluetooth" = "蓝牙";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "聚合";
+"transport.virtual" = "虚拟";
+"transport.pci" = "PCI";
+"transport.unknown" = "未知";
+
+/* 图标选择标签 */
+"icon.speaker" = "扬声器";
+"icon.speakerQuiet" = "扬声器（小）";
+"icon.speakerLoud" = "扬声器（大）";
+"icon.muted" = "静音";
+"icon.hiFiSpeaker" = "Hi‑Fi 扬声器";
+"icon.waveform" = "波形";
+"icon.microphone" = "麦克风";
+"icon.microphoneFilled" = "麦克风（填充）";
+"icon.ear" = "耳朵";
+"icon.headphones" = "耳机";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Desktop";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "显示器 / 监视器";
+"icon.music" = "音乐";
+"icon.builtIn" = "内置";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "无线 / 蓝牙";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "无线电";
+"icon.linkedAggregate" = "链接 / 聚合";
+"icon.virtual" = "虚拟";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "未知";

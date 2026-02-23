@@ -1,0 +1,167 @@
+/* Vanliga etiketter */
+"label.output" = "Ut";
+"label.input" = "In";
+"label.alert" = "Varning";
+"label.general" = "Allmänt";
+"label.auto" = "Auto";
+"label.volume" = "Volym";
+"label.inputGain" = "Ingångsförstärkning";
+
+/* Vanliga åtgärder */
+"action.preferences" = "Inställningar…";
+"action.soundSettings" = "Ljudinställningar…";
+"action.bluetoothSettings" = "Bluetooth-inställningar…";
+"action.quit" = "Avsluta";
+"action.playSound" = "Spela upp ljud";
+"action.disableDevice" = "Inaktivera enhet";
+"action.enable" = "Aktivera";
+"action.reset" = "Återställ";
+"action.resetToDefault" = "Återställ till standard";
+"action.rename" = "Byt namn";
+"action.cancel" = "Avbryt";
+"action.save" = "Spara";
+"action.chooseIcon" = "Välj ikon";
+"action.setIcon" = "Ange ikon…";
+"action.openSoundSettings" = "Öppna ljudinställningar…";
+"action.exportSettings" = "Exportera inställningar…";
+"action.importSettings" = "Importera inställningar…";
+"action.showInFinder" = "Visa i Finder";
+"action.clearVolumeMemory" = "Rensa volymminne";
+"action.viewSourceOnGitHub" = "Visa källkod på GitHub";
+"action.buyMeCoffee" = "☕  Bjud mig på kaffe";
+"action.reportIssue" = "Rapportera ett problem";
+
+/* Vanliga statusar */
+"status.connected" = "Ansluten";
+"status.disconnected" = "Frånkopplad";
+"status.exportedSettings" = "Inställningar exporterade.";
+"status.importedSettings" = "Inställningar importerade.";
+
+/* Fel-format */
+"error.exportFailedFormat" = "Export misslyckades: %@";
+"error.importFailedFormat" = "Import misslyckades: %@";
+
+/* Menyrad */
+"menu.autoHelp" = "Växla enheter automatiskt enligt prioriteringsregler";
+"menu.noDevices" = "Tystnad upptäckt. Så… fridfullt.";
+"menu.deviceRow.autoModeHelp" = "Autoväxling är på — stäng av för att välja manuellt";
+
+/* Easter eggs */
+"easter.audioDaemonStirs" = "Ljuddemonen rör på sig.";
+
+/* Inställningsfot */
+"prefs.footer.millisecondsSaved" = "Sparade millisekunder";
+"prefs.footer.autoSwitches" = "Autoväxlingar";
+"prefs.footer.signalIntegrityScore" = "Poäng för signalintegritet";
+"prefs.footer.milestone.tenSeconds" = "Du har återtagit 10 sekunder av ditt liv.";
+"prefs.footer.milestone.coffeeBreak" = "Du har överlevt en kaffepaus.";
+"prefs.footer.milestone.defeatedInefficiency" = "Du har besegrat ineffektivitet.";
+
+/* Inställningar: prioritet */
+"prefs.priority.output.description" = "Dra rader för att ordna föredragna utdataenheter. Sentrio aktiverar den högst rankade anslutna enheten.";
+"prefs.priority.input.description" = "Dra rader för att ordna föredragna indataenheter. Sentrio aktiverar den högst rankade anslutna enheten.";
+"prefs.priority.section.title" = "Prioritetsordning";
+"prefs.priority.section.hint" = "Dra ≡ för att ändra ordning";
+"prefs.disabled.section.title" = "Inaktiverade (används inte som reserv)";
+
+/* Inställningar: rader */
+"prefs.dragToReorder" = "Dra för att ändra ordning";
+"prefs.iconHelp.withCoreAudioFormat" = "CoreAudio-ikonfil: %@\nKlicka för att ersätta";
+"prefs.iconHelp.noCoreAudio" = "Klicka för att ändra ikon";
+"prefs.renameHelp.output" = "Byt namn för den här utrollen";
+"prefs.renameHelp.input" = "Byt namn för den här inrollen";
+"prefs.savedVolumeFormat" = "· Vol %d%%";
+"prefs.disableHelp" = "Inaktivera — ta bort från autoväxling. Kan aktiveras igen nedan.";
+"prefs.removePermanentlyHelp" = "Ta bort permanent — visas automatiskt igen om enheten ansluts på nytt";
+"prefs.removePermanentlyShort" = "Ta bort permanent";
+
+/* Inställningar: byt namn */
+"prefs.rename.subtitle.output" = "Anpassad etikett endast för den här utrollen.";
+"prefs.rename.subtitle.input" = "Anpassad etikett endast för den här inrollen.";
+"prefs.rename.deviceNamePlaceholder" = "Enhetsnamn";
+
+/* Inställningar: Allmänt */
+"prefs.general.enableAutoSwitching" = "Aktivera autoväxling";
+"prefs.general.enableAutoSwitching.description" = "Aktiverar automatiskt den högst rankade anslutna enheten när enheter ansluts eller kopplas från, eller när du ändrar ordning i prioritetslistan.";
+"prefs.general.visibility" = "Synlighet";
+"prefs.general.hideMenuBarIcon" = "Dölj menyradsikon";
+"prefs.general.hideMenuBarIcon.description" = "När den är dold, öppna Inställningar genom att starta Sentrio igen via Launchpad.";
+"prefs.general.system" = "System";
+"prefs.general.launchAtLogin" = "Starta vid inloggning";
+"prefs.general.privacy" = "Integritet";
+"prefs.general.showInputLevelMeter" = "Visa live-mätare för ingångsnivå (Inställningar)";
+"prefs.general.showInputLevelMeter.description" = "Om aktiverad övervakar Sentrio standardindataenheten endast när Inställningar är öppet. macOS visar mikrofonindikatorn under den tiden.";
+"prefs.general.settings" = "Inställningar";
+"prefs.general.settings.description" = "Exporten innehåller prioritetslistor, inaktiverade enheter, anpassade namn/ikoner och volymminne.";
+"prefs.general.volumeMemory" = "Volymminne";
+"prefs.general.volumeMemory.description" = "Volymnivåer sparas per enhet och återställs automatiskt när den enheten blir aktiv.";
+"prefs.language.title" = "Språk";
+"prefs.language.system" = "System (Automatiskt)";
+"prefs.language.description" = "Som standard används macOS-språket. Du kan ändra det här.";
+"prefs.general.about" = "Om";
+"prefs.general.about.description" = "Sentrio är en lätt macOS-menyradsapp för att hantera ljudenheter för in- och utdata — med automatisk växling baserat på prioritetsregler, volymminne per enhet och live-batterivisning.";
+"prefs.general.about.version" = "Version";
+"prefs.general.about.author" = "Författare";
+"prefs.general.about.license" = "Licens";
+"prefs.general.about.licenseValue" = "MIT Open Source";
+
+/* Fönstertitlar */
+"prefs.window.title" = "Sentrio-inställningar";
+
+/* Import / export */
+"error.importExport.invalidFile" = "Den filen verkar inte vara en Sentrio-inställningsexport.";
+"error.importExport.unsupportedSchemaFormat" = "Inställningsschema-versionen stöds inte: %d.";
+
+/* Ljud */
+"sound.none" = "Inget";
+"sound.systemDefault" = "Systemstandard";
+
+/* Transportetiketter */
+"transport.builtIn" = "Inbyggd";
+"transport.bluetooth" = "Bluetooth";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "Aggregat";
+"transport.virtual" = "Virtuell";
+"transport.pci" = "PCI";
+"transport.unknown" = "Okänd";
+
+/* Ikonväljare */
+"icon.speaker" = "Högtalare";
+"icon.speakerQuiet" = "Högtalare (tyst)";
+"icon.speakerLoud" = "Högtalare (högt)";
+"icon.muted" = "Tyst";
+"icon.hiFiSpeaker" = "Hi‑Fi-högtalare";
+"icon.waveform" = "Vågform";
+"icon.microphone" = "Mikrofon";
+"icon.microphoneFilled" = "Mikrofon (fylld)";
+"icon.ear" = "Öra";
+"icon.headphones" = "Hörlurar";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Desktop";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "Skärm / Monitor";
+"icon.music" = "Musik";
+"icon.builtIn" = "Inbyggd";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "Trådlöst / BT";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "Radio";
+"icon.linkedAggregate" = "Länkad / Aggregat";
+"icon.virtual" = "Virtuell";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "Okänd";

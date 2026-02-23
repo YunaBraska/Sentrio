@@ -14,14 +14,14 @@ struct MenuBarView: View {
             Divider()
             masterVolumeSection
             Divider()
-            deviceSection(title: "Output", systemImage: "speaker.wave.2",
+            deviceSection(title: L10n.tr("label.output"), systemImage: "speaker.wave.2",
                           devices: sorted(
                               audio.outputDevices.filter { !settings.disabledOutputDevices.contains($0.uid) },
                               by: settings.outputPriority
                           ),
                           defaultUID: audio.defaultOutput?.uid, isInput: false)
             Divider()
-            deviceSection(title: "Input", systemImage: "mic",
+            deviceSection(title: L10n.tr("label.input"), systemImage: "mic",
                           devices: sorted(
                               audio.inputDevices.filter { !settings.disabledInputDevices.contains($0.uid) },
                               by: settings.inputPriority
@@ -40,9 +40,9 @@ struct MenuBarView: View {
         HStack(spacing: 10) {
             Text("Sentrio").font(.headline)
             Spacer()
-            Toggle("Auto", isOn: $settings.isAutoMode)
+            Toggle(L10n.tr("label.auto"), isOn: $settings.isAutoMode)
                 .toggleStyle(.switch).controlSize(.mini)
-                .help("Automatically switch devices based on priority rules")
+                .help(L10n.tr("menu.autoHelp"))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
@@ -54,7 +54,7 @@ struct MenuBarView: View {
         VStack(spacing: 6) {
             VolumeRow(
                 icon: "speaker.wave.2",
-                label: "Output",
+                label: L10n.tr("label.output"),
                 volume: Binding(
                     get: { audio.outputVolume },
                     set: { v in
@@ -67,7 +67,7 @@ struct MenuBarView: View {
             )
             VolumeRow(
                 icon: "mic",
-                label: "Input",
+                label: L10n.tr("label.input"),
                 volume: Binding(
                     get: { audio.inputVolume },
                     set: { v in
@@ -78,7 +78,7 @@ struct MenuBarView: View {
             )
             VolumeRow(
                 icon: "bell",
-                label: "Alert",
+                label: L10n.tr("label.alert"),
                 volume: Binding(
                     get: { audio.alertVolume },
                     set: { v in
@@ -108,7 +108,7 @@ struct MenuBarView: View {
                 .padding(.bottom, 2)
 
             if devices.isEmpty {
-                Text("Silence detected. How… peaceful.")
+                Text(L10n.tr("menu.noDevices"))
                     .font(.caption).foregroundStyle(.tertiary)
                     .padding(.horizontal, 16).padding(.bottom, 8)
             } else {
@@ -128,22 +128,22 @@ struct MenuBarView: View {
     private var footerRow: some View {
         VStack(alignment: .leading, spacing: 6) {
             if EasterEggs.audioDaemonStirs() {
-                Text("The audio daemon stirs.")
+                Text(L10n.tr("easter.audioDaemonStirs"))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
             HStack(spacing: 0) {
-                Button("Preferences…") { appState.openPreferences() }
+                Button(L10n.tr("action.preferences")) { appState.openPreferences() }
                     .buttonStyle(.plain).foregroundStyle(.secondary)
                 Spacer()
-                Button("Sound Settings…") {
+                Button(L10n.tr("action.soundSettings")) {
                     if let url = URL(string: "x-apple.systempreferences:com.apple.preference.sound") {
                         NSWorkspace.shared.open(url)
                     }
                 }
                 .buttonStyle(.plain).foregroundStyle(.secondary)
                 Spacer()
-                Button("Quit") { NSApp.terminate(nil) }
+                Button(L10n.tr("action.quit")) { NSApp.terminate(nil) }
                     .buttonStyle(.plain).foregroundStyle(.secondary)
             }
         }
@@ -195,7 +195,7 @@ struct VolumeRow: View {
                         .frame(width: 16)
                 }
                 .buttonStyle(.plain)
-                .help("Play sound")
+                .help(L10n.tr("action.playSound"))
             }
         }
     }
@@ -254,15 +254,15 @@ private struct MenuDeviceRow: View {
         }
         .buttonStyle(.plain)
         .background(isDefault ? Color.accentColor.opacity(0.08) : Color.clear)
-        .help(settings.isAutoMode ? "Auto-switch is on — turn it off to select manually" : "")
+        .help(settings.isAutoMode ? L10n.tr("menu.deviceRow.autoModeHelp") : "")
         .contextMenu {
             iconPickerMenu
             Divider()
             if isAirPodsFamily {
-                Button("Bluetooth Settings…") { openBluetoothSettings() }
+                Button(L10n.tr("action.bluetoothSettings")) { openBluetoothSettings() }
                 Divider()
             }
-            Button("Disable Device") { settings.disableDevice(uid: device.uid, isOutput: !isInput) }
+            Button(L10n.tr("action.disableDevice")) { settings.disableDevice(uid: device.uid, isOutput: !isInput) }
         }
     }
 
@@ -288,14 +288,14 @@ private struct MenuDeviceRow: View {
 
     /// Context menu: icon picker
     private var iconPickerMenu: some View {
-        Menu("Set Icon…") {
-            Button("Reset to default") { settings.clearIcon(for: device.uid, isOutput: !isInput) }
+        Menu(L10n.tr("action.setIcon")) {
+            Button(L10n.tr("action.resetToDefault")) { settings.clearIcon(for: device.uid, isOutput: !isInput) }
             Divider()
             ForEach(AppSettings.iconOptions, id: \.symbol) { opt in
                 Button {
                     settings.setIcon(opt.symbol, for: device.uid, isOutput: !isInput)
                 } label: {
-                    Label(opt.label, systemImage: opt.symbol)
+                    Label(L10n.tr(opt.labelKey), systemImage: opt.symbol)
                 }
             }
         }

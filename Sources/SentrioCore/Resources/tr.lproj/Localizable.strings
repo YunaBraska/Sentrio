@@ -1,0 +1,167 @@
+/* Ortak etiketler */
+"label.output" = "Çıkış";
+"label.input" = "Giriş";
+"label.alert" = "Uyarı";
+"label.general" = "Genel";
+"label.auto" = "Oto";
+"label.volume" = "Ses";
+"label.inputGain" = "Giriş kazancı";
+
+/* Ortak eylemler */
+"action.preferences" = "Tercihler…";
+"action.soundSettings" = "Ses Ayarları…";
+"action.bluetoothSettings" = "Bluetooth Ayarları…";
+"action.quit" = "Çıkış";
+"action.playSound" = "Sesi çal";
+"action.disableDevice" = "Aygıtı devre dışı bırak";
+"action.enable" = "Etkinleştir";
+"action.reset" = "Sıfırla";
+"action.resetToDefault" = "Varsayılanlara döndür";
+"action.rename" = "Yeniden adlandır";
+"action.cancel" = "İptal";
+"action.save" = "Kaydet";
+"action.chooseIcon" = "Simge seç";
+"action.setIcon" = "Simge ayarla…";
+"action.openSoundSettings" = "Ses Ayarlarını Aç…";
+"action.exportSettings" = "Ayarları dışa aktar…";
+"action.importSettings" = "Ayarları içe aktar…";
+"action.showInFinder" = "Finder’da göster";
+"action.clearVolumeMemory" = "Ses hafızasını temizle";
+"action.viewSourceOnGitHub" = "Kaynağı GitHub’da görüntüle";
+"action.buyMeCoffee" = "☕  Bana bir kahve ısmarla";
+"action.reportIssue" = "Sorun bildir";
+
+/* Ortak durumlar */
+"status.connected" = "Bağlı";
+"status.disconnected" = "Bağlantı kesildi";
+"status.exportedSettings" = "Ayarlar dışa aktarıldı.";
+"status.importedSettings" = "Ayarlar içe aktarıldı.";
+
+/* Hata biçimleri */
+"error.exportFailedFormat" = "Dışa aktarma başarısız: %@";
+"error.importFailedFormat" = "İçe aktarma başarısız: %@";
+
+/* Menü çubuğu */
+"menu.autoHelp" = "Öncelik kurallarına göre aygıtları otomatik değiştir";
+"menu.noDevices" = "Sessizlik algılandı. Ne… huzurlu.";
+"menu.deviceRow.autoModeHelp" = "Otomatik geçiş açık — elle seçmek için kapat";
+
+/* Easter eggs */
+"easter.audioDaemonStirs" = "Ses şeytanı kıpırdanıyor.";
+
+/* Tercihler alt bilgisi */
+"prefs.footer.millisecondsSaved" = "Kazanılan milisaniye";
+"prefs.footer.autoSwitches" = "Otomatik geçişler";
+"prefs.footer.signalIntegrityScore" = "Sinyal bütünlüğü puanı";
+"prefs.footer.milestone.tenSeconds" = "Hayatından 10 saniye geri aldın.";
+"prefs.footer.milestone.coffeeBreak" = "Bir kahve molasını atlattın.";
+"prefs.footer.milestone.defeatedInefficiency" = "Verimsizliği yendin.";
+
+/* Tercihler: öncelik sekmeleri */
+"prefs.priority.output.description" = "Tercih edilen çıkış aygıtlarını sıralamak için satırları sürükleyin. Sentrio en yüksek öncelikli bağlı aygıtı etkinleştirir.";
+"prefs.priority.input.description" = "Tercih edilen giriş aygıtlarını sıralamak için satırları sürükleyin. Sentrio en yüksek öncelikli bağlı aygıtı etkinleştirir.";
+"prefs.priority.section.title" = "Öncelik sırası";
+"prefs.priority.section.hint" = "Yeniden sıralamak için ≡ tutup sürükle";
+"prefs.disabled.section.title" = "Devre dışı (yedek olarak kullanılmaz)";
+
+/* Tercihler: satırlar */
+"prefs.dragToReorder" = "Yeniden sıralamak için sürükle";
+"prefs.iconHelp.withCoreAudioFormat" = "CoreAudio simge dosyası: %@\nÜzerine yazmak için tıkla";
+"prefs.iconHelp.noCoreAudio" = "Simgeyi değiştirmek için tıkla";
+"prefs.renameHelp.output" = "Bu çıkış rolü için yeniden adlandır";
+"prefs.renameHelp.input" = "Bu giriş rolü için yeniden adlandır";
+"prefs.savedVolumeFormat" = "· Ses %d%%";
+"prefs.disableHelp" = "Devre dışı bırak — otomatik geçişten çıkar. Aşağıdan yeniden etkinleştirilebilir.";
+"prefs.removePermanentlyHelp" = "Kalıcı olarak kaldır — aygıt yeniden bağlanırsa otomatik olarak tekrar görünür";
+"prefs.removePermanentlyShort" = "Kalıcı olarak kaldır";
+
+/* Tercihler: yeniden adlandır */
+"prefs.rename.subtitle.output" = "Yalnızca bu çıkış rolü için özel etiket.";
+"prefs.rename.subtitle.input" = "Yalnızca bu giriş rolü için özel etiket.";
+"prefs.rename.deviceNamePlaceholder" = "Aygıt adı";
+
+/* Tercihler: Genel sekmesi */
+"prefs.general.enableAutoSwitching" = "Otomatik geçişi etkinleştir";
+"prefs.general.enableAutoSwitching.description" = "Aygıtlar bağlandığında/bağlantısı kesildiğinde veya öncelik listesini yeniden sıraladığınızda, en yüksek öncelikli bağlı aygıtı otomatik olarak etkinleştirir.";
+"prefs.general.visibility" = "Görünürlük";
+"prefs.general.hideMenuBarIcon" = "Menü çubuğu simgesini gizle";
+"prefs.general.hideMenuBarIcon.description" = "Gizliyken, Launchpad’den Sentrio’yu yeniden başlatarak Tercihler’i açın.";
+"prefs.general.system" = "Sistem";
+"prefs.general.launchAtLogin" = "Girişte başlat";
+"prefs.general.privacy" = "Gizlilik";
+"prefs.general.showInputLevelMeter" = "Canlı giriş seviye göstergesini göster (Tercihler)";
+"prefs.general.showInputLevelMeter.description" = "Etkinleştirildiğinde Sentrio, Tercihler açıkken yalnızca varsayılan giriş aygıtını izler. macOS bu süre boyunca mikrofon göstergesini gösterir.";
+"prefs.general.settings" = "Ayarlar";
+"prefs.general.settings.description" = "Dışa aktarma; öncelik listeleri, devre dışı aygıtlar, özel adlar/simgeler ve ses hafızasını içerir.";
+"prefs.general.volumeMemory" = "Ses Hafızası";
+"prefs.general.volumeMemory.description" = "Ses seviyeleri aygıt başına kaydedilir ve aygıt etkin olduğunda otomatik olarak geri yüklenir.";
+"prefs.language.title" = "Dil";
+"prefs.language.system" = "Sistem (Otomatik)";
+"prefs.language.description" = "Varsayılan olarak macOS dilini kullanır. Buradan değiştirebilirsiniz.";
+"prefs.general.about" = "Hakkında";
+"prefs.general.about.description" = "Sentrio, macOS menü çubuğunda ses giriş/çıkış aygıtlarını yönetmek için hafif bir uygulamadır — öncelik kurallarına dayalı otomatik geçiş, aygıt başına ses hafızası ve canlı pil göstergesi ile.";
+"prefs.general.about.version" = "Sürüm";
+"prefs.general.about.author" = "Yazar";
+"prefs.general.about.license" = "Lisans";
+"prefs.general.about.licenseValue" = "MIT Açık Kaynak";
+
+/* Pencere başlıkları */
+"prefs.window.title" = "Sentrio Tercihleri";
+
+/* İçe/dışa aktar */
+"error.importExport.invalidFile" = "Bu dosya Sentrio ayar dışa aktarması gibi görünmüyor.";
+"error.importExport.unsupportedSchemaFormat" = "Desteklenmeyen ayar şema sürümü: %d.";
+
+/* Sesler */
+"sound.none" = "Yok";
+"sound.systemDefault" = "Sistem varsayılanı";
+
+/* Taşıma etiketleri */
+"transport.builtIn" = "Dahili";
+"transport.bluetooth" = "Bluetooth";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "Birleşik";
+"transport.virtual" = "Sanal";
+"transport.pci" = "PCI";
+"transport.unknown" = "Bilinmiyor";
+
+/* Simge seçici */
+"icon.speaker" = "Hoparlör";
+"icon.speakerQuiet" = "Hoparlör (kısık)";
+"icon.speakerLoud" = "Hoparlör (yüksek)";
+"icon.muted" = "Sessiz";
+"icon.hiFiSpeaker" = "Hi‑Fi hoparlör";
+"icon.waveform" = "Dalga biçimi";
+"icon.microphone" = "Mikrofon";
+"icon.microphoneFilled" = "Mikrofon (dolu)";
+"icon.ear" = "Kulak";
+"icon.headphones" = "Kulaklık";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Desktop";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "Ekran / Monitör";
+"icon.music" = "Müzik";
+"icon.builtIn" = "Dahili";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "Kablosuz / BT";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "Radyo";
+"icon.linkedAggregate" = "Bağlı / Birleşik";
+"icon.virtual" = "Sanal";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "Bilinmiyor";

@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "Sentrio",
+    defaultLocalization: "en",
     platforms: [.macOS(.v13)],
     targets: [
         // Thin executable — only contains main.swift
@@ -14,7 +15,10 @@ let package = Package(
         // Library with all app logic — importable by tests
         .target(
             name: "SentrioCore",
-            path: "Sources/SentrioCore"
+            path: "Sources/SentrioCore",
+            resources: [
+                .process("Resources"),
+            ]
         ),
         .testTarget(
             name: "SentrioTests",

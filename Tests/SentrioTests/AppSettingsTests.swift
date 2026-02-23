@@ -25,6 +25,10 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertFalse(settings.hideMenuBarIcon)
     }
 
+    func test_appLanguageDefaultIsSystem() {
+        XCTAssertEqual(settings.appLanguage, "system")
+    }
+
     func test_priorityListsStartEmpty() {
         XCTAssertTrue(settings.outputPriority.isEmpty)
     }
@@ -226,6 +230,7 @@ final class AppSettingsTests: XCTestCase {
         settings.knownDeviceIsAppleMade = ["A": true]
         settings.knownDeviceModelUIDs = ["A": "2014 4c"]
         settings.knownDeviceBluetoothMinorTypes = ["A": "Headphones"]
+        settings.appLanguage = "de"
         settings.isAutoMode = false
         settings.hideMenuBarIcon = true
         settings.testSound = .system(name: "Tink")
@@ -253,6 +258,7 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(imported.knownDeviceIsAppleMade["A"], true)
         XCTAssertEqual(imported.knownDeviceModelUIDs["A"], "2014 4c")
         XCTAssertEqual(imported.knownDeviceBluetoothMinorTypes["A"], "Headphones")
+        XCTAssertEqual(imported.appLanguage, "de")
         XCTAssertFalse(imported.isAutoMode)
         XCTAssertTrue(imported.hideMenuBarIcon)
         XCTAssertEqual(imported.testSound, .system(name: "Tink"))
@@ -313,6 +319,7 @@ final class AppSettingsTests: XCTestCase {
         try settings.importSettings(from: Data(json.utf8))
         XCTAssertEqual(settings.outputPriority, ["A"])
         XCTAssertEqual(settings.inputPriority, ["M"])
+        XCTAssertEqual(settings.appLanguage, "system")
         XCTAssertTrue(settings.showInputLevelMeter, "Missing showInputLevelMeter should default to true")
         XCTAssertTrue(settings.knownDeviceTransportTypes.isEmpty)
         XCTAssertTrue(settings.knownDeviceIconBaseNames.isEmpty)
@@ -415,7 +422,8 @@ final class AppSettingsTests: XCTestCase {
     func test_iconOptionsAllNonEmpty() {
         for opt in AppSettings.iconOptions {
             XCTAssertFalse(opt.symbol.isEmpty, "Empty symbol in iconOptions")
-            XCTAssertFalse(opt.label.isEmpty, "Empty label for symbol '\(opt.symbol)'")
+            XCTAssertFalse(opt.labelKey.isEmpty, "Empty labelKey for symbol '\(opt.symbol)'")
+            XCTAssertFalse(L10n.tr(opt.labelKey).isEmpty, "Empty localized label for symbol '\(opt.symbol)'")
         }
     }
 

@@ -13,11 +13,11 @@ enum AppSound: Codable, Hashable {
     var displayName: String {
         switch self {
         case .none:
-            "None"
+            L10n.tr("sound.none")
         case let .system(name):
             name
         case .userPreferredAlert:
-            "System default"
+            L10n.tr("sound.systemDefault")
         }
     }
 }

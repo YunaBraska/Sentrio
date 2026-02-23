@@ -1,0 +1,167 @@
+/* Libellés courants */
+"label.output" = "Sortie";
+"label.input" = "Entrée";
+"label.alert" = "Alerte";
+"label.general" = "Général";
+"label.auto" = "Auto";
+"label.volume" = "Volume";
+"label.inputGain" = "Gain d’entrée";
+
+/* Actions courantes */
+"action.preferences" = "Préférences…";
+"action.soundSettings" = "Réglages audio…";
+"action.bluetoothSettings" = "Réglages Bluetooth…";
+"action.quit" = "Quitter";
+"action.playSound" = "Lire le son";
+"action.disableDevice" = "Désactiver l’appareil";
+"action.enable" = "Activer";
+"action.reset" = "Réinitialiser";
+"action.resetToDefault" = "Réinitialiser par défaut";
+"action.rename" = "Renommer";
+"action.cancel" = "Annuler";
+"action.save" = "Enregistrer";
+"action.chooseIcon" = "Choisir une icône";
+"action.setIcon" = "Définir l’icône…";
+"action.openSoundSettings" = "Ouvrir les réglages audio…";
+"action.exportSettings" = "Exporter les réglages…";
+"action.importSettings" = "Importer les réglages…";
+"action.showInFinder" = "Afficher dans le Finder";
+"action.clearVolumeMemory" = "Effacer la mémoire des volumes";
+"action.viewSourceOnGitHub" = "Voir le code sur GitHub";
+"action.buyMeCoffee" = "☕  M’offrir un café";
+"action.reportIssue" = "Signaler un problème";
+
+/* États courants */
+"status.connected" = "Connecté";
+"status.disconnected" = "Déconnecté";
+"status.exportedSettings" = "Réglages exportés.";
+"status.importedSettings" = "Réglages importés.";
+
+/* Formats d’erreur */
+"error.exportFailedFormat" = "Échec de l’export : %@";
+"error.importFailedFormat" = "Échec de l’import : %@";
+
+/* Barre de menus */
+"menu.autoHelp" = "Basculer automatiquement les appareils selon les règles de priorité";
+"menu.noDevices" = "Silence détecté. Quelle… paix.";
+"menu.deviceRow.autoModeHelp" = "Le basculement auto est activé — désactivez-le pour choisir manuellement";
+
+/* Easter eggs */
+"easter.audioDaemonStirs" = "Le daemon audio s’éveille.";
+
+/* Pied des Préférences */
+"prefs.footer.millisecondsSaved" = "Millisecondes économisées";
+"prefs.footer.autoSwitches" = "Basculements auto";
+"prefs.footer.signalIntegrityScore" = "Score d’intégrité du signal";
+"prefs.footer.milestone.tenSeconds" = "Vous avez récupéré 10 secondes de votre vie.";
+"prefs.footer.milestone.coffeeBreak" = "Vous avez survécu à une pause-café.";
+"prefs.footer.milestone.defeatedInefficiency" = "Vous avez vaincu l’inefficacité.";
+
+/* Préférences : onglets de priorité */
+"prefs.priority.output.description" = "Faites glisser les lignes pour classer les appareils de sortie préférés. Sentrio active l’appareil connecté le mieux classé.";
+"prefs.priority.input.description" = "Faites glisser les lignes pour classer les appareils d’entrée préférés. Sentrio active l’appareil connecté le mieux classé.";
+"prefs.priority.section.title" = "Ordre de priorité";
+"prefs.priority.section.hint" = "Saisissez ≡ pour réordonner";
+"prefs.disabled.section.title" = "Désactivés (pas utilisés en secours)";
+
+/* Préférences : lignes */
+"prefs.dragToReorder" = "Glisser pour réordonner";
+"prefs.iconHelp.withCoreAudioFormat" = "Fichier d’icône CoreAudio : %@\nCliquez pour remplacer";
+"prefs.iconHelp.noCoreAudio" = "Cliquez pour changer l’icône";
+"prefs.renameHelp.output" = "Renommer pour ce rôle de sortie";
+"prefs.renameHelp.input" = "Renommer pour ce rôle d’entrée";
+"prefs.savedVolumeFormat" = "· Vol %d%%";
+"prefs.disableHelp" = "Désactiver — retirer du basculement auto. Réactivable ci-dessous.";
+"prefs.removePermanentlyHelp" = "Supprimer définitivement — réapparaît automatiquement si l’appareil se reconnecte";
+"prefs.removePermanentlyShort" = "Supprimer définitivement";
+
+/* Préférences : renommage */
+"prefs.rename.subtitle.output" = "Libellé personnalisé uniquement pour ce rôle de sortie.";
+"prefs.rename.subtitle.input" = "Libellé personnalisé uniquement pour ce rôle d’entrée.";
+"prefs.rename.deviceNamePlaceholder" = "Nom de l’appareil";
+
+/* Préférences : onglet Général */
+"prefs.general.enableAutoSwitching" = "Activer le basculement automatique";
+"prefs.general.enableAutoSwitching.description" = "Active automatiquement l’appareil connecté le mieux classé lorsque des appareils se connectent/déconnectent, ou lorsque vous réordonnez la liste de priorité.";
+"prefs.general.visibility" = "Visibilité";
+"prefs.general.hideMenuBarIcon" = "Masquer l’icône de la barre de menus";
+"prefs.general.hideMenuBarIcon.description" = "Quand elle est masquée, ouvrez Préférences en relançant Sentrio depuis Launchpad.";
+"prefs.general.system" = "Système";
+"prefs.general.launchAtLogin" = "Lancer à l’ouverture de session";
+"prefs.general.privacy" = "Confidentialité";
+"prefs.general.showInputLevelMeter" = "Afficher le niveau d’entrée en direct (Préférences)";
+"prefs.general.showInputLevelMeter.description" = "Si activé, Sentrio surveille l’appareil d’entrée par défaut uniquement lorsque Préférences est ouvert. macOS affichera l’indicateur micro en cours d’utilisation pendant ce temps.";
+"prefs.general.settings" = "Réglages";
+"prefs.general.settings.description" = "L’export inclut les listes de priorité, les appareils désactivés, les noms/icônes personnalisés et la mémoire des volumes.";
+"prefs.general.volumeMemory" = "Mémoire des volumes";
+"prefs.general.volumeMemory.description" = "Les niveaux de volume sont enregistrés par appareil et restaurés automatiquement quand cet appareil devient actif.";
+"prefs.language.title" = "Langue";
+"prefs.language.system" = "Système (Automatique)";
+"prefs.language.description" = "Par défaut, utilise la langue de macOS. Vous pouvez la remplacer ici.";
+"prefs.general.about" = "À propos";
+"prefs.general.about.description" = "Sentrio est une application légère de barre de menus macOS pour gérer les appareils audio d’entrée et de sortie — avec basculement automatique selon des règles de priorité, mémoire de volume par appareil et affichage de la batterie en direct.";
+"prefs.general.about.version" = "Version";
+"prefs.general.about.author" = "Auteur";
+"prefs.general.about.license" = "Licence";
+"prefs.general.about.licenseValue" = "MIT Open Source";
+
+/* Titres de fenêtre */
+"prefs.window.title" = "Préférences Sentrio";
+
+/* Import / export */
+"error.importExport.invalidFile" = "Ce fichier ne semble pas être une exportation des réglages Sentrio.";
+"error.importExport.unsupportedSchemaFormat" = "Version de schéma des réglages non prise en charge : %d.";
+
+/* Sons */
+"sound.none" = "Aucun";
+"sound.systemDefault" = "Par défaut du système";
+
+/* Libellés de transport */
+"transport.builtIn" = "Intégré";
+"transport.bluetooth" = "Bluetooth";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "Agrégé";
+"transport.virtual" = "Virtuel";
+"transport.pci" = "PCI";
+"transport.unknown" = "Inconnu";
+
+/* Libellés du sélecteur d’icônes */
+"icon.speaker" = "Haut-parleur";
+"icon.speakerQuiet" = "Haut-parleur (faible)";
+"icon.speakerLoud" = "Haut-parleur (fort)";
+"icon.muted" = "Muet";
+"icon.hiFiSpeaker" = "Haut-parleur Hi‑Fi";
+"icon.waveform" = "Forme d’onde";
+"icon.microphone" = "Micro";
+"icon.microphoneFilled" = "Micro (plein)";
+"icon.ear" = "Oreille";
+"icon.headphones" = "Casque";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Bureau";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "Écran / Moniteur";
+"icon.music" = "Musique";
+"icon.builtIn" = "Intégré";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "Sans fil / BT";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "Radio";
+"icon.linkedAggregate" = "Lié / Agrégé";
+"icon.virtual" = "Virtuel";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "Inconnu";

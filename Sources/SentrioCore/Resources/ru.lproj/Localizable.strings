@@ -1,0 +1,167 @@
+/* Общие подписи */
+"label.output" = "Вывод";
+"label.input" = "Ввод";
+"label.alert" = "Оповещение";
+"label.general" = "Основное";
+"label.auto" = "Авто";
+"label.volume" = "Громкость";
+"label.inputGain" = "Усиление входа";
+
+/* Общие действия */
+"action.preferences" = "Настройки…";
+"action.soundSettings" = "Настройки звука…";
+"action.bluetoothSettings" = "Настройки Bluetooth…";
+"action.quit" = "Выйти";
+"action.playSound" = "Воспроизвести звук";
+"action.disableDevice" = "Отключить устройство";
+"action.enable" = "Включить";
+"action.reset" = "Сбросить";
+"action.resetToDefault" = "Сбросить по умолчанию";
+"action.rename" = "Переименовать";
+"action.cancel" = "Отмена";
+"action.save" = "Сохранить";
+"action.chooseIcon" = "Выбрать значок";
+"action.setIcon" = "Установить значок…";
+"action.openSoundSettings" = "Открыть настройки звука…";
+"action.exportSettings" = "Экспортировать настройки…";
+"action.importSettings" = "Импортировать настройки…";
+"action.showInFinder" = "Показать в Finder";
+"action.clearVolumeMemory" = "Очистить память громкости";
+"action.viewSourceOnGitHub" = "Посмотреть исходники на GitHub";
+"action.buyMeCoffee" = "☕  Угости меня кофе";
+"action.reportIssue" = "Сообщить о проблеме";
+
+/* Общие статусы */
+"status.connected" = "Подключено";
+"status.disconnected" = "Отключено";
+"status.exportedSettings" = "Настройки экспортированы.";
+"status.importedSettings" = "Настройки импортированы.";
+
+/* Форматы ошибок */
+"error.exportFailedFormat" = "Экспорт не удался: %@";
+"error.importFailedFormat" = "Импорт не удался: %@";
+
+/* Строка меню */
+"menu.autoHelp" = "Автоматически переключать устройства по правилам приоритета";
+"menu.noDevices" = "Обнаружена тишина. Как… умиротворённо.";
+"menu.deviceRow.autoModeHelp" = "Автопереключение включено — выключите, чтобы выбрать вручную";
+
+/* Пасхалки */
+"easter.audioDaemonStirs" = "Аудиодемон шевелится.";
+
+/* Нижняя панель настроек */
+"prefs.footer.millisecondsSaved" = "Сэкономлено миллисекунд";
+"prefs.footer.autoSwitches" = "Автопереключения";
+"prefs.footer.signalIntegrityScore" = "Оценка целостности сигнала";
+"prefs.footer.milestone.tenSeconds" = "Вы вернули себе 10 секунд жизни.";
+"prefs.footer.milestone.coffeeBreak" = "Вы пережили кофейный перерыв.";
+"prefs.footer.milestone.defeatedInefficiency" = "Вы победили неэффективность.";
+
+/* Настройки: вкладки приоритета */
+"prefs.priority.output.description" = "Перетаскивайте строки, чтобы упорядочить предпочтительные устройства вывода. Sentrio активирует самое приоритетное подключённое устройство.";
+"prefs.priority.input.description" = "Перетаскивайте строки, чтобы упорядочить предпочтительные устройства ввода. Sentrio активирует самое приоритетное подключённое устройство.";
+"prefs.priority.section.title" = "Порядок приоритета";
+"prefs.priority.section.hint" = "Перетащите ≡, чтобы изменить порядок";
+"prefs.disabled.section.title" = "Отключено (не используется как запасной вариант)";
+
+/* Настройки: строки */
+"prefs.dragToReorder" = "Перетащите, чтобы изменить порядок";
+"prefs.iconHelp.withCoreAudioFormat" = "Файл значка CoreAudio: %@\nНажмите, чтобы переопределить";
+"prefs.iconHelp.noCoreAudio" = "Нажмите, чтобы изменить значок";
+"prefs.renameHelp.output" = "Переименовать для этой роли вывода";
+"prefs.renameHelp.input" = "Переименовать для этой роли ввода";
+"prefs.savedVolumeFormat" = "· Громк. %d%%";
+"prefs.disableHelp" = "Отключить — исключить из автопереключения. Можно включить ниже.";
+"prefs.removePermanentlyHelp" = "Удалить навсегда — появится снова автоматически, если устройство подключится снова";
+"prefs.removePermanentlyShort" = "Удалить навсегда";
+
+/* Настройки: переименование */
+"prefs.rename.subtitle.output" = "Пользовательская метка только для этой роли вывода.";
+"prefs.rename.subtitle.input" = "Пользовательская метка только для этой роли ввода.";
+"prefs.rename.deviceNamePlaceholder" = "Имя устройства";
+
+/* Настройки: вкладка «Основное» */
+"prefs.general.enableAutoSwitching" = "Включить автопереключение";
+"prefs.general.enableAutoSwitching.description" = "Автоматически активирует самое приоритетное подключённое устройство при подключении/отключении устройств или при изменении порядка списка приоритета.";
+"prefs.general.visibility" = "Видимость";
+"prefs.general.hideMenuBarIcon" = "Скрыть значок в строке меню";
+"prefs.general.hideMenuBarIcon.description" = "Если значок скрыт, откройте Настройки, запустив Sentrio снова из Launchpad.";
+"prefs.general.system" = "Система";
+"prefs.general.launchAtLogin" = "Запускать при входе";
+"prefs.general.privacy" = "Конфиденциальность";
+"prefs.general.showInputLevelMeter" = "Показывать индикатор уровня входа (Настройки)";
+"prefs.general.showInputLevelMeter.description" = "Если включено, Sentrio отслеживает устройство ввода по умолчанию только пока открыты Настройки. macOS будет показывать индикатор использования микрофона в это время.";
+"prefs.general.settings" = "Настройки";
+"prefs.general.settings.description" = "Экспорт включает списки приоритета, отключённые устройства, пользовательские имена/значки и память громкости.";
+"prefs.general.volumeMemory" = "Память громкости";
+"prefs.general.volumeMemory.description" = "Уровни громкости сохраняются для каждого устройства и автоматически восстанавливаются, когда это устройство становится активным.";
+"prefs.language.title" = "Язык";
+"prefs.language.system" = "Система (Автоматически)";
+"prefs.language.description" = "По умолчанию используется язык macOS. Здесь можно выбрать другой.";
+"prefs.general.about" = "О приложении";
+"prefs.general.about.description" = "Sentrio — лёгкое приложение строки меню macOS для управления устройствами аудио-ввода и вывода — с автопереключением по правилам приоритета, памятью громкости для каждого устройства и отображением батареи в реальном времени.";
+"prefs.general.about.version" = "Версия";
+"prefs.general.about.author" = "Автор";
+"prefs.general.about.license" = "Лицензия";
+"prefs.general.about.licenseValue" = "MIT Open Source";
+
+/* Заголовки окон */
+"prefs.window.title" = "Настройки Sentrio";
+
+/* Импорт / экспорт */
+"error.importExport.invalidFile" = "Этот файл не похож на экспорт настроек Sentrio.";
+"error.importExport.unsupportedSchemaFormat" = "Неподдерживаемая версия схемы настроек: %d.";
+
+/* Звуки */
+"sound.none" = "Нет";
+"sound.systemDefault" = "Системная по умолчанию";
+
+/* Подписи транспорта */
+"transport.builtIn" = "Встроенное";
+"transport.bluetooth" = "Bluetooth";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "Агрегат";
+"transport.virtual" = "Виртуальное";
+"transport.pci" = "PCI";
+"transport.unknown" = "Неизвестно";
+
+/* Подписи выбора значков */
+"icon.speaker" = "Динамик";
+"icon.speakerQuiet" = "Динамик (тихо)";
+"icon.speakerLoud" = "Динамик (громко)";
+"icon.muted" = "Без звука";
+"icon.hiFiSpeaker" = "Hi‑Fi динамик";
+"icon.waveform" = "Волна";
+"icon.microphone" = "Микрофон";
+"icon.microphoneFilled" = "Микрофон (заливка)";
+"icon.ear" = "Ухо";
+"icon.headphones" = "Наушники";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Desktop";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "Дисплей / Монитор";
+"icon.music" = "Музыка";
+"icon.builtIn" = "Встроенное";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "Беспроводное / BT";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "Радио";
+"icon.linkedAggregate" = "Связано / Агрегат";
+"icon.virtual" = "Виртуальное";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "Неизвестно";

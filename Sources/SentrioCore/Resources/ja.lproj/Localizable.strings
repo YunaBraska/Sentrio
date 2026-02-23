@@ -1,0 +1,167 @@
+/* 共通ラベル */
+"label.output" = "出力";
+"label.input" = "入力";
+"label.alert" = "通知";
+"label.general" = "一般";
+"label.auto" = "自動";
+"label.volume" = "音量";
+"label.inputGain" = "入力ゲイン";
+
+/* 共通アクション */
+"action.preferences" = "設定…";
+"action.soundSettings" = "サウンド設定…";
+"action.bluetoothSettings" = "Bluetooth 設定…";
+"action.quit" = "終了";
+"action.playSound" = "サウンドを再生";
+"action.disableDevice" = "デバイスを無効化";
+"action.enable" = "有効にする";
+"action.reset" = "リセット";
+"action.resetToDefault" = "デフォルトに戻す";
+"action.rename" = "名前を変更";
+"action.cancel" = "キャンセル";
+"action.save" = "保存";
+"action.chooseIcon" = "アイコンを選択";
+"action.setIcon" = "アイコンを設定…";
+"action.openSoundSettings" = "サウンド設定を開く…";
+"action.exportSettings" = "設定をエクスポート…";
+"action.importSettings" = "設定をインポート…";
+"action.showInFinder" = "Finder で表示";
+"action.clearVolumeMemory" = "音量メモリをクリア";
+"action.viewSourceOnGitHub" = "GitHub でソースを見る";
+"action.buyMeCoffee" = "☕  コーヒーをおごる";
+"action.reportIssue" = "問題を報告";
+
+/* 共通ステータス */
+"status.connected" = "接続済み";
+"status.disconnected" = "未接続";
+"status.exportedSettings" = "設定をエクスポートしました。";
+"status.importedSettings" = "設定をインポートしました。";
+
+/* エラー形式 */
+"error.exportFailedFormat" = "エクスポートに失敗しました: %@";
+"error.importFailedFormat" = "インポートに失敗しました: %@";
+
+/* メニューバー */
+"menu.autoHelp" = "優先順位ルールに従ってデバイスを自動的に切り替え";
+"menu.noDevices" = "静寂を検知しました。なんて…平和。";
+"menu.deviceRow.autoModeHelp" = "自動切り替えがオンです — 手動で選ぶにはオフにしてください";
+
+/* イースターエッグ */
+"easter.audioDaemonStirs" = "オーディオデーモンが目覚める。";
+
+/* 設定フッター */
+"prefs.footer.millisecondsSaved" = "節約したミリ秒";
+"prefs.footer.autoSwitches" = "自動切り替え回数";
+"prefs.footer.signalIntegrityScore" = "信号整合性スコア";
+"prefs.footer.milestone.tenSeconds" = "人生の10秒を取り戻しました。";
+"prefs.footer.milestone.coffeeBreak" = "コーヒーブレイクを生き延びました。";
+"prefs.footer.milestone.defeatedInefficiency" = "非効率を打ち負かしました。";
+
+/* 設定: 優先順位タブ */
+"prefs.priority.output.description" = "行をドラッグして優先する出力デバイスを並べ替えます。Sentrio は最上位の接続済みデバイスを有効にします。";
+"prefs.priority.input.description" = "行をドラッグして優先する入力デバイスを並べ替えます。Sentrio は最上位の接続済みデバイスを有効にします。";
+"prefs.priority.section.title" = "優先順位";
+"prefs.priority.section.hint" = "≡ をつかんで並べ替え";
+"prefs.disabled.section.title" = "無効（フォールバックに使用しない）";
+
+/* 設定: 行 */
+"prefs.dragToReorder" = "ドラッグして並べ替え";
+"prefs.iconHelp.withCoreAudioFormat" = "CoreAudio アイコンファイル: %@\nクリックして上書き";
+"prefs.iconHelp.noCoreAudio" = "クリックしてアイコンを変更";
+"prefs.renameHelp.output" = "この出力ロールの名前を変更";
+"prefs.renameHelp.input" = "この入力ロールの名前を変更";
+"prefs.savedVolumeFormat" = "・音量 %d%%";
+"prefs.disableHelp" = "無効化 — 自動切り替えから除外します。下で再有効化できます。";
+"prefs.removePermanentlyHelp" = "完全に削除 — デバイスが再接続すると自動的に再表示されます";
+"prefs.removePermanentlyShort" = "完全に削除";
+
+/* 設定: 名前変更 */
+"prefs.rename.subtitle.output" = "この出力ロール専用のカスタムラベル。";
+"prefs.rename.subtitle.input" = "この入力ロール専用のカスタムラベル。";
+"prefs.rename.deviceNamePlaceholder" = "デバイス名";
+
+/* 設定: 一般タブ */
+"prefs.general.enableAutoSwitching" = "自動切り替えを有効にする";
+"prefs.general.enableAutoSwitching.description" = "デバイスの接続/切断や優先順位リストの並べ替えに応じて、最上位の接続済みデバイスを自動的に有効にします。";
+"prefs.general.visibility" = "表示";
+"prefs.general.hideMenuBarIcon" = "メニューバーアイコンを隠す";
+"prefs.general.hideMenuBarIcon.description" = "非表示の場合、Launchpad から Sentrio をもう一度起動して設定を開きます。";
+"prefs.general.system" = "システム";
+"prefs.general.launchAtLogin" = "ログイン時に起動";
+"prefs.general.privacy" = "プライバシー";
+"prefs.general.showInputLevelMeter" = "入力レベルメーターを表示（設定）";
+"prefs.general.showInputLevelMeter.description" = "有効にすると、Sentrio は設定が開いている間のみデフォルト入力デバイスを監視します。その間 macOS はマイク使用中インジケータを表示します。";
+"prefs.general.settings" = "設定";
+"prefs.general.settings.description" = "エクスポートには優先順位リスト、無効化したデバイス、カスタム名/アイコン、音量メモリが含まれます。";
+"prefs.general.volumeMemory" = "音量メモリ";
+"prefs.general.volumeMemory.description" = "音量レベルはデバイスごとに保存され、そのデバイスがアクティブになると自動的に復元されます。";
+"prefs.language.title" = "言語";
+"prefs.language.system" = "システム（自動）";
+"prefs.language.description" = "既定では macOS の言語を使用します。ここで上書きできます。";
+"prefs.general.about" = "情報";
+"prefs.general.about.description" = "Sentrio は macOS のメニューバー用の軽量アプリで、音声の入力/出力デバイスを管理します — 優先順位ルールに基づく自動切り替え、デバイス別の音量メモリ、バッテリーのライブ表示を備えています。";
+"prefs.general.about.version" = "バージョン";
+"prefs.general.about.author" = "作者";
+"prefs.general.about.license" = "ライセンス";
+"prefs.general.about.licenseValue" = "MIT オープンソース";
+
+/* ウィンドウタイトル */
+"prefs.window.title" = "Sentrio 設定";
+
+/* インポート/エクスポート */
+"error.importExport.invalidFile" = "このファイルは Sentrio の設定エクスポートではないようです。";
+"error.importExport.unsupportedSchemaFormat" = "未対応の設定スキーマ バージョン: %d。";
+
+/* サウンド */
+"sound.none" = "なし";
+"sound.systemDefault" = "システムのデフォルト";
+
+/* 接続方式ラベル */
+"transport.builtIn" = "内蔵";
+"transport.bluetooth" = "Bluetooth";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "アグリゲート";
+"transport.virtual" = "仮想";
+"transport.pci" = "PCI";
+"transport.unknown" = "不明";
+
+/* アイコン選択ラベル */
+"icon.speaker" = "スピーカー";
+"icon.speakerQuiet" = "スピーカー（小）";
+"icon.speakerLoud" = "スピーカー（大）";
+"icon.muted" = "ミュート";
+"icon.hiFiSpeaker" = "Hi‑Fi スピーカー";
+"icon.waveform" = "波形";
+"icon.microphone" = "マイク";
+"icon.microphoneFilled" = "マイク（塗り）";
+"icon.ear" = "耳";
+"icon.headphones" = "ヘッドフォン";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Desktop";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "ディスプレイ / モニター";
+"icon.music" = "音楽";
+"icon.builtIn" = "内蔵";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "ワイヤレス / BT";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "ラジオ";
+"icon.linkedAggregate" = "リンク / アグリゲート";
+"icon.virtual" = "仮想";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "不明";

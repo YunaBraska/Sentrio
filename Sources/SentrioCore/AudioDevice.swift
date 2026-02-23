@@ -26,17 +26,17 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
 
         public var label: String {
             switch self {
-            case .builtIn: "Built-in"
-            case .bluetooth: "Bluetooth"
-            case .usb: "USB"
-            case .airPlay: "AirPlay"
-            case .thunderbolt: "Thunderbolt"
-            case .hdmi: "HDMI"
-            case .displayPort: "DisplayPort"
-            case .aggregate: "Aggregate"
-            case .virtual: "Virtual"
-            case .pci: "PCI"
-            case .unknown: "Unknown"
+            case .builtIn: L10n.tr("transport.builtIn")
+            case .bluetooth: L10n.tr("transport.bluetooth")
+            case .usb: L10n.tr("transport.usb")
+            case .airPlay: L10n.tr("transport.airPlay")
+            case .thunderbolt: L10n.tr("transport.thunderbolt")
+            case .hdmi: L10n.tr("transport.hdmi")
+            case .displayPort: L10n.tr("transport.displayPort")
+            case .aggregate: L10n.tr("transport.aggregate")
+            case .virtual: L10n.tr("transport.virtual")
+            case .pci: L10n.tr("transport.pci")
+            case .unknown: L10n.tr("transport.unknown")
             }
         }
     }

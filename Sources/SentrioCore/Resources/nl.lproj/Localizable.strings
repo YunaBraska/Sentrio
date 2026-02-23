@@ -1,0 +1,167 @@
+/* Algemene labels */
+"label.output" = "Uitvoer";
+"label.input" = "Invoer";
+"label.alert" = "Melding";
+"label.general" = "Algemeen";
+"label.auto" = "Auto";
+"label.volume" = "Volume";
+"label.inputGain" = "Ingangsversterking";
+
+/* Algemene acties */
+"action.preferences" = "Voorkeuren…";
+"action.soundSettings" = "Geluidsinstellingen…";
+"action.bluetoothSettings" = "Bluetooth-instellingen…";
+"action.quit" = "Stop";
+"action.playSound" = "Geluid afspelen";
+"action.disableDevice" = "Apparaat uitschakelen";
+"action.enable" = "Inschakelen";
+"action.reset" = "Herstellen";
+"action.resetToDefault" = "Terug naar standaard";
+"action.rename" = "Hernoemen";
+"action.cancel" = "Annuleren";
+"action.save" = "Opslaan";
+"action.chooseIcon" = "Pictogram kiezen";
+"action.setIcon" = "Pictogram instellen…";
+"action.openSoundSettings" = "Geluidsinstellingen openen…";
+"action.exportSettings" = "Instellingen exporteren…";
+"action.importSettings" = "Instellingen importeren…";
+"action.showInFinder" = "Toon in Finder";
+"action.clearVolumeMemory" = "Volumengeheugen wissen";
+"action.viewSourceOnGitHub" = "Broncode op GitHub bekijken";
+"action.buyMeCoffee" = "☕  Koop me een koffie";
+"action.reportIssue" = "Meld een probleem";
+
+/* Algemene statussen */
+"status.connected" = "Verbonden";
+"status.disconnected" = "Verbroken";
+"status.exportedSettings" = "Instellingen geëxporteerd.";
+"status.importedSettings" = "Instellingen geïmporteerd.";
+
+/* Foutformaten */
+"error.exportFailedFormat" = "Export mislukt: %@";
+"error.importFailedFormat" = "Import mislukt: %@";
+
+/* Menubalk */
+"menu.autoHelp" = "Schakel apparaten automatisch op basis van prioriteitsregels";
+"menu.noDevices" = "Stilte gedetecteerd. Wat… vredig.";
+"menu.deviceRow.autoModeHelp" = "Automatisch wisselen staat aan — zet het uit om handmatig te kiezen";
+
+/* Easter eggs */
+"easter.audioDaemonStirs" = "De audiodaemon roert zich.";
+
+/* Voorkeuren-voettekst */
+"prefs.footer.millisecondsSaved" = "Bespaarde milliseconden";
+"prefs.footer.autoSwitches" = "Automatische wissels";
+"prefs.footer.signalIntegrityScore" = "Signaalintegriteitsscore";
+"prefs.footer.milestone.tenSeconds" = "Je hebt 10 seconden van je leven teruggewonnen.";
+"prefs.footer.milestone.coffeeBreak" = "Je hebt een koffiepauze overleefd.";
+"prefs.footer.milestone.defeatedInefficiency" = "Je hebt inefficiëntie verslagen.";
+
+/* Voorkeuren: prioriteitstabbladen */
+"prefs.priority.output.description" = "Sleep rijen om voorkeursuitvoerapparaten te ordenen. Sentrio activeert het hoogst gerangschikte verbonden apparaat.";
+"prefs.priority.input.description" = "Sleep rijen om voorkeursinvoerapparaten te ordenen. Sentrio activeert het hoogst gerangschikte verbonden apparaat.";
+"prefs.priority.section.title" = "Prioriteitsvolgorde";
+"prefs.priority.section.hint" = "Pak ≡ om te herschikken";
+"prefs.disabled.section.title" = "Uitgeschakeld (niet gebruikt als fallback)";
+
+/* Voorkeuren: rijen */
+"prefs.dragToReorder" = "Sleep om te herschikken";
+"prefs.iconHelp.withCoreAudioFormat" = "CoreAudio-pictogrambestand: %@\nKlik om te overschrijven";
+"prefs.iconHelp.noCoreAudio" = "Klik om pictogram te wijzigen";
+"prefs.renameHelp.output" = "Hernoemen voor deze uitvoerrol";
+"prefs.renameHelp.input" = "Hernoemen voor deze invoerrol";
+"prefs.savedVolumeFormat" = "· Vol %d%%";
+"prefs.disableHelp" = "Uitschakelen — verwijderen uit automatisch wisselen. Kan hieronder weer worden ingeschakeld.";
+"prefs.removePermanentlyHelp" = "Permanent verwijderen — verschijnt automatisch opnieuw als het apparaat weer verbinding maakt";
+"prefs.removePermanentlyShort" = "Permanent verwijderen";
+
+/* Voorkeuren: hernoemen */
+"prefs.rename.subtitle.output" = "Aangepast label alleen voor deze uitvoerrol.";
+"prefs.rename.subtitle.input" = "Aangepast label alleen voor deze invoerrol.";
+"prefs.rename.deviceNamePlaceholder" = "Apparaatnaam";
+
+/* Voorkeuren: tab Algemeen */
+"prefs.general.enableAutoSwitching" = "Automatisch wisselen inschakelen";
+"prefs.general.enableAutoSwitching.description" = "Activeert automatisch het hoogst gerangschikte verbonden apparaat wanneer apparaten verbinden of verbreken, of wanneer je de prioriteitenlijst herschikt.";
+"prefs.general.visibility" = "Zichtbaarheid";
+"prefs.general.hideMenuBarIcon" = "Menubalkpictogram verbergen";
+"prefs.general.hideMenuBarIcon.description" = "Als verborgen, open Voorkeuren door Sentrio opnieuw te starten via Launchpad.";
+"prefs.general.system" = "Systeem";
+"prefs.general.launchAtLogin" = "Start bij inloggen";
+"prefs.general.privacy" = "Privacy";
+"prefs.general.showInputLevelMeter" = "Live invoerniveaumeter tonen (Voorkeuren)";
+"prefs.general.showInputLevelMeter.description" = "Indien ingeschakeld, monitort Sentrio het standaard invoerapparaat alleen terwijl Voorkeuren geopend is. macOS toont in die tijd de microfoon-indicator.";
+"prefs.general.settings" = "Instellingen";
+"prefs.general.settings.description" = "Export bevat prioriteitenlijsten, uitgeschakelde apparaten, aangepaste namen/pictogrammen en volumengeheugen.";
+"prefs.general.volumeMemory" = "Volumengeheugen";
+"prefs.general.volumeMemory.description" = "Volumeniveaus worden per apparaat opgeslagen en automatisch hersteld wanneer dat apparaat actief wordt.";
+"prefs.language.title" = "Taal";
+"prefs.language.system" = "Systeem (Automatisch)";
+"prefs.language.description" = "Standaard gebruikt het je macOS-taal. Je kunt dit hier overschrijven.";
+"prefs.general.about" = "Over";
+"prefs.general.about.description" = "Sentrio is een lichte macOS-menubalkapp om audio-invoer- en uitvoerapparaten te beheren — met automatisch wisselen op basis van prioriteitsregels, volumengeheugen per apparaat en live batterijweergave.";
+"prefs.general.about.version" = "Versie";
+"prefs.general.about.author" = "Auteur";
+"prefs.general.about.license" = "Licentie";
+"prefs.general.about.licenseValue" = "MIT Open Source";
+
+/* Venstertitels */
+"prefs.window.title" = "Sentrio-voorkeuren";
+
+/* Import / export */
+"error.importExport.invalidFile" = "Dat bestand lijkt geen Sentrio-instellingenexport te zijn.";
+"error.importExport.unsupportedSchemaFormat" = "Niet-ondersteunde schema-versie van instellingen: %d.";
+
+/* Geluiden */
+"sound.none" = "Geen";
+"sound.systemDefault" = "Systeemstandaard";
+
+/* Transportlabels */
+"transport.builtIn" = "Ingebouwd";
+"transport.bluetooth" = "Bluetooth";
+"transport.usb" = "USB";
+"transport.airPlay" = "AirPlay";
+"transport.thunderbolt" = "Thunderbolt";
+"transport.hdmi" = "HDMI";
+"transport.displayPort" = "DisplayPort";
+"transport.aggregate" = "Geaggregeerd";
+"transport.virtual" = "Virtueel";
+"transport.pci" = "PCI";
+"transport.unknown" = "Onbekend";
+
+/* Labels voor pictogramkiezer */
+"icon.speaker" = "Luidspreker";
+"icon.speakerQuiet" = "Luidspreker (zacht)";
+"icon.speakerLoud" = "Luidspreker (hard)";
+"icon.muted" = "Gedempt";
+"icon.hiFiSpeaker" = "Hi‑Fi-luidspreker";
+"icon.waveform" = "Golfvorm";
+"icon.microphone" = "Microfoon";
+"icon.microphoneFilled" = "Microfoon (gevuld)";
+"icon.ear" = "Oor";
+"icon.headphones" = "Koptelefoon";
+"icon.earpods" = "EarPods";
+"icon.airpodsPro" = "AirPods Pro";
+"icon.airpods" = "AirPods";
+"icon.airpodsMax" = "AirPods Max";
+"icon.homepod" = "HomePod";
+"icon.homepodMini" = "HomePod mini";
+"icon.iphone" = "iPhone";
+"icon.ipad" = "iPad";
+"icon.appleWatch" = "Apple Watch";
+"icon.macbook" = "MacBook";
+"icon.macMini" = "Mac mini";
+"icon.imacDesktop" = "iMac / Desktop";
+"icon.appleTV" = "Apple TV";
+"icon.displayMonitor" = "Scherm / Monitor";
+"icon.music" = "Muziek";
+"icon.builtIn" = "Ingebouwd";
+"icon.usb" = "USB";
+"icon.thunderbolt" = "Thunderbolt";
+"icon.wirelessBt" = "Draadloos / BT";
+"icon.airPlay" = "AirPlay";
+"icon.radio" = "Radio";
+"icon.linkedAggregate" = "Gekoppeld / Geaggregeerd";
+"icon.virtual" = "Virtueel";
+"icon.pciCpu" = "PCI / CPU";
+"icon.unknown" = "Onbekend";

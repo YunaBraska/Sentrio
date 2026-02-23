@@ -14,11 +14,11 @@ struct PreferencesView: View {
         VStack(spacing: 0) {
             TabView {
                 PriorityTab(isOutput: true)
-                    .tabItem { Label("Output", systemImage: "speaker.wave.2") }
+                    .tabItem { Label(L10n.tr("label.output"), systemImage: "speaker.wave.2") }
                 PriorityTab(isOutput: false)
-                    .tabItem { Label("Input", systemImage: "mic") }
+                    .tabItem { Label(L10n.tr("label.input"), systemImage: "mic") }
                 GeneralTab()
-                    .tabItem { Label("General", systemImage: "gear") }
+                    .tabItem { Label(L10n.tr("label.general"), systemImage: "gear") }
             }
             .padding()
 
@@ -54,14 +54,14 @@ private struct PreferencesFooterView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             if EasterEggs.audioDaemonStirs() {
-                Text("The audio daemon stirs.")
+                Text(L10n.tr("easter.audioDaemonStirs"))
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
 
             HStack(spacing: 16) {
                 HStack(spacing: 6) {
-                    Text("Milliseconds Saved")
+                    Text(L10n.tr("prefs.footer.millisecondsSaved"))
                     Text(settings.millisecondsSaved, format: .number)
                         .monospacedDigit()
                 }
@@ -69,7 +69,7 @@ private struct PreferencesFooterView: View {
                 Spacer()
 
                 HStack(spacing: 6) {
-                    Text("Auto-switches")
+                    Text(L10n.tr("prefs.footer.autoSwitches"))
                     Text(settings.autoSwitchCount, format: .number)
                         .monospacedDigit()
                 }
@@ -77,7 +77,7 @@ private struct PreferencesFooterView: View {
                 Spacer()
 
                 HStack(spacing: 6) {
-                    Text("Signal Integrity Score")
+                    Text(L10n.tr("prefs.footer.signalIntegrityScore"))
                     Text(settings.signalIntegrityScore, format: .number)
                         .monospacedDigit()
                 }
@@ -99,9 +99,9 @@ private struct PreferencesFooterView: View {
 
     private var milestoneMessage: String? {
         let ms = settings.millisecondsSaved
-        if ms >= 86_400_000 { return "You have defeated inefficiency." }
-        if ms >= 3_600_000 { return "You have outlived one coffee break." }
-        if ms >= 10000 { return "You have reclaimed 10 seconds of your life." }
+        if ms >= 86_400_000 { return L10n.tr("prefs.footer.milestone.defeatedInefficiency") }
+        if ms >= 3_600_000 { return L10n.tr("prefs.footer.milestone.coffeeBreak") }
+        if ms >= 10000 { return L10n.tr("prefs.footer.milestone.tenSeconds") }
         return nil
     }
 }
@@ -140,8 +140,8 @@ private struct PriorityTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(isOutput
-                ? "Drag rows to order preferred output devices. Sentrio activates the top-ranked connected device."
-                : "Drag rows to order preferred input devices. Sentrio activates the top-ranked connected device.")
+                ? L10n.tr("prefs.priority.output.description")
+                : L10n.tr("prefs.priority.input.description"))
                 .foregroundStyle(.secondary).font(.callout)
 
             // ── Volume for this role ───────────────────────────────────────
@@ -150,7 +150,7 @@ private struct PriorityTab: View {
             // ── Priority list (custom drag-and-drop — more reliable than List.onMove) ────
             GroupBox {
                 VStack(spacing: 0) {
-                    sectionHeader("Priority order", hint: "Grab ≡ to reorder")
+                    sectionHeader(L10n.tr("prefs.priority.section.title"), hint: L10n.tr("prefs.priority.section.hint"))
                     Divider()
 
                     ScrollView {
@@ -175,7 +175,7 @@ private struct PriorityTab: View {
                     // ── Disabled section ─────────────────────────────────
                     if !disabledUIDs.isEmpty {
                         Divider()
-                        sectionHeader("Disabled (not used as fallback)", titleColor: .orange)
+                        sectionHeader(L10n.tr("prefs.disabled.section.title"), titleColor: .orange)
                         Divider()
                         VStack(spacing: 0) {
                             ForEach(disabledUIDs, id: \.self) { uid in
@@ -199,7 +199,7 @@ private struct PriorityTab: View {
                 // Output volume
                 sliderRow(
                     icon: isOutput ? "speaker" : "mic",
-                    label: isOutput ? "Output" : "Input",
+                    label: isOutput ? L10n.tr("label.output") : L10n.tr("label.input"),
                     volume: isOutput
                         ? Binding(
                             get: { audio.outputVolume },
@@ -221,7 +221,7 @@ private struct PriorityTab: View {
                 if isOutput {
                     sliderRow(
                         icon: "bell",
-                        label: "Alert",
+                        label: L10n.tr("label.alert"),
                         volume: Binding(
                             get: { audio.alertVolume },
                             set: { v in
@@ -234,7 +234,7 @@ private struct PriorityTab: View {
                 }
             }
         } label: {
-            Label(isOutput ? "Volume" : "Input Gain",
+            Label(isOutput ? L10n.tr("label.volume") : L10n.tr("label.inputGain"),
                   systemImage: isOutput ? "speaker.wave.2" : "mic")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
@@ -271,7 +271,7 @@ private struct PriorityTab: View {
                         .frame(width: 16)
                 }
                 .buttonStyle(.plain)
-                .help("Play sound")
+                .help(L10n.tr("action.playSound"))
             }
         }
     }
@@ -369,7 +369,7 @@ private struct PriorityRow: View {
                     draggedUID = uid
                     return NSItemProvider(object: uid as NSString)
                 }
-                .help("Drag to reorder")
+                .help(L10n.tr("prefs.dragToReorder"))
 
             // Connection dot
             Circle()
@@ -388,8 +388,8 @@ private struct PriorityRow: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .help(device.flatMap(\.iconBaseName).map { "CoreAudio icon file: \($0)\nClick to override" }
-                ?? "Click to change icon")
+            .help(device.flatMap(\.iconBaseName).map { L10n.format("prefs.iconHelp.withCoreAudioFormat", $0) }
+                ?? L10n.tr("prefs.iconHelp.noCoreAudio"))
             .popover(isPresented: $showIconPicker, arrowEdge: .trailing) {
                 IconPickerPopover(uid: uid, isOutput: isOutput)
                     .environmentObject(settings)
@@ -411,7 +411,7 @@ private struct PriorityRow: View {
                             .foregroundStyle(.tertiary)
                     }
                     .buttonStyle(.plain)
-                    .help("Rename for this \(isOutput ? "output" : "input") role")
+                    .help(isOutput ? L10n.tr("prefs.renameHelp.output") : L10n.tr("prefs.renameHelp.input"))
                     .popover(isPresented: $showRenamePopover, arrowEdge: .trailing) {
                         RenamePopover(
                             uid: uid, isOutput: isOutput,
@@ -432,11 +432,11 @@ private struct PriorityRow: View {
                             BatteryStatesInlineView(states: dev.batteryStates)
                         }
                     } else {
-                        Text("Disconnected")
+                        Text(L10n.tr("status.disconnected"))
                             .font(.caption2).foregroundStyle(.tertiary)
                     }
                     if let vol = settings.savedVolume(for: uid, isOutput: isOutput) {
-                        Text("· Vol \(Int(vol * 100))%")
+                        Text(L10n.format("prefs.savedVolumeFormat", Int(vol * 100)))
                             .font(.caption2).foregroundStyle(.tertiary)
                     }
                 }
@@ -463,7 +463,7 @@ private struct PriorityRow: View {
                 Image(systemName: "minus.circle").foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .help("Disable — remove from auto-switching. Can be re-enabled below.")
+            .help(L10n.tr("prefs.disableHelp"))
 
             // Delete button — only for disconnected devices
             if !isConnected {
@@ -473,7 +473,7 @@ private struct PriorityRow: View {
                     Image(systemName: "trash").foregroundStyle(.red.opacity(0.7))
                 }
                 .buttonStyle(.plain)
-                .help("Remove permanently — reappears automatically if device reconnects")
+                .help(L10n.tr("prefs.removePermanentlyHelp"))
             }
         }
         .padding(.horizontal, 10)
@@ -503,17 +503,17 @@ private struct RenamePopover: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Rename").font(.headline)
-            Text("Custom label for this \(isOutput ? "output" : "input") role only.")
+            Text(L10n.tr("action.rename")).font(.headline)
+            Text(isOutput ? L10n.tr("prefs.rename.subtitle.output") : L10n.tr("prefs.rename.subtitle.input"))
                 .font(.caption).foregroundStyle(.secondary)
 
-            TextField("Device name", text: $name)
+            TextField(L10n.tr("prefs.rename.deviceNamePlaceholder"), text: $name)
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 220)
                 .onSubmit { save() }
 
             HStack {
-                Button("Reset") {
+                Button(L10n.tr("action.reset")) {
                     settings.clearCustomName(for: uid, isOutput: isOutput)
                     name = originalName
                     isPresented = false
@@ -524,10 +524,10 @@ private struct RenamePopover: View {
 
                 Spacer()
 
-                Button("Cancel") { isPresented = false }
+                Button(L10n.tr("action.cancel")) { isPresented = false }
                     .keyboardShortcut(.cancelAction)
 
-                Button("Save", action: save)
+                Button(L10n.tr("action.save"), action: save)
                     .keyboardShortcut(.defaultAction)
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
             }
@@ -601,7 +601,7 @@ private struct DisabledRow: View {
                             .foregroundStyle(.tertiary)
                     }
                     .buttonStyle(.plain)
-                    .help("Rename for this \(isOutput ? "output" : "input") role")
+                    .help(isOutput ? L10n.tr("prefs.renameHelp.output") : L10n.tr("prefs.renameHelp.input"))
                     .popover(isPresented: $showRenamePopover, arrowEdge: .trailing) {
                         RenamePopover(
                             uid: uid, isOutput: isOutput,
@@ -614,7 +614,7 @@ private struct DisabledRow: View {
                     }
                 }
                 HStack(spacing: 6) {
-                    Text(isConnected ? "Connected" : "Disconnected")
+                    Text(isConnected ? L10n.tr("status.connected") : L10n.tr("status.disconnected"))
                         .font(.caption2)
                         .foregroundStyle(isConnected
                             ? AnyShapeStyle(.green.opacity(0.8))
@@ -627,7 +627,7 @@ private struct DisabledRow: View {
 
             Spacer()
 
-            Button("Enable") { settings.enableDevice(uid: uid, isOutput: isOutput) }
+            Button(L10n.tr("action.enable")) { settings.enableDevice(uid: uid, isOutput: isOutput) }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
 
@@ -639,7 +639,7 @@ private struct DisabledRow: View {
                     Image(systemName: "trash").foregroundStyle(.red.opacity(0.7))
                 }
                 .buttonStyle(.plain)
-                .help("Remove permanently")
+                .help(L10n.tr("prefs.removePermanentlyShort"))
             }
         }
         .padding(.horizontal, 10)
@@ -662,9 +662,9 @@ struct IconPickerPopover: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Choose Icon").font(.headline)
+                Text(L10n.tr("action.chooseIcon")).font(.headline)
                 Spacer()
-                Button("Reset") {
+                Button(L10n.tr("action.reset")) {
                     settings.clearIcon(for: uid, isOutput: isOutput)
                     dismiss()
                 }
@@ -684,7 +684,7 @@ struct IconPickerPopover: View {
                             Image(systemName: opt.symbol)
                                 .font(.title2)
                                 .frame(height: 26)
-                            Text(opt.label)
+                            Text(L10n.tr(opt.labelKey))
                                 .font(.system(size: 7))
                                 .lineLimit(2)
                                 .multilineTextAlignment(.center)
@@ -702,7 +702,7 @@ struct IconPickerPopover: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .help(opt.label)
+                    .help(L10n.tr(opt.labelKey))
                 }
             }
         }
@@ -724,69 +724,85 @@ private struct GeneralTab: View {
         Form {
             // ── Auto-switching ──────────────────────────────────────
             Section {
-                Toggle("Enable auto-switching", isOn: $settings.isAutoMode)
-                Text("Automatically activates the top-ranked connected device whenever devices connect or disconnect, or when you reorder the priority list.")
+                Toggle(L10n.tr("prefs.general.enableAutoSwitching"), isOn: $settings.isAutoMode)
+                Text(L10n.tr("prefs.general.enableAutoSwitching.description"))
                     .font(.caption).foregroundStyle(.secondary)
             }
 
             // ── Visibility ──────────────────────────────────────────
-            Section("Visibility") {
-                Toggle("Hide menu bar icon", isOn: $settings.hideMenuBarIcon)
-                Text("When hidden, open Preferences by launching Sentrio again from Launchpad.")
+            Section(L10n.tr("prefs.general.visibility")) {
+                Toggle(L10n.tr("prefs.general.hideMenuBarIcon"), isOn: $settings.hideMenuBarIcon)
+                Text(L10n.tr("prefs.general.hideMenuBarIcon.description"))
                     .font(.caption).foregroundStyle(.secondary)
             }
 
+            // ── Language ────────────────────────────────────────────
+            Section(L10n.tr("prefs.language.title")) {
+                Picker(L10n.tr("prefs.language.title"), selection: $settings.appLanguage) {
+                    Text(L10n.tr("prefs.language.system")).tag("system")
+                    Divider()
+                    ForEach(L10n.supportedLocalizations, id: \.self) { loc in
+                        Text(L10n.languageDisplayName(loc)).tag(loc)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Text(L10n.tr("prefs.language.description"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             // ── System ──────────────────────────────────────────────
-            Section("System") {
-                Toggle("Launch at login", isOn: $launchAtLogin)
+            Section(L10n.tr("prefs.general.system")) {
+                Toggle(L10n.tr("prefs.general.launchAtLogin"), isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { settings.setLaunchAtLogin($0) }
-                Button("Open Sound Settings…") {
+                Button(L10n.tr("action.openSoundSettings")) {
                     openSite("x-apple.systempreferences:com.apple.preference.sound")
                 }
             }
 
             // ── Privacy ─────────────────────────────────────────────
-            Section("Privacy") {
-                Toggle("Show live input level meter (Preferences)", isOn: $settings.showInputLevelMeter)
-                Text("If enabled, Sentrio monitors the default input device only while Preferences is open. macOS will show the microphone‑in‑use indicator during that time.")
+            Section(L10n.tr("prefs.general.privacy")) {
+                Toggle(L10n.tr("prefs.general.showInputLevelMeter"), isOn: $settings.showInputLevelMeter)
+                Text(L10n.tr("prefs.general.showInputLevelMeter.description"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
             // ── Import / export ─────────────────────────────────────
-            Section("Settings") {
-                Button("Export Settings…") { exportSettings() }
-                Button("Import Settings…") { importSettings() }
+            Section(L10n.tr("prefs.general.settings")) {
+                Button(L10n.tr("action.exportSettings")) { exportSettings() }
+                Button(L10n.tr("action.importSettings")) { importSettings() }
                 if let importExportStatus {
                     Text(importExportStatus)
                         .font(.caption)
                         .foregroundStyle(importExportStatusIsError ? .red : .secondary)
                 }
                 if let lastExportURL {
-                    Button("Show in Finder") {
+                    Button(L10n.tr("action.showInFinder")) {
                         NSWorkspace.shared.activateFileViewerSelecting([lastExportURL])
                     }
                 }
-                Text("Export includes priority lists, disabled devices, custom names/icons, and volume memory.")
+                Text(L10n.tr("prefs.general.settings.description"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
             // ── Volume memory ────────────────────────────────────────
-            Section("Volume Memory") {
-                Text("Volume levels are saved per device and restored automatically when that device becomes active.")
+            Section(L10n.tr("prefs.general.volumeMemory")) {
+                Text(L10n.tr("prefs.general.volumeMemory.description"))
                     .font(.caption).foregroundStyle(.secondary)
-                Button("Clear Volume Memory") { settings.volumeMemory = [:] }
+                Button(L10n.tr("action.clearVolumeMemory")) { settings.volumeMemory = [:] }
                     .foregroundStyle(.red)
             }
 
             // ── About ────────────────────────────────────────────────
-            Section("About") {
-                Text("Sentrio is a lightweight macOS menu bar app for managing audio input and output devices — with automatic switching based on priority rules, per-device volume memory, and live battery display.")
+            Section(L10n.tr("prefs.general.about")) {
+                Text(L10n.tr("prefs.general.about.description"))
                     .font(.caption).foregroundStyle(.secondary)
 
                 HStack {
-                    Text("Version")
+                    Text(L10n.tr("prefs.general.about.version"))
                     Spacer()
                     let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
                     let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
@@ -796,23 +812,23 @@ private struct GeneralTab: View {
                     Text(display).foregroundStyle(.secondary)
                 }
                 HStack {
-                    Text("Author")
+                    Text(L10n.tr("prefs.general.about.author"))
                     Spacer()
                     Text("Yuna Morgenstern").foregroundStyle(.secondary)
                 }
                 HStack {
-                    Text("License")
+                    Text(L10n.tr("prefs.general.about.license"))
                     Spacer()
-                    Text("MIT Open Source").foregroundStyle(.secondary)
+                    Text(L10n.tr("prefs.general.about.licenseValue")).foregroundStyle(.secondary)
                 }
 
-                Button("View Source on GitHub") {
+                Button(L10n.tr("action.viewSourceOnGitHub")) {
                     openSite("https://github.com/YunaBraska/Sentrio")
                 }
-                Button("☕  Buy Me a Coffee") {
+                Button(L10n.tr("action.buyMeCoffee")) {
                     openSite("https://github.com/sponsors/YunaBraska?frequency=one-time")
                 }
-                Button("Report an Issue") {
+                Button(L10n.tr("action.reportIssue")) {
                     openSite("https://github.com/YunaBraska/Sentrio/issues/new")
                 }
             }
@@ -839,10 +855,10 @@ private struct GeneralTab: View {
         do {
             try settings.exportSettings(to: url)
             lastExportURL = url
-            setImportExportStatus("Exported settings.", isError: false)
+            setImportExportStatus(L10n.tr("status.exportedSettings"), isError: false)
         } catch {
             lastExportURL = nil
-            setImportExportStatus("Export failed: \(error.localizedDescription)", isError: true)
+            setImportExportStatus(L10n.format("error.exportFailedFormat", error.localizedDescription), isError: true)
         }
     }
 
@@ -854,9 +870,9 @@ private struct GeneralTab: View {
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do {
             try settings.importSettings(from: url)
-            setImportExportStatus("Imported settings.", isError: false)
+            setImportExportStatus(L10n.tr("status.importedSettings"), isError: false)
         } catch {
-            setImportExportStatus("Import failed: \(error.localizedDescription)", isError: true)
+            setImportExportStatus(L10n.format("error.importFailedFormat", error.localizedDescription), isError: true)
         }
     }
 

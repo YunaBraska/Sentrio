@@ -3,18 +3,24 @@ import Foundation
 
 enum BusyLightIntegrationError: LocalizedError {
     case unavailable
+    case invalidURLScheme(String)
+    case unsupportedExternalCommand(String)
 
     var errorDescription: String? {
         switch self {
         case .unavailable:
             "Busy Light is currently unavailable."
+        case let .invalidURLScheme(scheme):
+            "Unsupported URL scheme '\(scheme)'."
+        case let .unsupportedExternalCommand(message):
+            message
         }
     }
 }
 
 @MainActor
-final class BusyLightIntegrationBridge {
-    static let shared = BusyLightIntegrationBridge()
+public final class BusyLightIntegrationBridge {
+    public static let shared = BusyLightIntegrationBridge()
 
     private weak var engine: BusyLightEngine?
 
@@ -24,14 +30,82 @@ final class BusyLightIntegrationBridge {
         self.engine = engine
     }
 
-    func setAuto(trigger: String) throws {
+    public func setAuto(trigger: String) throws {
         guard let engine else { throw BusyLightIntegrationError.unavailable }
         engine.enableAutoControl(source: trigger)
     }
 
-    func setManual(action: BusyLightAction, trigger: String) throws {
+    public func setManual(action: BusyLightAction, trigger: String) throws {
         guard let engine else { throw BusyLightIntegrationError.unavailable }
         engine.setManualControl(action: action, source: trigger)
+    }
+
+    public func handleIncomingURL(_ url: URL) throws {
+        let scheme = url.scheme?.lowercased() ?? ""
+        guard scheme == "sentrio" else {
+            throw BusyLightIntegrationError.invalidURLScheme(scheme)
+        }
+        guard let engine else { throw BusyLightIntegrationError.unavailable }
+
+        let source = "Integration URL \(url.absoluteString)"
+        let result = engine.handleExternalURL(url, source: source)
+        if case let .failure(error) = result {
+            throw BusyLightIntegrationError.unsupportedExternalCommand(error.message)
+        }
+    }
+}
+
+enum BusyLightIntentActionBuildError: LocalizedError, Equatable {
+    case invalidRGBComponent(name: String, value: Int)
+
+    var errorDescription: String? {
+        switch self {
+        case let .invalidRGBComponent(name, value):
+            "Invalid \(name) value \(value). Use 0...255."
+        }
+    }
+}
+
+struct BusyLightIntentActionBuilder {
+    static let minPeriodMilliseconds = 120
+    static let maxPeriodMilliseconds = 3_000
+    static let offPeriodMilliseconds = 600
+
+    static func fromPreset(mode: BusyLightMode, color: BusyLightColor, periodMilliseconds: Int) -> BusyLightAction {
+        if mode == .off {
+            return BusyLightAction(mode: .off, color: .offColor, periodMilliseconds: offPeriodMilliseconds)
+        }
+        let period = min(max(periodMilliseconds, minPeriodMilliseconds), maxPeriodMilliseconds)
+        return BusyLightAction(mode: mode, color: color, periodMilliseconds: period)
+    }
+
+    static func fromRGB(
+        mode: BusyLightMode,
+        red: Int,
+        green: Int,
+        blue: Int,
+        periodMilliseconds: Int
+    ) throws -> BusyLightAction {
+        if mode == .off {
+            return BusyLightAction(mode: .off, color: .offColor, periodMilliseconds: offPeriodMilliseconds)
+        }
+        let r = try normalizeComponent(name: "red", value: red)
+        let g = try normalizeComponent(name: "green", value: green)
+        let b = try normalizeComponent(name: "blue", value: blue)
+
+        let period = min(max(periodMilliseconds, minPeriodMilliseconds), maxPeriodMilliseconds)
+        return BusyLightAction(
+            mode: mode,
+            color: BusyLightColor(red: r, green: g, blue: b),
+            periodMilliseconds: period
+        )
+    }
+
+    private static func normalizeComponent(name: String, value: Int) throws -> UInt8 {
+        guard (0 ... 255).contains(value) else {
+            throw BusyLightIntentActionBuildError.invalidRGBComponent(name: name, value: value)
+        }
+        return UInt8(value)
     }
 }
 
@@ -129,21 +203,54 @@ struct SetBusyLightManualIntent: AppIntent {
     }
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let normalizedPeriod = min(max(periodMilliseconds, 120), 3_000)
         let chosenMode = mode.busyLightMode
         let chosenColor = color.busyLightColor
 
-        let action: BusyLightAction
-        if chosenMode == .off || color == .off {
-            action = BusyLightAction(mode: .off, color: .offColor, periodMilliseconds: 600)
-        } else {
-            action = BusyLightAction(mode: chosenMode, color: chosenColor, periodMilliseconds: normalizedPeriod)
-        }
+        let action = BusyLightIntentActionBuilder.fromPreset(
+            mode: (color == .off ? .off : chosenMode),
+            color: chosenColor,
+            periodMilliseconds: periodMilliseconds
+        )
 
         try await MainActor.run {
             try BusyLightIntegrationBridge.shared.setManual(action: action, trigger: "Shortcuts/Manual")
         }
         return .result(dialog: "Busy Light manual action applied.")
+    }
+}
+
+@available(macOS 13.0, *)
+struct SetBusyLightManualRGBIntent: AppIntent {
+    static let title: LocalizedStringResource = "Set Busy Light Manual RGB"
+    static let description = IntentDescription("Sets Busy Light manual mode with custom RGB color and effect.")
+
+    @Parameter(title: "Red (0-255)", default: 255)
+    var red: Int
+
+    @Parameter(title: "Green (0-255)", default: 0)
+    var green: Int
+
+    @Parameter(title: "Blue (0-255)", default: 0)
+    var blue: Int
+
+    @Parameter(title: "Mode")
+    var mode: BusyLightShortcutMode
+
+    @Parameter(title: "Period (ms)", default: 600)
+    var periodMilliseconds: Int
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let action = try BusyLightIntentActionBuilder.fromRGB(
+            mode: mode.busyLightMode,
+            red: red,
+            green: green,
+            blue: blue,
+            periodMilliseconds: periodMilliseconds
+        )
+        try await MainActor.run {
+            try BusyLightIntegrationBridge.shared.setManual(action: action, trigger: "Shortcuts/Manual RGB")
+        }
+        return .result(dialog: "Busy Light custom RGB action applied.")
     }
 }
 
@@ -171,5 +278,18 @@ struct BusyLightAppShortcuts: AppShortcutsProvider {
             shortTitle: "Busy Light Manual",
             systemImageName: "lightbulb.max"
         )
+
+        AppShortcut(
+            intent: SetBusyLightManualRGBIntent(),
+            phrases: [
+                "Set Busy Light custom color in \(.applicationName)",
+                "Set Busy Light RGB in \(.applicationName)",
+            ],
+            shortTitle: "Busy Light RGB",
+            systemImageName: "paintpalette"
+        )
     }
 }
+
+@available(macOS 14.0, *)
+public struct SentrioCoreAppIntentsPackage: AppIntentsPackage {}

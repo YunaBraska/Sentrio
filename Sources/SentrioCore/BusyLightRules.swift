@@ -18,7 +18,7 @@ enum BusyLightSignal: String, Codable, CaseIterable, Equatable {
 
 // MARK: - Actions
 
-enum BusyLightMode: String, Codable, CaseIterable, Equatable {
+public enum BusyLightMode: String, Codable, CaseIterable, Equatable {
     case off
     case solid
     case blink
@@ -30,24 +30,36 @@ enum BusyLightControlMode: String, Codable, CaseIterable, Equatable {
     case manual
 }
 
-struct BusyLightColor: Codable, Equatable, Hashable {
+public struct BusyLightColor: Codable, Equatable, Hashable {
     var red: UInt8
     var green: UInt8
     var blue: UInt8
 
-    static let redColor = BusyLightColor(red: 255, green: 0, blue: 0)
-    static let greenColor = BusyLightColor(red: 0, green: 255, blue: 0)
-    static let yellowColor = BusyLightColor(red: 255, green: 190, blue: 0)
-    static let offColor = BusyLightColor(red: 0, green: 0, blue: 0)
+    public init(red: UInt8, green: UInt8, blue: UInt8) {
+        self.red = red
+        self.green = green
+        self.blue = blue
+    }
+
+    public static let redColor = BusyLightColor(red: 255, green: 0, blue: 0)
+    public static let greenColor = BusyLightColor(red: 0, green: 255, blue: 0)
+    public static let yellowColor = BusyLightColor(red: 255, green: 190, blue: 0)
+    public static let offColor = BusyLightColor(red: 0, green: 0, blue: 0)
 }
 
-struct BusyLightAction: Codable, Equatable {
+public struct BusyLightAction: Codable, Equatable {
     /// The output style applied to the BusyLight.
     var mode: BusyLightMode
     /// Used by `.solid`, `.blink`, `.pulse`. Ignored by `.off`.
     var color: BusyLightColor
     /// Used by `.blink` and `.pulse` as the animation period in milliseconds.
     var periodMilliseconds: Int
+
+    public init(mode: BusyLightMode, color: BusyLightColor, periodMilliseconds: Int) {
+        self.mode = mode
+        self.color = color
+        self.periodMilliseconds = periodMilliseconds
+    }
 
     static let defaultBusy = BusyLightAction(mode: .solid, color: .redColor, periodMilliseconds: 600)
     static let defaultPlayback = BusyLightAction(mode: .solid, color: .yellowColor, periodMilliseconds: 600)

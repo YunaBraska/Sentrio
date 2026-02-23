@@ -36,6 +36,13 @@ find "$BINARY_DIR" -maxdepth 1 -name "*.bundle" -print0 | while IFS= read -r -d 
     cp -R "$bundle" "$CONTENTS/Resources/"
 done
 
+echo "→ Copying App Intents metadata…"
+find "$BINARY_DIR" -maxdepth 1 -name "*.appintents" -print0 | while IFS= read -r -d '' metadata_dir; do
+    if [[ -d "$metadata_dir/Metadata.appintents" ]]; then
+        cp -R "$metadata_dir/Metadata.appintents" "$CONTENTS/Resources/"
+    fi
+done
+
 # ── Info.plist ─────────────────────────────────────────────────────────────────
 cat > "$CONTENTS/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -69,6 +76,21 @@ cat > "$CONTENTS/Info.plist" << EOF
     <string>NSApplication</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Sentrio uses the microphone input level to show a live activity indicator next to your input device.</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.sentrio.app.busylight</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>sentrio</string>
+            </array>
+        </dict>
+    </array>
+    <key>NSAppleScriptEnabled</key>
+    <true/>
+    <key>NSSupportsAppIntents</key>
+    <true/>
 </dict>
 </plist>
 EOF

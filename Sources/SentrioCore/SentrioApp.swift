@@ -35,6 +35,16 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    public func application(_: NSApplication, open urls: [URL]) {
+        for url in urls {
+            do {
+                try BusyLightIntegrationBridge.shared.handleIncomingURL(url)
+            } catch {
+                NSLog("Sentrio BusyLight URL error: %@", error.localizedDescription)
+            }
+        }
+    }
+
     public func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
         NotificationCenter.default.post(name: .reopenApp, object: nil)
         return true

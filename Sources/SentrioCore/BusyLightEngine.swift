@@ -37,6 +37,18 @@ private struct BusyLightAPIErrorResponse: Codable {
     var error: String
 }
 
+enum BusyLightExternalCommandError: Error {
+    case parse(String)
+    case unsupported(String)
+
+    var message: String {
+        switch self {
+        case let .parse(message), let .unsupported(message):
+            message
+        }
+    }
+}
+
 final class BusyLightEngine: ObservableObject {
     @Published private(set) var connectedDevices: [BusyLightUSBDevice] = []
     @Published private(set) var signals = BusyLightSignals(
@@ -92,19 +104,6 @@ final class BusyLightEngine: ObservableObject {
     private static let solidKeepaliveInterval: TimeInterval = 20
     private static let maxRecentEvents = 20
     private static let defaultActionPeriodMilliseconds = 600
-
-    private static let namedColors: [String: BusyLightColor] = [
-        "red": .redColor,
-        "green": .greenColor,
-        "yellow": .yellowColor,
-        "orange": BusyLightColor(red: 255, green: 140, blue: 0),
-        "blue": BusyLightColor(red: 0, green: 122, blue: 255),
-        "purple": BusyLightColor(red: 160, green: 80, blue: 255),
-        "pink": BusyLightColor(red: 255, green: 0, blue: 128),
-        "cyan": BusyLightColor(red: 0, green: 200, blue: 255),
-        "white": BusyLightColor(red: 255, green: 255, blue: 255),
-        "off": .offColor,
-    ]
 
     init(audio: AudioManager, settings: AppSettings) {
         self.settings = settings
@@ -192,6 +191,20 @@ final class BusyLightEngine: ObservableObject {
 
     func setManualControl(action: BusyLightAction, source: String) {
         setManualAction(action, source: source)
+    }
+
+    @discardableResult
+    func handleExternalURL(_ url: URL, source: String) -> Result<Void, BusyLightExternalCommandError> {
+        let parseResult = BusyLightCommandParser.parse(
+            url: url,
+            manualDefaultPeriodMilliseconds: settings.busyLightManualAction.periodMilliseconds
+        )
+        switch parseResult {
+        case let .failure(error):
+            return .failure(.parse(error.message))
+        case let .success(command):
+            return executeExternalCommand(command, source: source)
+        }
     }
 
     // MARK: - Rules / control mode
@@ -298,86 +311,53 @@ final class BusyLightEngine: ObservableObject {
             return .json(statusCode: 405, object: BusyLightAPIErrorResponse(error: "Method not allowed"))
         }
 
-        var segments = request.path.split(separator: "/").map { String($0).lowercased() }
-        if segments.first == "v1" { segments.removeFirst() }
-        guard !segments.isEmpty else {
-            return .json(statusCode: 200, object: apiState())
+        let parseResult = BusyLightCommandParser.parse(
+            path: request.path,
+            manualDefaultPeriodMilliseconds: settings.busyLightManualAction.periodMilliseconds
+        )
+        switch parseResult {
+        case let .failure(error):
+            return .json(statusCode: error.statusCode, object: BusyLightAPIErrorResponse(error: error.message))
+        case let .success(command):
+            return executeRESTCommand(command, source: "REST \(request.path)")
         }
-
-        guard segments.first == "busylight" || segments.first == "busyligt" else {
-            return .json(statusCode: 404, object: BusyLightAPIErrorResponse(error: "Unknown resource"))
-        }
-        segments.removeFirst()
-
-        if segments.isEmpty || segments[0] == "state" {
-            return .json(statusCode: 200, object: apiState())
-        }
-        if segments[0] == "logs" || segments[0] == "log" {
-            return .json(statusCode: 200, object: recentEvents)
-        }
-        if segments[0] == "auto" {
-            setAutoMode(source: "REST \(request.path)")
-            return .json(statusCode: 200, object: apiState())
-        }
-        if segments[0] == "rules" {
-            guard segments.count >= 2 else {
-                return .json(statusCode: 400, object: BusyLightAPIErrorResponse(error: "Missing rules state. Use /rules/on or /rules/off"))
-            }
-            switch segments[1] {
-            case "on", "true", "1", "enabled":
-                setRulesEnabled(true, source: "REST \(request.path)")
-                return .json(statusCode: 200, object: apiState())
-            case "off", "false", "0", "disabled":
-                setRulesEnabled(false, source: "REST \(request.path)")
-                return .json(statusCode: 200, object: apiState())
-            default:
-                return .json(statusCode: 400, object: BusyLightAPIErrorResponse(error: "Invalid rules state. Use on/off"))
-            }
-        }
-
-        return handleRESTManualAction(segments: segments, source: "REST \(request.path)")
     }
 
-    private func handleRESTManualAction(segments: [String], source: String) -> BusyLightRESTResponse {
-        guard segments.count <= 3 else {
-            return .json(statusCode: 400, object: BusyLightAPIErrorResponse(error: "Too many path segments"))
-        }
-
-        if segments[0] == "off" {
-            setManualAction(
-                BusyLightAction(mode: .off, color: .offColor, periodMilliseconds: Self.defaultActionPeriodMilliseconds),
-                source: source
-            )
+    private func executeRESTCommand(_ command: BusyLightCommand, source: String) -> BusyLightRESTResponse {
+        switch command {
+        case .state:
+            return .json(statusCode: 200, object: apiState())
+        case .logs:
+            return .json(statusCode: 200, object: recentEvents)
+        case .auto:
+            setAutoMode(source: source)
+            return .json(statusCode: 200, object: apiState())
+        case let .rules(enabled):
+            setRulesEnabled(enabled, source: source)
+            return .json(statusCode: 200, object: apiState())
+        case let .manual(action):
+            setManualAction(action, source: source)
             return .json(statusCode: 200, object: apiState())
         }
+    }
 
-        guard let color = Self.namedColors[segments[0]] else {
-            return .json(statusCode: 400, object: BusyLightAPIErrorResponse(error: "Unknown color '\(segments[0])'"))
+    private func executeExternalCommand(
+        _ command: BusyLightCommand,
+        source: String
+    ) -> Result<Void, BusyLightExternalCommandError> {
+        switch command {
+        case .state, .logs:
+            return .failure(.unsupported("Read-only endpoint is not supported for URL/AppleScript control"))
+        case .auto:
+            setAutoMode(source: source)
+            return .success(())
+        case let .rules(enabled):
+            setRulesEnabled(enabled, source: source)
+            return .success(())
+        case let .manual(action):
+            setManualAction(action, source: source)
+            return .success(())
         }
-
-        let mode: BusyLightMode
-        if segments.count >= 2 {
-            guard let parsed = BusyLightMode(rawValue: segments[1]) else {
-                return .json(statusCode: 400, object: BusyLightAPIErrorResponse(error: "Unknown mode '\(segments[1])'"))
-            }
-            mode = parsed
-        } else {
-            mode = .solid
-        }
-
-        let period: Int
-        if segments.count >= 3 {
-            guard let p = Int(segments[2]), p > 0 else {
-                return .json(statusCode: 400, object: BusyLightAPIErrorResponse(error: "Invalid period '\(segments[2])'"))
-            }
-            period = p
-        } else {
-            period = settings.busyLightManualAction.periodMilliseconds
-        }
-
-        let action = BusyLightAction(mode: mode, color: color, periodMilliseconds: period)
-        setManualAction(action, source: source)
-        return .json(statusCode: 200, object: apiState())
     }
 
     private func setAutoMode(source: String) {

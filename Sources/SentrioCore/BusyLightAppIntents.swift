@@ -66,9 +66,9 @@ enum BusyLightIntentActionBuildError: LocalizedError, Equatable {
     }
 }
 
-struct BusyLightIntentActionBuilder {
+enum BusyLightIntentActionBuilder {
     static let minPeriodMilliseconds = 120
-    static let maxPeriodMilliseconds = 3_000
+    static let maxPeriodMilliseconds = 3000
     static let offPeriodMilliseconds = 600
 
     static func fromPreset(mode: BusyLightMode, color: BusyLightColor, periodMilliseconds: Int) -> BusyLightAction {
@@ -207,7 +207,7 @@ struct SetBusyLightManualIntent: AppIntent {
         let chosenColor = color.busyLightColor
 
         let action = BusyLightIntentActionBuilder.fromPreset(
-            mode: (color == .off ? .off : chosenMode),
+            mode: color == .off ? .off : chosenMode,
             color: chosenColor,
             periodMilliseconds: periodMilliseconds
         )

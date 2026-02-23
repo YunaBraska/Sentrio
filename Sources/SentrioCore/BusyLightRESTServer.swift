@@ -11,7 +11,7 @@ struct BusyLightRESTResponse {
     var contentType: String
     var body: Data
 
-    static func json<T: Encodable>(statusCode: Int, object: T) -> BusyLightRESTResponse {
+    static func json(statusCode: Int, object: some Encodable) -> BusyLightRESTResponse {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
         let data = (try? encoder.encode(object)) ?? Data("{}".utf8)
@@ -37,7 +37,7 @@ final class BusyLightRESTServer {
     func start(port: Int) {
         stop()
 
-        guard (1 ... 65_535).contains(port), let nwPort = NWEndpoint.Port(rawValue: UInt16(port)) else {
+        guard (1 ... 65535).contains(port), let nwPort = NWEndpoint.Port(rawValue: UInt16(port)) else {
             notifyState(running: false, error: "Invalid port \(port)")
             return
         }
@@ -104,7 +104,7 @@ final class BusyLightRESTServer {
                 return
             }
 
-            if buffer.count > 64 * 1_024 {
+            if buffer.count > 64 * 1024 {
                 send(
                     BusyLightRESTResponse.text(statusCode: 413, body: "Request too large"),
                     on: connection

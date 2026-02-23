@@ -58,7 +58,7 @@ enum BusyLightCommandParseError: Error, Equatable {
     }
 }
 
-struct BusyLightCommandParser {
+enum BusyLightCommandParser {
     private static let hexCharacterSet = CharacterSet(charactersIn: "0123456789abcdef")
 
     private static let namedColors: [String: BusyLightColor] = [

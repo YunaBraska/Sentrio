@@ -15,7 +15,9 @@ struct BusyLightUSBSendResult: Codable, Equatable {
     var statusCode: Int32
     var recoveredAfterRetry: Bool
 
-    var isSuccess: Bool { statusCode == Int32(kIOReturnSuccess) }
+    var isSuccess: Bool {
+        statusCode == Int32(kIOReturnSuccess)
+    }
 }
 
 final class BusyLightUSBClient: ObservableObject {

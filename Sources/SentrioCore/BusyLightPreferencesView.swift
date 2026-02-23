@@ -201,7 +201,7 @@ struct BusyLightTab: View {
                     }
                     Slider(
                         value: manualPeriodBinding,
-                        in: 120 ... 3_000
+                        in: 120 ... 3000
                     )
                 }
             }

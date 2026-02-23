@@ -18,7 +18,7 @@ final class BusyLightIntentActionBuilderTests: XCTestCase {
         let action = BusyLightIntentActionBuilder.fromPreset(
             mode: .off,
             color: BusyLightColor(red: 200, green: 100, blue: 50),
-            periodMilliseconds: 1_999
+            periodMilliseconds: 1999
         )
 
         XCTAssertEqual(action.mode, .off)
@@ -49,14 +49,14 @@ final class BusyLightIntentActionBuilderTests: XCTestCase {
             periodMilliseconds: 100_000
         )
 
-        XCTAssertEqual(action.periodMilliseconds, 3_000)
+        XCTAssertEqual(action.periodMilliseconds, 3000)
     }
 
     func test_fromRGB_offModeIgnoresComponents() throws {
         let action = try BusyLightIntentActionBuilder.fromRGB(
             mode: .off,
             red: -1,
-            green: 9_999,
+            green: 9999,
             blue: -400,
             periodMilliseconds: 250
         )

@@ -6,5 +6,6 @@ if ! command -v swiftformat >/dev/null 2>&1; then
     exit 1
 fi
 
+swiftformat Package.swift Sources Tests
 swiftformat --lint Package.swift Sources Tests
 swift test

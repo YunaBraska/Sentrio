@@ -270,16 +270,15 @@ final class BusyLightEngine: ObservableObject {
             return
         }
 
-        let results: [BusyLightUSBSendResult]
-        switch action.mode {
+        let results: [BusyLightUSBSendResult] = switch action.mode {
         case .off:
-            results = usb.turnOff()
+            usb.turnOff()
         case .solid:
-            results = startSolid(action)
+            startSolid(action)
         case .blink:
-            results = startBlink(action)
+            startBlink(action)
         case .pulse:
-            results = startPulse(action)
+            startPulse(action)
         }
 
         let failed = results.filter { !$0.isSuccess }.count
@@ -506,13 +505,13 @@ final class BusyLightEngine: ObservableObject {
     private func describe(action: BusyLightAction) -> String {
         switch action.mode {
         case .off:
-            return "off"
+            "off"
         case .solid:
-            return "solid(\(action.color.red),\(action.color.green),\(action.color.blue))"
+            "solid(\(action.color.red),\(action.color.green),\(action.color.blue))"
         case .blink:
-            return "blink(\(action.color.red),\(action.color.green),\(action.color.blue))/\(action.periodMilliseconds)ms"
+            "blink(\(action.color.red),\(action.color.green),\(action.color.blue))/\(action.periodMilliseconds)ms"
         case .pulse:
-            return "pulse(\(action.color.red),\(action.color.green),\(action.color.blue))/\(action.periodMilliseconds)ms"
+            "pulse(\(action.color.red),\(action.color.green),\(action.color.blue))/\(action.periodMilliseconds)ms"
         }
     }
 

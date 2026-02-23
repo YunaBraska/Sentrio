@@ -589,7 +589,7 @@ final class AppSettings: ObservableObject {
     }
 
     private static func normalizedBusyLightAPIPort(_ port: Int) -> Int {
-        min(max(port, 1_024), 65_535)
+        min(max(port, 1024), 65535)
     }
 
     // MARK: – Persistence

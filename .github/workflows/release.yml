@@ -52,6 +52,16 @@ jobs:
       - name: Format check and tests
         run: bash scripts/check.sh
 
+      - name: Verify clean working tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Working tree changed during checks. Commit formatting updates first."
+            git status --short
+            exit 1
+          fi
+
       - name: Build distributable
         run: bash build.sh "${{ steps.version.outputs.tag }}"
 

@@ -3,6 +3,7 @@
 "label.input" = "Tulo";
 "label.alert" = "Hälytys";
 "label.general" = "Yleiset";
+"label.busyLight" = "Busy Light";
 "label.auto" = "Auto";
 "label.volume" = "Äänenvoimakkuus";
 "label.inputGain" = "Tulovahvistus";
@@ -30,12 +31,26 @@
 "action.viewSourceOnGitHub" = "Näytä lähdekoodi GitHubissa";
 "action.buyMeCoffee" = "☕  Osta minulle kahvi";
 "action.reportIssue" = "Ilmoita ongelmasta";
+"action.addRule" = "Lisää sääntö";
+"action.addCondition" = "Lisää ehto";
+"action.removeCondition" = "Poista ehto";
+"action.preview" = "Esikatselu";
+"action.moveUp" = "Siirrä ylös";
+"action.moveDown" = "Siirrä alas";
+"action.deleteRule" = "Poista sääntö";
 
 /* Yleiset tilat */
 "status.connected" = "Yhdistetty";
 "status.disconnected" = "Katkaistu";
+"status.on" = "Päällä";
+"status.off" = "Pois";
 "status.exportedSettings" = "Asetukset viety.";
 "status.importedSettings" = "Asetukset tuotu.";
+
+/* Logiikka */
+"logic.when" = "Kun";
+"logic.and" = "JA";
+"logic.or" = "TAI";
 
 /* Virhemuodot */
 "error.exportFailedFormat" = "Vienti epäonnistui: %@";
@@ -105,6 +120,31 @@
 "prefs.general.about.license" = "Lisenssi";
 "prefs.general.about.licenseValue" = "MIT Open Source";
 
+/* Asetukset: Busy Light */
+"prefs.busylight.enable" = "Ota BusyLight käyttöön";
+"prefs.busylight.enable.description" = "Ohjaa Kuando/BusyLight‑USB‑valoa mikrofonin/kameran/näytön tallennuksen perusteella.";
+"prefs.busylight.devices" = "Laitteet";
+"prefs.busylight.devices.none" = "BusyLight‑USB‑laitetta ei havaittu.";
+"prefs.busylight.signals" = "Signaalit";
+"prefs.busylight.signals.description" = "Signaalit päivittyvät, kun toimintaa havaitaan.";
+"prefs.busylight.rules" = "Säännöt";
+"prefs.busylight.rules.empty" = "Ei sääntöjä vielä.";
+"prefs.busylight.rule.new" = "Uusi sääntö";
+"prefs.busylight.rule.enableHelp" = "Ota tämä sääntö käyttöön / poista käytöstä";
+"prefs.busylight.rule.namePlaceholder" = "Säännön nimi";
+"prefs.busylight.conditions" = "Ehdot";
+"prefs.busylight.action" = "Toiminto";
+"prefs.busylight.mode.off" = "Pois";
+"prefs.busylight.mode.solid" = "Kiinteä";
+"prefs.busylight.mode.blink" = "Vilkku";
+"prefs.busylight.mode.pulse" = "Pulssi";
+"prefs.busylight.color" = "Väri";
+"prefs.busylight.speed" = "Nopeus";
+"prefs.busylight.speedValueFormat" = "%d ms";
+"prefs.busylight.signal.microphone" = "Mikrofoni";
+"prefs.busylight.signal.camera" = "Kamera";
+"prefs.busylight.signal.screenRecording" = "Näytön tallennus";
+
 /* Ikkunan otsikot */
 "prefs.window.title" = "Sentrio-asetukset";
 
@@ -165,3 +205,33 @@
 "icon.virtual" = "Virtuaalinen";
 "icon.pciCpu" = "PCI / CPU";
 "icon.unknown" = "Tuntematon";
+
+"prefs.busylight.rules.enable" = "Ota säännöt käyttöön";
+
+"prefs.busylight.signal.music" = "Hälytysäänet";
+
+"prefs.busylight.manualAction" = "Manuaalinen toiminto";
+
+"prefs.busylight.api" = "Etä-API";
+
+"prefs.busylight.api.enable" = "Ota paikallinen REST-API käyttöön";
+
+"prefs.busylight.api.port" = "Portti";
+
+"prefs.busylight.api.status" = "Palvelimen tila";
+
+"prefs.busylight.api.status.running" = "Käynnissä";
+
+"prefs.busylight.api.status.stopped" = "Pysäytetty";
+
+"prefs.busylight.api.lastErrorFormat" = "Viimeisin palvelinvirhe: %@";
+
+"prefs.busylight.api.baseURLFormat" = "Perus-URL: %@";
+
+"prefs.busylight.api.examples" = "Esimerkkipolut: /busylight/auto, /busylight/red, /busylight/red/pulse, /busylight/red/pulse/234, /busylight/rules/off, /busylight/state";
+
+"prefs.busylight.logs" = "Viimeisin toiminta (viimeiset 20)";
+
+"prefs.busylight.logs.empty" = "Ei vielä laukaisutapahtumia.";
+
+"action.clearLog" = "Tyhjennä loki";

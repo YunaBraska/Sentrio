@@ -3,6 +3,7 @@
 "label.input" = "Giriş";
 "label.alert" = "Uyarı";
 "label.general" = "Genel";
+"label.busyLight" = "Busy Light";
 "label.auto" = "Oto";
 "label.volume" = "Ses";
 "label.inputGain" = "Giriş kazancı";
@@ -30,12 +31,26 @@
 "action.viewSourceOnGitHub" = "Kaynağı GitHub’da görüntüle";
 "action.buyMeCoffee" = "☕  Bana bir kahve ısmarla";
 "action.reportIssue" = "Sorun bildir";
+"action.addRule" = "Kural ekle";
+"action.addCondition" = "Koşul ekle";
+"action.removeCondition" = "Koşulu kaldır";
+"action.preview" = "Önizleme";
+"action.moveUp" = "Yukarı taşı";
+"action.moveDown" = "Aşağı taşı";
+"action.deleteRule" = "Kuralı sil";
 
 /* Ortak durumlar */
 "status.connected" = "Bağlı";
 "status.disconnected" = "Bağlantı kesildi";
+"status.on" = "Açık";
+"status.off" = "Kapalı";
 "status.exportedSettings" = "Ayarlar dışa aktarıldı.";
 "status.importedSettings" = "Ayarlar içe aktarıldı.";
+
+/* Mantık */
+"logic.when" = "Eğer";
+"logic.and" = "VE";
+"logic.or" = "VEYA";
 
 /* Hata biçimleri */
 "error.exportFailedFormat" = "Dışa aktarma başarısız: %@";
@@ -105,6 +120,31 @@
 "prefs.general.about.license" = "Lisans";
 "prefs.general.about.licenseValue" = "MIT Açık Kaynak";
 
+/* Tercihler: Busy Light */
+"prefs.busylight.enable" = "BusyLight’i etkinleştir";
+"prefs.busylight.enable.description" = "Kuando/BusyLight USB ışığını mikrofon/kamera/ekran kaydı etkinliğine göre kontrol eder.";
+"prefs.busylight.devices" = "Cihazlar";
+"prefs.busylight.devices.none" = "BusyLight USB cihazı algılanmadı.";
+"prefs.busylight.signals" = "Sinyaller";
+"prefs.busylight.signals.description" = "Etkinlik algılandığında sinyaller güncellenir.";
+"prefs.busylight.rules" = "Kurallar";
+"prefs.busylight.rules.empty" = "Henüz kural yok.";
+"prefs.busylight.rule.new" = "Yeni kural";
+"prefs.busylight.rule.enableHelp" = "Bu kuralı etkinleştir/devre dışı bırak";
+"prefs.busylight.rule.namePlaceholder" = "Kural adı";
+"prefs.busylight.conditions" = "Koşullar";
+"prefs.busylight.action" = "Eylem";
+"prefs.busylight.mode.off" = "Kapalı";
+"prefs.busylight.mode.solid" = "Sabit";
+"prefs.busylight.mode.blink" = "Yanıp sön";
+"prefs.busylight.mode.pulse" = "Nabız";
+"prefs.busylight.color" = "Renk";
+"prefs.busylight.speed" = "Hız";
+"prefs.busylight.speedValueFormat" = "%d ms";
+"prefs.busylight.signal.microphone" = "Mikrofon";
+"prefs.busylight.signal.camera" = "Kamera";
+"prefs.busylight.signal.screenRecording" = "Ekran kaydı";
+
 /* Pencere başlıkları */
 "prefs.window.title" = "Sentrio Tercihleri";
 
@@ -165,3 +205,33 @@
 "icon.virtual" = "Sanal";
 "icon.pciCpu" = "PCI / CPU";
 "icon.unknown" = "Bilinmiyor";
+
+"prefs.busylight.rules.enable" = "Kuralları etkinleştir";
+
+"prefs.busylight.signal.music" = "Uyarı sesleri";
+
+"prefs.busylight.manualAction" = "Manuel eylem";
+
+"prefs.busylight.api" = "Uzak API";
+
+"prefs.busylight.api.enable" = "Yerel REST API'yi etkinleştir";
+
+"prefs.busylight.api.port" = "Bağlantı noktası";
+
+"prefs.busylight.api.status" = "Sunucu durumu";
+
+"prefs.busylight.api.status.running" = "Çalışıyor";
+
+"prefs.busylight.api.status.stopped" = "Durduruldu";
+
+"prefs.busylight.api.lastErrorFormat" = "Son sunucu hatası: %@";
+
+"prefs.busylight.api.baseURLFormat" = "Temel URL: %@";
+
+"prefs.busylight.api.examples" = "Örnek yollar: /busylight/auto, /busylight/red, /busylight/red/pulse, /busylight/red/pulse/234, /busylight/rules/off, /busylight/state";
+
+"prefs.busylight.logs" = "Son etkinlik (son 20)";
+
+"prefs.busylight.logs.empty" = "Henüz tetikleme olayı yok.";
+
+"action.clearLog" = "Günlüğü temizle";

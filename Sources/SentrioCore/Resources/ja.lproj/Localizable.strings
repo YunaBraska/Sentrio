@@ -3,6 +3,7 @@
 "label.input" = "入力";
 "label.alert" = "通知";
 "label.general" = "一般";
+"label.busyLight" = "Busy Light";
 "label.auto" = "自動";
 "label.volume" = "音量";
 "label.inputGain" = "入力ゲイン";
@@ -30,12 +31,26 @@
 "action.viewSourceOnGitHub" = "GitHub でソースを見る";
 "action.buyMeCoffee" = "☕  コーヒーをおごる";
 "action.reportIssue" = "問題を報告";
+"action.addRule" = "ルールを追加";
+"action.addCondition" = "条件を追加";
+"action.removeCondition" = "条件を削除";
+"action.preview" = "プレビュー";
+"action.moveUp" = "上へ移動";
+"action.moveDown" = "下へ移動";
+"action.deleteRule" = "ルールを削除";
 
 /* 共通ステータス */
 "status.connected" = "接続済み";
 "status.disconnected" = "未接続";
+"status.on" = "オン";
+"status.off" = "オフ";
 "status.exportedSettings" = "設定をエクスポートしました。";
 "status.importedSettings" = "設定をインポートしました。";
+
+/* ロジック */
+"logic.when" = "次の場合";
+"logic.and" = "かつ";
+"logic.or" = "または";
 
 /* エラー形式 */
 "error.exportFailedFormat" = "エクスポートに失敗しました: %@";
@@ -105,6 +120,31 @@
 "prefs.general.about.license" = "ライセンス";
 "prefs.general.about.licenseValue" = "MIT オープンソース";
 
+/* 設定: Busy Light */
+"prefs.busylight.enable" = "BusyLight を有効にする";
+"prefs.busylight.enable.description" = "マイク/カメラ/画面収録の状態に応じて Kuando/BusyLight USB ライトを制御します。";
+"prefs.busylight.devices" = "デバイス";
+"prefs.busylight.devices.none" = "BusyLight USB デバイスが見つかりません。";
+"prefs.busylight.signals" = "シグナル";
+"prefs.busylight.signals.description" = "アクティビティを検出するとシグナルが更新されます。";
+"prefs.busylight.rules" = "ルール";
+"prefs.busylight.rules.empty" = "ルールはまだありません。";
+"prefs.busylight.rule.new" = "新しいルール";
+"prefs.busylight.rule.enableHelp" = "このルールを有効/無効にする";
+"prefs.busylight.rule.namePlaceholder" = "ルール名";
+"prefs.busylight.conditions" = "条件";
+"prefs.busylight.action" = "アクション";
+"prefs.busylight.mode.off" = "オフ";
+"prefs.busylight.mode.solid" = "固定";
+"prefs.busylight.mode.blink" = "点滅";
+"prefs.busylight.mode.pulse" = "パルス";
+"prefs.busylight.color" = "色";
+"prefs.busylight.speed" = "速度";
+"prefs.busylight.speedValueFormat" = "%d ms";
+"prefs.busylight.signal.microphone" = "マイク";
+"prefs.busylight.signal.camera" = "カメラ";
+"prefs.busylight.signal.screenRecording" = "画面収録";
+
 /* ウィンドウタイトル */
 "prefs.window.title" = "Sentrio 設定";
 
@@ -165,3 +205,33 @@
 "icon.virtual" = "仮想";
 "icon.pciCpu" = "PCI / CPU";
 "icon.unknown" = "不明";
+
+"prefs.busylight.rules.enable" = "ルールを有効化";
+
+"prefs.busylight.signal.music" = "通知音";
+
+"prefs.busylight.manualAction" = "手動アクション";
+
+"prefs.busylight.api" = "リモート API";
+
+"prefs.busylight.api.enable" = "ローカル REST API を有効化";
+
+"prefs.busylight.api.port" = "ポート";
+
+"prefs.busylight.api.status" = "サーバー状態";
+
+"prefs.busylight.api.status.running" = "稼働中";
+
+"prefs.busylight.api.status.stopped" = "停止";
+
+"prefs.busylight.api.lastErrorFormat" = "直近のサーバーエラー: %@";
+
+"prefs.busylight.api.baseURLFormat" = "ベース URL: %@";
+
+"prefs.busylight.api.examples" = "パス例: /busylight/auto, /busylight/red, /busylight/red/pulse, /busylight/red/pulse/234, /busylight/rules/off, /busylight/state";
+
+"prefs.busylight.logs" = "最近のアクティビティ（最新20件）";
+
+"prefs.busylight.logs.empty" = "トリガーイベントはまだありません。";
+
+"action.clearLog" = "ログを消去";

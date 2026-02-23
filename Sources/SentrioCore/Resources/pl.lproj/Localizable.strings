@@ -3,6 +3,7 @@
 "label.input" = "Wejście";
 "label.alert" = "Alert";
 "label.general" = "Ogólne";
+"label.busyLight" = "Busy Light";
 "label.auto" = "Auto";
 "label.volume" = "Głośność";
 "label.inputGain" = "Wzmocnienie wejścia";
@@ -30,12 +31,26 @@
 "action.viewSourceOnGitHub" = "Zobacz kod na GitHubie";
 "action.buyMeCoffee" = "☕  Postaw mi kawę";
 "action.reportIssue" = "Zgłoś problem";
+"action.addRule" = "Dodaj regułę";
+"action.addCondition" = "Dodaj warunek";
+"action.removeCondition" = "Usuń warunek";
+"action.preview" = "Podgląd";
+"action.moveUp" = "Przenieś w górę";
+"action.moveDown" = "Przenieś w dół";
+"action.deleteRule" = "Usuń regułę";
 
 /* Wspólne statusy */
 "status.connected" = "Połączono";
 "status.disconnected" = "Rozłączono";
+"status.on" = "Włączone";
+"status.off" = "Wyłączone";
 "status.exportedSettings" = "Wyeksportowano ustawienia.";
 "status.importedSettings" = "Zaimportowano ustawienia.";
+
+/* Logika */
+"logic.when" = "Gdy";
+"logic.and" = "I";
+"logic.or" = "LUB";
 
 /* Formaty błędów */
 "error.exportFailedFormat" = "Eksport nie powiódł się: %@";
@@ -105,6 +120,31 @@
 "prefs.general.about.license" = "Licencja";
 "prefs.general.about.licenseValue" = "MIT Open Source";
 
+/* Preferencje: Busy Light */
+"prefs.busylight.enable" = "Włącz BusyLight";
+"prefs.busylight.enable.description" = "Steruje lampką USB Kuando/BusyLight na podstawie aktywności mikrofonu/kamery/nagrywania ekranu.";
+"prefs.busylight.devices" = "Urządzenia";
+"prefs.busylight.devices.none" = "Nie wykryto urządzenia USB BusyLight.";
+"prefs.busylight.signals" = "Sygnały";
+"prefs.busylight.signals.description" = "Sygnały są aktualizowane po wykryciu aktywności.";
+"prefs.busylight.rules" = "Reguły";
+"prefs.busylight.rules.empty" = "Brak reguł.";
+"prefs.busylight.rule.new" = "Nowa reguła";
+"prefs.busylight.rule.enableHelp" = "Włącz/wyłącz tę regułę";
+"prefs.busylight.rule.namePlaceholder" = "Nazwa reguły";
+"prefs.busylight.conditions" = "Warunki";
+"prefs.busylight.action" = "Akcja";
+"prefs.busylight.mode.off" = "Wyłączone";
+"prefs.busylight.mode.solid" = "Stałe";
+"prefs.busylight.mode.blink" = "Miganie";
+"prefs.busylight.mode.pulse" = "Pulsowanie";
+"prefs.busylight.color" = "Kolor";
+"prefs.busylight.speed" = "Szybkość";
+"prefs.busylight.speedValueFormat" = "%d ms";
+"prefs.busylight.signal.microphone" = "Mikrofon";
+"prefs.busylight.signal.camera" = "Kamera";
+"prefs.busylight.signal.screenRecording" = "Nagrywanie ekranu";
+
 /* Tytuły okien */
 "prefs.window.title" = "Preferencje Sentrio";
 
@@ -165,3 +205,33 @@
 "icon.virtual" = "Wirtualne";
 "icon.pciCpu" = "PCI / CPU";
 "icon.unknown" = "Nieznane";
+
+"prefs.busylight.rules.enable" = "Włącz reguły";
+
+"prefs.busylight.signal.music" = "Dźwięki alertów";
+
+"prefs.busylight.manualAction" = "Akcja ręczna";
+
+"prefs.busylight.api" = "Zdalne API";
+
+"prefs.busylight.api.enable" = "Włącz lokalne REST API";
+
+"prefs.busylight.api.port" = "Port";
+
+"prefs.busylight.api.status" = "Stan serwera";
+
+"prefs.busylight.api.status.running" = "Działa";
+
+"prefs.busylight.api.status.stopped" = "Zatrzymany";
+
+"prefs.busylight.api.lastErrorFormat" = "Ostatni błąd serwera: %@";
+
+"prefs.busylight.api.baseURLFormat" = "Bazowy URL: %@";
+
+"prefs.busylight.api.examples" = "Przykładowe ścieżki: /busylight/auto, /busylight/red, /busylight/red/pulse, /busylight/red/pulse/234, /busylight/rules/off, /busylight/state";
+
+"prefs.busylight.logs" = "Ostatnia aktywność (ostatnie 20)";
+
+"prefs.busylight.logs.empty" = "Brak zdarzeń wyzwalających.";
+
+"action.clearLog" = "Wyczyść log";

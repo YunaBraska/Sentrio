@@ -3,6 +3,7 @@
 "label.input" = "Input";
 "label.alert" = "Alert";
 "label.general" = "General";
+"label.busyLight" = "Busy Light";
 "label.auto" = "Auto";
 "label.volume" = "Volume";
 "label.inputGain" = "Input Gain";
@@ -30,12 +31,26 @@
 "action.viewSourceOnGitHub" = "View Source on GitHub";
 "action.buyMeCoffee" = "☕  Buy Me a Coffee";
 "action.reportIssue" = "Report an Issue";
+"action.addRule" = "Add Rule";
+"action.addCondition" = "Add Condition";
+"action.removeCondition" = "Remove Condition";
+"action.preview" = "Preview";
+"action.moveUp" = "Move up";
+"action.moveDown" = "Move down";
+"action.deleteRule" = "Delete rule";
 
 /* Common statuses */
 "status.connected" = "Connected";
 "status.disconnected" = "Disconnected";
+"status.on" = "On";
+"status.off" = "Off";
 "status.exportedSettings" = "Exported settings.";
 "status.importedSettings" = "Imported settings.";
+
+/* Logic */
+"logic.when" = "When";
+"logic.and" = "AND";
+"logic.or" = "OR";
 
 /* Error formats */
 "error.exportFailedFormat" = "Export failed: %@";
@@ -105,6 +120,31 @@
 "prefs.general.about.license" = "License";
 "prefs.general.about.licenseValue" = "MIT Open Source";
 
+/* Preferences: Busy Light */
+"prefs.busylight.enable" = "Enable BusyLight";
+"prefs.busylight.enable.description" = "Controls your Kuando/BusyLight USB light based on mic/camera/screen activity.";
+"prefs.busylight.devices" = "Devices";
+"prefs.busylight.devices.none" = "No BusyLight USB device detected.";
+"prefs.busylight.signals" = "Signals";
+"prefs.busylight.signals.description" = "Signals update when activity is detected.";
+"prefs.busylight.rules" = "Rules";
+"prefs.busylight.rules.empty" = "No rules yet.";
+"prefs.busylight.rule.new" = "New rule";
+"prefs.busylight.rule.enableHelp" = "Enable/disable this rule";
+"prefs.busylight.rule.namePlaceholder" = "Rule name";
+"prefs.busylight.conditions" = "Conditions";
+"prefs.busylight.action" = "Action";
+"prefs.busylight.mode.off" = "Off";
+"prefs.busylight.mode.solid" = "Solid";
+"prefs.busylight.mode.blink" = "Blink";
+"prefs.busylight.mode.pulse" = "Pulse";
+"prefs.busylight.color" = "Color";
+"prefs.busylight.speed" = "Speed";
+"prefs.busylight.speedValueFormat" = "%d ms";
+"prefs.busylight.signal.microphone" = "Microphone";
+"prefs.busylight.signal.camera" = "Camera";
+"prefs.busylight.signal.screenRecording" = "Screen recording";
+
 /* Window titles */
 "prefs.window.title" = "Sentrio Preferences";
 
@@ -165,3 +205,33 @@
 "icon.virtual" = "Virtual";
 "icon.pciCpu" = "PCI / CPU";
 "icon.unknown" = "Unknown";
+
+"prefs.busylight.rules.enable" = "Enable rules";
+
+"prefs.busylight.signal.music" = "Alert sounds";
+
+"prefs.busylight.manualAction" = "Manual action";
+
+"prefs.busylight.api" = "Remote API";
+
+"prefs.busylight.api.enable" = "Enable local REST API";
+
+"prefs.busylight.api.port" = "Port";
+
+"prefs.busylight.api.status" = "Server status";
+
+"prefs.busylight.api.status.running" = "Running";
+
+"prefs.busylight.api.status.stopped" = "Stopped";
+
+"prefs.busylight.api.lastErrorFormat" = "Last server error: %@";
+
+"prefs.busylight.api.baseURLFormat" = "Base URL: %@";
+
+"prefs.busylight.api.examples" = "Example paths: /busylight/auto, /busylight/red, /busylight/red/pulse, /busylight/red/pulse/234, /busylight/rules/off, /busylight/state";
+
+"prefs.busylight.logs" = "Recent activity (last 20)";
+
+"prefs.busylight.logs.empty" = "No trigger events yet.";
+
+"action.clearLog" = "Clear log";

@@ -235,6 +235,31 @@ final class AppSettingsTests: XCTestCase {
         settings.hideMenuBarIcon = true
         settings.testSound = .system(name: "Tink")
         settings.alertSound = .none
+        settings.busyLightEnabled = true
+        settings.busyLightControlMode = .manual
+        settings.busyLightManualAction = BusyLightAction(
+            mode: .solid,
+            color: BusyLightColor(red: 10, green: 20, blue: 30),
+            periodMilliseconds: 777
+        )
+        settings.busyLightAPIEnabled = true
+        settings.busyLightAPIPort = 51234
+        settings.busyLightRules = try [
+            BusyLightRule(
+                id: XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-000000000001")),
+                name: "Mic busy",
+                isEnabled: true,
+                expression: BusyLightExpression(
+                    conditions: [BusyLightCondition(signal: .microphone, expectedValue: true)],
+                    operators: []
+                ),
+                action: BusyLightAction(
+                    mode: .blink,
+                    color: BusyLightColor(red: 255, green: 140, blue: 0),
+                    periodMilliseconds: 900
+                )
+            ),
+        ]
 
         let data = try settings.exportSettingsData()
 
@@ -263,6 +288,12 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertTrue(imported.hideMenuBarIcon)
         XCTAssertEqual(imported.testSound, .system(name: "Tink"))
         XCTAssertEqual(imported.alertSound, .none)
+        XCTAssertTrue(imported.busyLightEnabled)
+        XCTAssertEqual(imported.busyLightControlMode, .manual)
+        XCTAssertEqual(imported.busyLightManualAction, settings.busyLightManualAction)
+        XCTAssertTrue(imported.busyLightAPIEnabled)
+        XCTAssertEqual(imported.busyLightAPIPort, 51234)
+        XCTAssertEqual(imported.busyLightRules, settings.busyLightRules)
     }
 
     func test_importRejectsNonSettingsJSON() throws {
@@ -326,6 +357,12 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertTrue(settings.knownDeviceIsAppleMade.isEmpty)
         XCTAssertTrue(settings.knownDeviceModelUIDs.isEmpty)
         XCTAssertTrue(settings.knownDeviceBluetoothMinorTypes.isEmpty)
+        XCTAssertFalse(settings.busyLightEnabled)
+        XCTAssertEqual(settings.busyLightControlMode, .auto)
+        XCTAssertEqual(settings.busyLightManualAction, .defaultBusy)
+        XCTAssertFalse(settings.busyLightAPIEnabled)
+        XCTAssertEqual(settings.busyLightAPIPort, 47833)
+        XCTAssertEqual(settings.busyLightRules.count, 3)
     }
 
     // MARK: – deleteDevice

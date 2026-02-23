@@ -3,6 +3,7 @@
 "label.input" = "Invoer";
 "label.alert" = "Melding";
 "label.general" = "Algemeen";
+"label.busyLight" = "Busy Light";
 "label.auto" = "Auto";
 "label.volume" = "Volume";
 "label.inputGain" = "Ingangsversterking";
@@ -30,12 +31,26 @@
 "action.viewSourceOnGitHub" = "Broncode op GitHub bekijken";
 "action.buyMeCoffee" = "☕  Koop me een koffie";
 "action.reportIssue" = "Meld een probleem";
+"action.addRule" = "Regel toevoegen";
+"action.addCondition" = "Voorwaarde toevoegen";
+"action.removeCondition" = "Voorwaarde verwijderen";
+"action.preview" = "Voorbeeld";
+"action.moveUp" = "Omhoog";
+"action.moveDown" = "Omlaag";
+"action.deleteRule" = "Regel verwijderen";
 
 /* Algemene statussen */
 "status.connected" = "Verbonden";
 "status.disconnected" = "Verbroken";
+"status.on" = "Aan";
+"status.off" = "Uit";
 "status.exportedSettings" = "Instellingen geëxporteerd.";
 "status.importedSettings" = "Instellingen geïmporteerd.";
+
+/* Logica */
+"logic.when" = "Wanneer";
+"logic.and" = "EN";
+"logic.or" = "OF";
 
 /* Foutformaten */
 "error.exportFailedFormat" = "Export mislukt: %@";
@@ -105,6 +120,31 @@
 "prefs.general.about.license" = "Licentie";
 "prefs.general.about.licenseValue" = "MIT Open Source";
 
+/* Voorkeuren: Busy Light */
+"prefs.busylight.enable" = "BusyLight inschakelen";
+"prefs.busylight.enable.description" = "Bedient je Kuando/BusyLight‑USB‑lamp op basis van microfoon/camera/schermopname.";
+"prefs.busylight.devices" = "Apparaten";
+"prefs.busylight.devices.none" = "Geen BusyLight‑USB‑apparaat gedetecteerd.";
+"prefs.busylight.signals" = "Signalen";
+"prefs.busylight.signals.description" = "Signalen worden bijgewerkt wanneer activiteit wordt gedetecteerd.";
+"prefs.busylight.rules" = "Regels";
+"prefs.busylight.rules.empty" = "Nog geen regels.";
+"prefs.busylight.rule.new" = "Nieuwe regel";
+"prefs.busylight.rule.enableHelp" = "Deze regel in-/uitschakelen";
+"prefs.busylight.rule.namePlaceholder" = "Regelnaam";
+"prefs.busylight.conditions" = "Voorwaarden";
+"prefs.busylight.action" = "Actie";
+"prefs.busylight.mode.off" = "Uit";
+"prefs.busylight.mode.solid" = "Vast";
+"prefs.busylight.mode.blink" = "Knipperen";
+"prefs.busylight.mode.pulse" = "Pulseren";
+"prefs.busylight.color" = "Kleur";
+"prefs.busylight.speed" = "Snelheid";
+"prefs.busylight.speedValueFormat" = "%d ms";
+"prefs.busylight.signal.microphone" = "Microfoon";
+"prefs.busylight.signal.camera" = "Camera";
+"prefs.busylight.signal.screenRecording" = "Schermopname";
+
 /* Venstertitels */
 "prefs.window.title" = "Sentrio-voorkeuren";
 
@@ -165,3 +205,33 @@
 "icon.virtual" = "Virtueel";
 "icon.pciCpu" = "PCI / CPU";
 "icon.unknown" = "Onbekend";
+
+"prefs.busylight.rules.enable" = "Regels inschakelen";
+
+"prefs.busylight.signal.music" = "Waarschuwingsgeluiden";
+
+"prefs.busylight.manualAction" = "Handmatige actie";
+
+"prefs.busylight.api" = "Externe API";
+
+"prefs.busylight.api.enable" = "Lokale REST-API inschakelen";
+
+"prefs.busylight.api.port" = "Poort";
+
+"prefs.busylight.api.status" = "Serverstatus";
+
+"prefs.busylight.api.status.running" = "Actief";
+
+"prefs.busylight.api.status.stopped" = "Gestopt";
+
+"prefs.busylight.api.lastErrorFormat" = "Laatste serverfout: %@";
+
+"prefs.busylight.api.baseURLFormat" = "Basis-URL: %@";
+
+"prefs.busylight.api.examples" = "Voorbeeldpaden: /busylight/auto, /busylight/red, /busylight/red/pulse, /busylight/red/pulse/234, /busylight/rules/off, /busylight/state";
+
+"prefs.busylight.logs" = "Recente activiteit (laatste 20)";
+
+"prefs.busylight.logs.empty" = "Nog geen triggergebeurtenissen.";
+
+"action.clearLog" = "Log wissen";

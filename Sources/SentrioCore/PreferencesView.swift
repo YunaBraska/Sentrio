@@ -5,20 +5,37 @@ import UniformTypeIdentifiers
 // MARK: – Root
 
 struct PreferencesView: View {
+    private enum PreferencesTab: Hashable {
+        case output
+        case input
+        case busyLight
+        case general
+    }
+
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
+    @EnvironmentObject var busyLight: BusyLightEngine
     @EnvironmentObject var appState: AppState
     @State private var isWindowActive = false
+    @State private var selectedTab: PreferencesTab = .output
 
     var body: some View {
         VStack(spacing: 0) {
-            TabView {
+            TabView(selection: $selectedTab) {
                 PriorityTab(isOutput: true)
                     .tabItem { Label(L10n.tr("label.output"), systemImage: "speaker.wave.2") }
+                    .tag(PreferencesTab.output)
                 PriorityTab(isOutput: false)
                     .tabItem { Label(L10n.tr("label.input"), systemImage: "mic") }
+                    .tag(PreferencesTab.input)
+                if !busyLight.connectedDevices.isEmpty {
+                    BusyLightTab()
+                        .tabItem { Label(L10n.tr("label.busyLight"), systemImage: "lightbulb") }
+                        .tag(PreferencesTab.busyLight)
+                }
                 GeneralTab()
                     .tabItem { Label(L10n.tr("label.general"), systemImage: "gear") }
+                    .tag(PreferencesTab.general)
             }
             .padding()
 
@@ -34,6 +51,11 @@ struct PreferencesView: View {
             }
         )
         .onChange(of: settings.showInputLevelMeter) { _ in updateInputLevelMonitoringDemand() }
+        .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in
+            if isEmpty, selectedTab == .busyLight {
+                selectedTab = .output
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
     }

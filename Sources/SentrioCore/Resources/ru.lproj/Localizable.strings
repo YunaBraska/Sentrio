@@ -3,6 +3,7 @@
 "label.input" = "Ввод";
 "label.alert" = "Оповещение";
 "label.general" = "Основное";
+"label.busyLight" = "Busy Light";
 "label.auto" = "Авто";
 "label.volume" = "Громкость";
 "label.inputGain" = "Усиление входа";
@@ -30,12 +31,26 @@
 "action.viewSourceOnGitHub" = "Посмотреть исходники на GitHub";
 "action.buyMeCoffee" = "☕  Угости меня кофе";
 "action.reportIssue" = "Сообщить о проблеме";
+"action.addRule" = "Добавить правило";
+"action.addCondition" = "Добавить условие";
+"action.removeCondition" = "Удалить условие";
+"action.preview" = "Предпросмотр";
+"action.moveUp" = "Вверх";
+"action.moveDown" = "Вниз";
+"action.deleteRule" = "Удалить правило";
 
 /* Общие статусы */
 "status.connected" = "Подключено";
 "status.disconnected" = "Отключено";
+"status.on" = "Включено";
+"status.off" = "Выключено";
 "status.exportedSettings" = "Настройки экспортированы.";
 "status.importedSettings" = "Настройки импортированы.";
+
+/* Логика */
+"logic.when" = "Когда";
+"logic.and" = "И";
+"logic.or" = "ИЛИ";
 
 /* Форматы ошибок */
 "error.exportFailedFormat" = "Экспорт не удался: %@";
@@ -105,6 +120,31 @@
 "prefs.general.about.license" = "Лицензия";
 "prefs.general.about.licenseValue" = "MIT Open Source";
 
+/* Настройки: Busy Light */
+"prefs.busylight.enable" = "Включить BusyLight";
+"prefs.busylight.enable.description" = "Управляет USB‑лампой Kuando/BusyLight в зависимости от активности микрофона/камеры/записи экрана.";
+"prefs.busylight.devices" = "Устройства";
+"prefs.busylight.devices.none" = "USB‑устройство BusyLight не обнаружено.";
+"prefs.busylight.signals" = "Сигналы";
+"prefs.busylight.signals.description" = "Сигналы обновляются при обнаружении активности.";
+"prefs.busylight.rules" = "Правила";
+"prefs.busylight.rules.empty" = "Правил пока нет.";
+"prefs.busylight.rule.new" = "Новое правило";
+"prefs.busylight.rule.enableHelp" = "Включить/выключить это правило";
+"prefs.busylight.rule.namePlaceholder" = "Название правила";
+"prefs.busylight.conditions" = "Условия";
+"prefs.busylight.action" = "Действие";
+"prefs.busylight.mode.off" = "Выключено";
+"prefs.busylight.mode.solid" = "Постоянно";
+"prefs.busylight.mode.blink" = "Мигание";
+"prefs.busylight.mode.pulse" = "Пульсация";
+"prefs.busylight.color" = "Цвет";
+"prefs.busylight.speed" = "Скорость";
+"prefs.busylight.speedValueFormat" = "%d мс";
+"prefs.busylight.signal.microphone" = "Микрофон";
+"prefs.busylight.signal.camera" = "Камера";
+"prefs.busylight.signal.screenRecording" = "Запись экрана";
+
 /* Заголовки окон */
 "prefs.window.title" = "Настройки Sentrio";
 
@@ -165,3 +205,33 @@
 "icon.virtual" = "Виртуальное";
 "icon.pciCpu" = "PCI / CPU";
 "icon.unknown" = "Неизвестно";
+
+"prefs.busylight.rules.enable" = "Включить правила";
+
+"prefs.busylight.signal.music" = "Звуки уведомлений";
+
+"prefs.busylight.manualAction" = "Ручное действие";
+
+"prefs.busylight.api" = "Удалённый API";
+
+"prefs.busylight.api.enable" = "Включить локальный REST API";
+
+"prefs.busylight.api.port" = "Порт";
+
+"prefs.busylight.api.status" = "Статус сервера";
+
+"prefs.busylight.api.status.running" = "Запущен";
+
+"prefs.busylight.api.status.stopped" = "Остановлен";
+
+"prefs.busylight.api.lastErrorFormat" = "Последняя ошибка сервера: %@";
+
+"prefs.busylight.api.baseURLFormat" = "Базовый URL: %@";
+
+"prefs.busylight.api.examples" = "Примеры путей: /busylight/auto, /busylight/red, /busylight/red/pulse, /busylight/red/pulse/234, /busylight/rules/off, /busylight/state";
+
+"prefs.busylight.logs" = "Недавняя активность (последние 20)";
+
+"prefs.busylight.logs.empty" = "Пока нет событий срабатывания.";
+
+"action.clearLog" = "Очистить журнал";

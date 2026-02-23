@@ -3,6 +3,7 @@
 "label.input" = "Indgang";
 "label.alert" = "Alarm";
 "label.general" = "Generelt";
+"label.busyLight" = "Busy Light";
 "label.auto" = "Auto";
 "label.volume" = "Lydstyrke";
 "label.inputGain" = "Indgangsforstærkning";
@@ -30,12 +31,26 @@
 "action.viewSourceOnGitHub" = "Se kildekode på GitHub";
 "action.buyMeCoffee" = "☕  Køb mig en kaffe";
 "action.reportIssue" = "Rapportér et problem";
+"action.addRule" = "Tilføj regel";
+"action.addCondition" = "Tilføj betingelse";
+"action.removeCondition" = "Fjern betingelse";
+"action.preview" = "Forhåndsvis";
+"action.moveUp" = "Flyt op";
+"action.moveDown" = "Flyt ned";
+"action.deleteRule" = "Slet regel";
 
 /* Almindelige statusser */
 "status.connected" = "Forbundet";
 "status.disconnected" = "Frakoblet";
+"status.on" = "Til";
+"status.off" = "Fra";
 "status.exportedSettings" = "Indstillinger eksporteret.";
 "status.importedSettings" = "Indstillinger importeret.";
+
+/* Logik */
+"logic.when" = "Når";
+"logic.and" = "OG";
+"logic.or" = "ELLER";
 
 /* Fejlformater */
 "error.exportFailedFormat" = "Eksport mislykkedes: %@";
@@ -105,6 +120,31 @@
 "prefs.general.about.license" = "Licens";
 "prefs.general.about.licenseValue" = "MIT Open Source";
 
+/* Indstillinger: Busy Light */
+"prefs.busylight.enable" = "Aktivér BusyLight";
+"prefs.busylight.enable.description" = "Styr din Kuando/BusyLight‑USB‑lampe baseret på mikrofon/kamera/skærmoptagelse.";
+"prefs.busylight.devices" = "Enheder";
+"prefs.busylight.devices.none" = "Ingen BusyLight‑USB‑enhed fundet.";
+"prefs.busylight.signals" = "Signaler";
+"prefs.busylight.signals.description" = "Signaler opdateres, når aktivitet registreres.";
+"prefs.busylight.rules" = "Regler";
+"prefs.busylight.rules.empty" = "Ingen regler endnu.";
+"prefs.busylight.rule.new" = "Ny regel";
+"prefs.busylight.rule.enableHelp" = "Aktivér/deaktivér denne regel";
+"prefs.busylight.rule.namePlaceholder" = "Regelnavn";
+"prefs.busylight.conditions" = "Betingelser";
+"prefs.busylight.action" = "Handling";
+"prefs.busylight.mode.off" = "Fra";
+"prefs.busylight.mode.solid" = "Fast";
+"prefs.busylight.mode.blink" = "Blink";
+"prefs.busylight.mode.pulse" = "Puls";
+"prefs.busylight.color" = "Farve";
+"prefs.busylight.speed" = "Hastighed";
+"prefs.busylight.speedValueFormat" = "%d ms";
+"prefs.busylight.signal.microphone" = "Mikrofon";
+"prefs.busylight.signal.camera" = "Kamera";
+"prefs.busylight.signal.screenRecording" = "Skærmoptagelse";
+
 /* Vinduestitler */
 "prefs.window.title" = "Sentrio-indstillinger";
 
@@ -165,3 +205,33 @@
 "icon.virtual" = "Virtuel";
 "icon.pciCpu" = "PCI / CPU";
 "icon.unknown" = "Ukendt";
+
+"prefs.busylight.rules.enable" = "Aktivér regler";
+
+"prefs.busylight.signal.music" = "Advarselslyde";
+
+"prefs.busylight.manualAction" = "Manuel handling";
+
+"prefs.busylight.api" = "Fjern-API";
+
+"prefs.busylight.api.enable" = "Aktivér lokal REST-API";
+
+"prefs.busylight.api.port" = "Port";
+
+"prefs.busylight.api.status" = "Serverstatus";
+
+"prefs.busylight.api.status.running" = "Kører";
+
+"prefs.busylight.api.status.stopped" = "Stoppet";
+
+"prefs.busylight.api.lastErrorFormat" = "Seneste serverfejl: %@";
+
+"prefs.busylight.api.baseURLFormat" = "Basis-URL: %@";
+
+"prefs.busylight.api.examples" = "Eksempelstier: /busylight/auto, /busylight/red, /busylight/red/pulse, /busylight/red/pulse/234, /busylight/rules/off, /busylight/state";
+
+"prefs.busylight.logs" = "Seneste aktivitet (seneste 20)";
+
+"prefs.busylight.logs.empty" = "Ingen udløsende hændelser endnu.";
+
+"action.clearLog" = "Ryd log";

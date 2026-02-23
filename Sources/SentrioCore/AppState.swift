@@ -7,12 +7,14 @@ final class AppState: ObservableObject {
     let settings = AppSettings()
     let audio = AudioManager()
     lazy var rules = RulesEngine(audio: audio, settings: settings)
+    lazy var busyLight = BusyLightEngine(audio: audio, settings: settings)
 
     private var preferencesWindow: NSWindow?
     private var cancellables = Set<AnyCancellable>()
 
     init() {
         _ = rules
+        _ = busyLight
 
         // ── Forward changes from nested ObservableObjects so App.body re-evaluates ──
         // This is what makes the dynamic menu bar icon and hideMenuBarIcon work.
@@ -72,6 +74,7 @@ final class AppState: ObservableObject {
             let view = PreferencesView()
                 .environmentObject(settings)
                 .environmentObject(audio)
+                .environmentObject(busyLight)
                 .environmentObject(self)
             let controller = NSHostingController(rootView: view)
             let win = NSWindow(contentViewController: controller)

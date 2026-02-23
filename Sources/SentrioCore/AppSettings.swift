@@ -123,6 +123,39 @@ final class AppSettings: ObservableObject {
         didSet { save("alertSound", alertSound) }
     }
 
+    // MARK: – BusyLight
+
+    @Published var busyLightEnabled: Bool {
+        didSet { defaults.set(busyLightEnabled, forKey: "busyLightEnabled") }
+    }
+
+    @Published var busyLightControlMode: BusyLightControlMode {
+        didSet { save("busyLightControlMode", busyLightControlMode) }
+    }
+
+    @Published var busyLightManualAction: BusyLightAction {
+        didSet { save("busyLightManualAction", busyLightManualAction) }
+    }
+
+    @Published var busyLightAPIEnabled: Bool {
+        didSet { defaults.set(busyLightAPIEnabled, forKey: "busyLightAPIEnabled") }
+    }
+
+    @Published var busyLightAPIPort: Int {
+        didSet {
+            let normalized = Self.normalizedBusyLightAPIPort(busyLightAPIPort)
+            if normalized != busyLightAPIPort {
+                busyLightAPIPort = normalized
+                return
+            }
+            defaults.set(normalized, forKey: "busyLightAPIPort")
+        }
+    }
+
+    @Published var busyLightRules: [BusyLightRule] {
+        didSet { save("busyLightRules", busyLightRules) }
+    }
+
     // MARK: – Storage
 
     private let defaults: UserDefaults
@@ -160,6 +193,15 @@ final class AppSettings: ObservableObject {
         knownDeviceBluetoothMinorTypes = defaults.jsonDecode([String: String].self, forKey: "knownDeviceBluetoothMinorTypes") ?? [:]
         testSound = defaults.jsonDecode(AppSound.self, forKey: "testSound") ?? .defaultTestSound
         alertSound = defaults.jsonDecode(AppSound.self, forKey: "alertSound") ?? .defaultAlertSound
+
+        busyLightEnabled = defaults.object(forKey: "busyLightEnabled") as? Bool ?? false
+        busyLightControlMode = defaults.string(forKey: "busyLightControlMode")
+            .flatMap(BusyLightControlMode.init(rawValue:)) ?? .auto
+        busyLightManualAction = defaults.jsonDecode(BusyLightAction.self, forKey: "busyLightManualAction") ?? .defaultBusy
+        busyLightAPIEnabled = defaults.object(forKey: "busyLightAPIEnabled") as? Bool ?? false
+        let storedBusyLightPort = defaults.object(forKey: "busyLightAPIPort") as? Int
+        busyLightAPIPort = Self.normalizedBusyLightAPIPort(storedBusyLightPort ?? 47833)
+        busyLightRules = defaults.jsonDecode([BusyLightRule].self, forKey: "busyLightRules") ?? BusyLightRule.defaultRules()
 
         // Property observers do not fire during init.
         L10n.overrideLocalization = appLanguage == "system" ? nil : appLanguage
@@ -415,6 +457,14 @@ final class AppSettings: ObservableObject {
 
         var testSound: AppSound?
         var alertSound: AppSound?
+
+        var busyLightEnabled: Bool?
+        var busyLightRulesEnabled: Bool?
+        var busyLightControlMode: BusyLightControlMode?
+        var busyLightManualAction: BusyLightAction?
+        var busyLightAPIEnabled: Bool?
+        var busyLightAPIPort: Int?
+        var busyLightRules: [BusyLightRule]?
     }
 
     enum ImportExportError: LocalizedError {
@@ -433,7 +483,7 @@ final class AppSettings: ObservableObject {
 
     func exportSettingsData() throws -> Data {
         let export = ExportedSettings(
-            schemaVersion: 1,
+            schemaVersion: 3,
             exportedAt: Date(),
             outputPriority: outputPriority,
             inputPriority: inputPriority,
@@ -453,7 +503,14 @@ final class AppSettings: ObservableObject {
             hideMenuBarIcon: hideMenuBarIcon,
             showInputLevelMeter: showInputLevelMeter,
             testSound: testSound,
-            alertSound: alertSound
+            alertSound: alertSound,
+            busyLightEnabled: busyLightEnabled,
+            busyLightRulesEnabled: busyLightControlMode == .auto,
+            busyLightControlMode: busyLightControlMode,
+            busyLightManualAction: busyLightManualAction,
+            busyLightAPIEnabled: busyLightAPIEnabled,
+            busyLightAPIPort: busyLightAPIPort,
+            busyLightRules: busyLightRules
         )
 
         let encoder = JSONEncoder()
@@ -483,7 +540,7 @@ final class AppSettings: ObservableObject {
             throw ImportExportError.invalidFile
         }
 
-        guard export.schemaVersion == 1 else {
+        guard export.schemaVersion == 1 || export.schemaVersion == 2 || export.schemaVersion == 3 else {
             throw ImportExportError.unsupportedSchema(export.schemaVersion)
         }
 
@@ -513,11 +570,26 @@ final class AppSettings: ObservableObject {
         showInputLevelMeter = export.showInputLevelMeter ?? true
         testSound = export.testSound ?? .defaultTestSound
         alertSound = export.alertSound ?? .defaultAlertSound
+
+        busyLightEnabled = export.busyLightEnabled ?? false
+        if let importedMode = export.busyLightControlMode {
+            busyLightControlMode = importedMode
+        } else {
+            busyLightControlMode = (export.busyLightRulesEnabled ?? true) ? .auto : .manual
+        }
+        busyLightManualAction = export.busyLightManualAction ?? .defaultBusy
+        busyLightAPIEnabled = export.busyLightAPIEnabled ?? false
+        busyLightAPIPort = Self.normalizedBusyLightAPIPort(export.busyLightAPIPort ?? 47833)
+        busyLightRules = export.busyLightRules ?? BusyLightRule.defaultRules()
     }
 
     private static func deduped(_ items: [String]) -> [String] {
         var seen = Set<String>()
         return items.filter { seen.insert($0).inserted }
+    }
+
+    private static func normalizedBusyLightAPIPort(_ port: Int) -> Int {
+        min(max(port, 1_024), 65_535)
     }
 
     // MARK: – Persistence

@@ -1,49 +1,90 @@
-# Repository Guidelines
+# AGENTS.md
 
-## Project Structure & Module Organization
+Working map for contributors and coding agents.
 
-This is a Swift Package Manager (SwiftPM) macOS menu bar app.
-
-- `Package.swift` — SwiftPM manifest (macOS 13+, Swift 5.9+)
-- `Sources/Sentrio/` — thin executable target (`main.swift`)
-- `Sources/SentrioCore/` — app logic (CoreAudio wrappers, rules engine, settings, SwiftUI views)
-- `Tests/SentrioTests/` — unit tests for `SentrioCore` (XCTest)
-- `.github/` — issue/PR templates and the release workflow
-- `build.sh` — assembles a distributable `build/Sentrio.app`
-
-Generated folders like `.build/` and `build/` should not be committed.
-
-## Build, Test, and Development Commands
+## Quick Start
 
 ```bash
-swift build                 # Debug build
-swift build && .build/debug/Sentrio   # Build + run from terminal
-swift test                  # Run XCTest suite
-./build.sh [VERSION]        # Build app bundle into ./build/ (VERSION optional)
-open Package.swift          # Open in Xcode (optional)
+swift build
+swift test
+bash scripts/check.sh
+bash scripts/format.sh
 ```
 
-## Coding Style & Naming Conventions
+## Repo Navigation
 
-- Keep `Sources/Sentrio/` minimal; put testable logic in `Sources/SentrioCore/`.
-- Match existing Swift conventions: 4-space indentation, `// MARK: –` section headers, minimal comments (explain *why*).
-- Prefer `let` and small types; use `final class` for shared state containers (`AppState`, managers).
-- Naming: types `UpperCamelCase`, members `lowerCamelCase`, tests `*Tests` with methods named `test_*`.
+- `Package.swift`  
+  SwiftPM manifest (`Sentrio` executable + `SentrioCore` library).
 
-Formatting is enforced with **SwiftFormat**.
+- `Sources/Sentrio/main.swift`  
+  App entrypoint (`SentrioApp.main()` only).
 
-- Format: `bash scripts/format.sh`
-- Lint + tests: `bash scripts/check.sh`
+- `Sources/SentrioCore/SentrioApp.swift`  
+  Menu bar scene, app delegate, reopen handling.
 
-## Testing Guidelines
+- `Sources/SentrioCore/AppState.swift`  
+  App composition root: `AppSettings`, `AudioManager`, `RulesEngine`, `BusyLightEngine`.
 
-- Framework: XCTest (`swift test`).
-- Add tests under `Tests/SentrioTests/` and target `SentrioCore`.
-- Keep tests deterministic (e.g., use `UserDefaults(suiteName:)` like `AppSettingsTests`).
+- `Sources/SentrioCore/AudioManager.swift`  
+  CoreAudio device discovery, defaults, volume, battery snapshots.
 
-## Commit & Pull Request Guidelines
+- `Sources/SentrioCore/RulesEngine.swift`  
+  Auto-switch logic for default audio devices.
 
-- Use the PR template in `.github/PULL_REQUEST_TEMPLATE.md` (summary, type, linked issue, testing checklist).
-- Commit messages follow `type: short summary` (e.g., `fix: …`, `feat: …`, `test: …`, `docs: …`), present tense.
-- Releases are created via **Actions → Release → Run workflow**; version tags are UTC timestamps (`YYYY.MM.DDDHHMM`).
-- Homebrew: the Release workflow updates the cask in `YunaBraska/homebrew-tap` (requires `HOMEBREW_TAP_TOKEN` secret).
+- `Sources/SentrioCore/BusyLightEngine.swift`  
+  BusyLight rule evaluation + output scheduling (solid/blink/pulse).
+
+- `Sources/SentrioCore/BusyLightUSBClient.swift`  
+  HID USB discovery + 64-byte report writes.
+
+- `Sources/SentrioCore/BusyLightSignalsMonitor.swift`  
+  Mic/camera/screen signals feeding BusyLight rules.
+
+- `Sources/SentrioCore/PreferencesView.swift` and `Sources/SentrioCore/BusyLightPreferencesView.swift`  
+  Settings UI.
+
+- `Tests/SentrioTests/`  
+  XCTest suite for `SentrioCore`.
+
+## Runtime Data Flow
+
+1. `main.swift` boots `SentrioApp`.
+2. `SentrioApp` owns a single `AppState`.
+3. `AppState` initializes `AudioManager`, `RulesEngine`, and `BusyLightEngine`.
+4. `BusyLightSignalsMonitor` publishes signal state.
+5. `BusyLightEngine` maps signal state + configured rules to a `BusyLightAction`.
+6. `BusyLightUSBClient` sends HID reports to all matched BusyLight devices.
+
+## BusyLight Troubleshooting
+
+- Check device detection first in Preferences > BusyLight > Devices.
+- Check live signal indicators in Preferences > BusyLight > Signals.
+- Validate rule order and enabled state in Preferences > BusyLight > Rules.
+- For lights that turn off by themselves in `solid` mode, use periodic keepalive writes (engine-level), not one-shot color sends.
+- If blink/pulse looks wrong, verify `periodMilliseconds` and rule transitions.
+
+## BusyLight Product Decisions (Current)
+
+- Preferences/API parity is required: anything changeable via REST must be visible/editable in Preferences, and vice versa.
+- Control semantics are fixed:
+  - rules enabled = `auto`
+  - rules disabled = `manual`
+- REST action paths that set light state must switch control to `manual`; `/v1/busylight/auto` returns to rules.
+- Logs are in-memory only, capped to the most recent 20 trigger events, and must include trigger origin (`REST`, rule name, startup, etc.).
+- Keepalive writes are operational noise and must not be logged as trigger events.
+- BusyLight tab visibility follows hardware presence: hide when no device, show on reconnect.
+- BusyLight API port input is integer-only UX in Preferences; normalize to valid range in settings.
+- Signal label uses **Alert sounds** (not guaranteed per-app media truth).
+
+## Style + Testing
+
+- Keep app wiring in `Sentrio`; keep logic in `SentrioCore`.
+- Swift style: 4 spaces, `UpperCamelCase` types, `lowerCamelCase` members.
+- Prefer deterministic tests and `UserDefaults(suiteName:)` for settings tests.
+- Do not commit generated output from `.build/` or `build/`.
+- Any new user-facing text requires localization updates across all supported `.lproj` files.
+
+## Release Notes
+
+- Commit format: `type: short summary` (`fix:`, `feat:`, `test:`, `docs:`).
+- Release tags use UTC timestamp format `YYYY.MM.DDDHHMM`.

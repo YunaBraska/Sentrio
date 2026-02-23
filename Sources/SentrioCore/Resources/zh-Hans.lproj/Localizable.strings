@@ -3,6 +3,7 @@
 "label.input" = "输入";
 "label.alert" = "提醒";
 "label.general" = "通用";
+"label.busyLight" = "Busy Light";
 "label.auto" = "自动";
 "label.volume" = "音量";
 "label.inputGain" = "输入增益";
@@ -30,12 +31,26 @@
 "action.viewSourceOnGitHub" = "在 GitHub 查看源码";
 "action.buyMeCoffee" = "☕  请我喝咖啡";
 "action.reportIssue" = "报告问题";
+"action.addRule" = "添加规则";
+"action.addCondition" = "添加条件";
+"action.removeCondition" = "移除条件";
+"action.preview" = "预览";
+"action.moveUp" = "上移";
+"action.moveDown" = "下移";
+"action.deleteRule" = "删除规则";
 
 /* 通用状态 */
 "status.connected" = "已连接";
 "status.disconnected" = "未连接";
+"status.on" = "开";
+"status.off" = "关";
 "status.exportedSettings" = "已导出设置。";
 "status.importedSettings" = "已导入设置。";
+
+/* 逻辑 */
+"logic.when" = "当";
+"logic.and" = "且";
+"logic.or" = "或";
 
 /* 错误格式 */
 "error.exportFailedFormat" = "导出失败：%@";
@@ -105,6 +120,31 @@
 "prefs.general.about.license" = "许可证";
 "prefs.general.about.licenseValue" = "MIT 开源";
 
+/* 偏好设置：Busy Light */
+"prefs.busylight.enable" = "启用 BusyLight";
+"prefs.busylight.enable.description" = "根据麦克风/摄像头/屏幕活动控制 Kuando/BusyLight USB 灯。";
+"prefs.busylight.devices" = "设备";
+"prefs.busylight.devices.none" = "未检测到 BusyLight USB 设备。";
+"prefs.busylight.signals" = "信号";
+"prefs.busylight.signals.description" = "检测到活动时会更新信号。";
+"prefs.busylight.rules" = "规则";
+"prefs.busylight.rules.empty" = "暂无规则。";
+"prefs.busylight.rule.new" = "新规则";
+"prefs.busylight.rule.enableHelp" = "启用/停用此规则";
+"prefs.busylight.rule.namePlaceholder" = "规则名称";
+"prefs.busylight.conditions" = "条件";
+"prefs.busylight.action" = "动作";
+"prefs.busylight.mode.off" = "关";
+"prefs.busylight.mode.solid" = "常亮";
+"prefs.busylight.mode.blink" = "闪烁";
+"prefs.busylight.mode.pulse" = "呼吸";
+"prefs.busylight.color" = "颜色";
+"prefs.busylight.speed" = "速度";
+"prefs.busylight.speedValueFormat" = "%d 毫秒";
+"prefs.busylight.signal.microphone" = "麦克风";
+"prefs.busylight.signal.camera" = "摄像头";
+"prefs.busylight.signal.screenRecording" = "屏幕录制";
+
 /* 窗口标题 */
 "prefs.window.title" = "Sentrio 偏好设置";
 
@@ -165,3 +205,33 @@
 "icon.virtual" = "虚拟";
 "icon.pciCpu" = "PCI / CPU";
 "icon.unknown" = "未知";
+
+"prefs.busylight.rules.enable" = "启用规则";
+
+"prefs.busylight.signal.music" = "提醒音";
+
+"prefs.busylight.manualAction" = "手动操作";
+
+"prefs.busylight.api" = "远程 API";
+
+"prefs.busylight.api.enable" = "启用本地 REST API";
+
+"prefs.busylight.api.port" = "端口";
+
+"prefs.busylight.api.status" = "服务器状态";
+
+"prefs.busylight.api.status.running" = "运行中";
+
+"prefs.busylight.api.status.stopped" = "已停止";
+
+"prefs.busylight.api.lastErrorFormat" = "最近的服务器错误：%@";
+
+"prefs.busylight.api.baseURLFormat" = "基础 URL：%@";
+
+"prefs.busylight.api.examples" = "示例路径：/busylight/auto, /busylight/red, /busylight/red/pulse, /busylight/red/pulse/234, /busylight/rules/off, /busylight/state";
+
+"prefs.busylight.logs" = "最近活动（最近 20 条）";
+
+"prefs.busylight.logs.empty" = "暂无触发事件。";
+
+"action.clearLog" = "清除日志";

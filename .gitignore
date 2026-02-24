@@ -1,7 +1,25 @@
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# SwiftPM / Xcode build outputs
 .build/
 build/
 .swiftpm/
 DerivedData/
+*.xcuserstate
 xcuserdata/
+
+# IDE/editor
 .idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs / temp
+*.log
+*.tmp
+*.temp

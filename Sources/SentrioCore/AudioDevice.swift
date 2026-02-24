@@ -6,7 +6,7 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
 
     public enum TransportType: String, Codable, CaseIterable {
         case builtIn, bluetooth, usb, airPlay, thunderbolt, hdmi, displayPort
-        case aggregate, virtual, pci, unknown
+        case aggregate, virtual, continuity, pci, unknown
 
         public var connectionSystemImage: String {
             switch self {
@@ -19,6 +19,7 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
             case .displayPort: "display"
             case .aggregate: "link"
             case .virtual: "waveform.path"
+            case .continuity: "iphone"
             case .pci: "cpu"
             case .unknown: "questionmark.circle"
             }
@@ -35,6 +36,7 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
             case .displayPort: L10n.tr("transport.displayPort")
             case .aggregate: L10n.tr("transport.aggregate")
             case .virtual: L10n.tr("transport.virtual")
+            case .continuity: L10n.tr("transport.continuity")
             case .pci: L10n.tr("transport.pci")
             case .unknown: L10n.tr("transport.unknown")
             }

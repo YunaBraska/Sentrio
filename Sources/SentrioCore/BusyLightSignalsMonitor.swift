@@ -6,6 +6,11 @@ import Foundation
 import MediaPlayer
 
 final class BusyLightSignalsMonitor: ObservableObject {
+    enum RuntimeMode {
+        case live
+        case isolated
+    }
+
     @Published private(set) var signals = BusyLightSignals(
         microphoneInUse: false,
         cameraInUse: false,
@@ -13,17 +18,30 @@ final class BusyLightSignalsMonitor: ObservableObject {
         musicPlaying: false
     )
 
-    private let microphone: BusyLightMicrophoneMonitor
-    private let camera: BusyLightCameraMonitor
-    private let screenRecording: BusyLightScreenRecordingMonitor
-    private let playback: BusyLightPlaybackMonitor
+    private let microphone: BusyLightMicrophoneMonitor?
+    private let camera: BusyLightCameraMonitor?
+    private let screenRecording: BusyLightScreenRecordingMonitor?
+    private let playback: BusyLightPlaybackMonitor?
     private var cancellables = Set<AnyCancellable>()
 
-    init(audio: AudioManager) {
-        microphone = BusyLightMicrophoneMonitor(audio: audio)
-        camera = BusyLightCameraMonitor()
-        screenRecording = BusyLightScreenRecordingMonitor()
-        playback = BusyLightPlaybackMonitor(audio: audio)
+    init(audio: AudioManager, mode: RuntimeMode = .live) {
+        guard mode == .live else {
+            microphone = nil
+            camera = nil
+            screenRecording = nil
+            playback = nil
+            return
+        }
+
+        let microphone = BusyLightMicrophoneMonitor(audio: audio)
+        let camera = BusyLightCameraMonitor()
+        let screenRecording = BusyLightScreenRecordingMonitor()
+        let playback = BusyLightPlaybackMonitor(audio: audio)
+
+        self.microphone = microphone
+        self.camera = camera
+        self.screenRecording = screenRecording
+        self.playback = playback
 
         microphone.$isMicrophoneInUse
             .combineLatest(camera.$isCameraInUse, screenRecording.$isScreenRecordingInUse)

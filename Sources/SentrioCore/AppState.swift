@@ -4,18 +4,30 @@ import SwiftUI
 
 @MainActor
 final class AppState: ObservableObject {
-    let settings = AppSettings()
-    let audio = AudioManager()
-    lazy var rules = RulesEngine(audio: audio, settings: settings)
-    lazy var busyLight = BusyLightEngine(audio: audio, settings: settings)
+    let settings: AppSettings
+    let audio: AudioManager
+    let rules: RulesEngine
+    let busyLight: BusyLightEngine
 
     private var preferencesWindow: NSWindow?
     private var cancellables = Set<AnyCancellable>()
 
-    init() {
-        _ = rules
-        _ = busyLight
-        BusyLightIntegrationBridge.shared.bind(engine: busyLight)
+    init(
+        settings: AppSettings = AppSettings(),
+        audio: AudioManager = AudioManager(),
+        rules: RulesEngine? = nil,
+        busyLight: BusyLightEngine? = nil,
+        bindIntegrationBridge: Bool = true
+    ) {
+        self.settings = settings
+        self.audio = audio
+        let resolvedRules = rules ?? RulesEngine(audio: audio, settings: settings)
+        self.rules = resolvedRules
+        let resolvedBusyLight = busyLight ?? BusyLightEngine(audio: audio, settings: settings)
+        self.busyLight = resolvedBusyLight
+        if bindIntegrationBridge {
+            BusyLightIntegrationBridge.shared.bind(engine: resolvedBusyLight)
+        }
 
         // ── Forward changes from nested ObservableObjects so App.body re-evaluates ──
         // This is what makes the dynamic menu bar icon and hideMenuBarIcon work.

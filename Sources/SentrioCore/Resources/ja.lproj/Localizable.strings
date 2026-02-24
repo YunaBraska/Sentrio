@@ -173,6 +173,7 @@
 "transport.displayPort" = "DisplayPort";
 "transport.aggregate" = "アグリゲート";
 "transport.virtual" = "仮想";
+"transport.continuity" = "Continuity";
 "transport.pci" = "PCI";
 "transport.unknown" = "不明";
 

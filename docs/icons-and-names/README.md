@@ -4,11 +4,14 @@
 
 You can customize device identity without changing hardware behavior.
 
+![Preferences - Output tab](../screenshots/generated/preferences_output.png)
+
 ## Custom icons
 
 - Right-click a device in the menu panel.
 - Choose a different icon.
 - Icon choice is stored per role (Output vs Input).
+- Hidden devices can also have custom icons.
 
 ## Custom names
 

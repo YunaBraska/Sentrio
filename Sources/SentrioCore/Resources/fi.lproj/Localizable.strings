@@ -173,6 +173,7 @@
 "transport.displayPort" = "DisplayPort";
 "transport.aggregate" = "Aggregaatti";
 "transport.virtual" = "Virtuaalinen";
+"transport.continuity" = "Continuity";
 "transport.pci" = "PCI";
 "transport.unknown" = "Tuntematon";
 

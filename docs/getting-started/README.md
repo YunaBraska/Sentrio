@@ -4,6 +4,11 @@
 
 Use this page if you want Sentrio working in a few minutes.
 
+## Quick visual guide
+
+![Menu bar panel](../screenshots/generated/bar_menu.png)
+![Preferences - Output tab](../screenshots/generated/preferences_output.png)
+
 ## 5 minute setup
 
 1. Install and open Sentrio.

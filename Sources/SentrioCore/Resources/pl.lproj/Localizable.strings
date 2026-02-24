@@ -173,6 +173,7 @@
 "transport.displayPort" = "DisplayPort";
 "transport.aggregate" = "Agregat";
 "transport.virtual" = "Wirtualne";
+"transport.continuity" = "Continuity";
 "transport.pci" = "PCI";
 "transport.unknown" = "Nieznane";
 

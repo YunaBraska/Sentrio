@@ -5,39 +5,42 @@ import UniformTypeIdentifiers
 // MARK: – Root
 
 struct PreferencesView: View {
-    private enum PreferencesTab: Hashable {
+    enum PreferencesTab: Hashable {
         case output
         case input
         case busyLight
         case general
     }
 
+    enum RenderMode {
+        case native
+        case screenshot
+    }
+
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var busyLight: BusyLightEngine
     @EnvironmentObject var appState: AppState
+    private let renderMode: RenderMode
     @State private var isWindowActive = false
-    @State private var selectedTab: PreferencesTab = .output
+    @State private var selectedTab: PreferencesTab
+
+    init(
+        renderMode: RenderMode = .native,
+        initialTab: PreferencesTab = .output
+    ) {
+        self.renderMode = renderMode
+        _selectedTab = State(initialValue: initialTab)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            TabView(selection: $selectedTab) {
-                PriorityTab(isOutput: true)
-                    .tabItem { Label(L10n.tr("label.output"), systemImage: "speaker.wave.2") }
-                    .tag(PreferencesTab.output)
-                PriorityTab(isOutput: false)
-                    .tabItem { Label(L10n.tr("label.input"), systemImage: "mic") }
-                    .tag(PreferencesTab.input)
-                if !busyLight.connectedDevices.isEmpty {
-                    BusyLightTab()
-                        .tabItem { Label(L10n.tr("label.busyLight"), systemImage: "lightbulb") }
-                        .tag(PreferencesTab.busyLight)
-                }
-                GeneralTab()
-                    .tabItem { Label(L10n.tr("label.general"), systemImage: "gear") }
-                    .tag(PreferencesTab.general)
+            switch renderMode {
+            case .native:
+                nativeTabContainer
+            case .screenshot:
+                screenshotTabContainer
             }
-            .padding()
 
             Divider()
             PreferencesFooterView()
@@ -52,12 +55,74 @@ struct PreferencesView: View {
         )
         .onChange(of: settings.showInputLevelMeter) { _ in updateInputLevelMonitoringDemand() }
         .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in
-            if isEmpty, selectedTab == .busyLight {
+            if renderMode == .native, isEmpty, selectedTab == .busyLight {
                 selectedTab = .output
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
+    }
+
+    private var hasBusyLightTab: Bool {
+        !busyLight.connectedDevices.isEmpty
+    }
+
+    private var nativeTabContainer: some View {
+        TabView(selection: $selectedTab) {
+            PriorityTab(isOutput: true)
+                .tabItem { Label(L10n.tr("label.output"), systemImage: "speaker.wave.2") }
+                .tag(PreferencesTab.output)
+            PriorityTab(isOutput: false)
+                .tabItem { Label(L10n.tr("label.input"), systemImage: "mic") }
+                .tag(PreferencesTab.input)
+            if hasBusyLightTab {
+                BusyLightTab()
+                    .tabItem { Label(L10n.tr("label.busyLight"), systemImage: "lightbulb") }
+                    .tag(PreferencesTab.busyLight)
+            }
+            GeneralTab()
+                .tabItem { Label(L10n.tr("label.general"), systemImage: "gear") }
+                .tag(PreferencesTab.general)
+        }
+        .padding()
+    }
+
+    private var screenshotTabContainer: some View {
+        VStack(spacing: 12) {
+            Picker("", selection: $selectedTab) {
+                Label(L10n.tr("label.output"), systemImage: "speaker.wave.2")
+                    .tag(PreferencesTab.output)
+                Label(L10n.tr("label.input"), systemImage: "mic")
+                    .tag(PreferencesTab.input)
+                Label(L10n.tr("label.busyLight"), systemImage: "lightbulb")
+                    .tag(PreferencesTab.busyLight)
+                Label(L10n.tr("label.general"), systemImage: "gear")
+                    .tag(PreferencesTab.general)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            activeTabContent
+        }
+        .padding()
+    }
+
+    @ViewBuilder
+    private var activeTabContent: some View {
+        switch selectedTab {
+        case .output:
+            PriorityTab(isOutput: true)
+        case .input:
+            PriorityTab(isOutput: false)
+        case .busyLight:
+            if hasBusyLightTab || renderMode == .screenshot {
+                BusyLightTab()
+            } else {
+                PriorityTab(isOutput: true)
+            }
+        case .general:
+            GeneralTab()
+        }
     }
 
     private func updateInputLevelMonitoringDemand() {

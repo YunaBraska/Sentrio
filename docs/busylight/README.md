@@ -4,6 +4,8 @@
 
 BusyLight controls a USB status light from app signals and rules.
 
+![Preferences - Busy Light tab](../screenshots/generated/preferences_busy_light.png)
+
 ## Setup
 
 1. Connect a supported BusyLight USB device.

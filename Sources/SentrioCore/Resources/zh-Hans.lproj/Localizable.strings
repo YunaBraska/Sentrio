@@ -173,6 +173,7 @@
 "transport.displayPort" = "DisplayPort";
 "transport.aggregate" = "聚合";
 "transport.virtual" = "虚拟";
+"transport.continuity" = "Continuity";
 "transport.pci" = "PCI";
 "transport.unknown" = "未知";
 

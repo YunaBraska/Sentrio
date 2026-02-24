@@ -9,6 +9,11 @@ extension Notification.Name {
 }
 
 final class AudioManager: ObservableObject {
+    enum RuntimeMode {
+        case live
+        case isolated
+    }
+
     // MARK: – Published
 
     @Published var inputDevices: [AudioDevice] = []
@@ -49,10 +54,15 @@ final class AudioManager: ObservableObject {
     private var unavailableUntilByUID: [String: Date] = [:]
     private let unavailableUntilByUIDLock = NSLock()
     private let unavailableCooldownSeconds: TimeInterval = 30
+    private let runtimeMode: RuntimeMode
+    private var isolatedVolumeByUIDAndRole: [String: [Bool: Float]] = [:]
 
     // MARK: – Init
 
-    init() {
+    init(mode: RuntimeMode = .live) {
+        runtimeMode = mode
+        guard mode == .live else { return }
+
         refreshDevices()
         addListeners()
         startPeriodicRefresh()
@@ -63,6 +73,10 @@ final class AudioManager: ObservableObject {
     // MARK: – Input level (microphone monitor)
 
     func setInputLevelMonitoringEnabled(_ enabled: Bool) {
+        guard runtimeMode == .live else {
+            inputLevel = 0
+            return
+        }
         guard enabled != isInputLevelMonitoringEnabled else { return }
         isInputLevelMonitoringEnabled = enabled
         if enabled {
@@ -85,6 +99,7 @@ final class AudioManager: ObservableObject {
     // MARK: – Device refresh
 
     func refreshDevices() {
+        guard runtimeMode == .live else { return }
         let all = fetchAllDevices() // includes battery from power sources
         let defaultIn = resolveDefaultID(input: true)
         let defaultOut = resolveDefaultID(input: false)
@@ -101,6 +116,7 @@ final class AudioManager: ObservableObject {
     }
 
     func refreshVolumes() {
+        guard runtimeMode == .live else { return }
         let out = defaultOutput
         let inp = defaultInput
         let currentOutVolume = outputVolume
@@ -135,6 +151,22 @@ final class AudioManager: ObservableObject {
         isInput: Bool,
         completion: ((Bool) -> Void)? = nil
     ) {
+        guard runtimeMode == .live else {
+            let applyUpdate = {
+                if isInput {
+                    self.defaultInput = device
+                } else {
+                    self.defaultOutput = device
+                }
+                completion?(true)
+            }
+            if Thread.isMainThread {
+                applyUpdate()
+            } else {
+                DispatchQueue.main.sync(execute: applyUpdate)
+            }
+            return
+        }
         coreAudioWorkQueue.async { [weak self] in
             guard let self else { return }
 
@@ -186,6 +218,12 @@ final class AudioManager: ObservableObject {
     // MARK: – Volume
 
     func volume(for device: AudioDevice, isOutput: Bool) -> Float? {
+        if runtimeMode == .isolated {
+            if let saved = isolatedVolumeByUIDAndRole[device.uid]?[isOutput] {
+                return saved
+            }
+            return isOutput ? outputVolume : inputVolume
+        }
         let scope: AudioObjectPropertyScope = isOutput
             ? kAudioObjectPropertyScopeOutput : kAudioObjectPropertyScopeInput
         for element: UInt32 in [kAudioObjectPropertyElementMain, 1, 2] {
@@ -203,6 +241,10 @@ final class AudioManager: ObservableObject {
     }
 
     func mute(for device: AudioDevice, isOutput: Bool) -> Bool? {
+        if runtimeMode == .isolated {
+            guard isOutput else { return nil }
+            return (isolatedVolumeByUIDAndRole[device.uid]?[true] ?? outputVolume) <= 0.001
+        }
         let scope: AudioObjectPropertyScope = isOutput
             ? kAudioObjectPropertyScopeOutput : kAudioObjectPropertyScopeInput
         for element: UInt32 in [kAudioObjectPropertyElementMain, 1, 2] {
@@ -220,6 +262,18 @@ final class AudioManager: ObservableObject {
     }
 
     func setVolume(_ volume: Float, for device: AudioDevice, isOutput: Bool) {
+        if runtimeMode == .isolated {
+            var entry = isolatedVolumeByUIDAndRole[device.uid] ?? [:]
+            entry[isOutput] = volume
+            isolatedVolumeByUIDAndRole[device.uid] = entry
+            if isOutput {
+                outputVolume = volume
+                isOutputMuted = volume <= 0.001
+            } else {
+                inputVolume = volume
+            }
+            return
+        }
         let scope: AudioObjectPropertyScope = isOutput
             ? kAudioObjectPropertyScopeOutput : kAudioObjectPropertyScopeInput
         var addr = AudioObjectPropertyAddress(
@@ -261,6 +315,7 @@ final class AudioManager: ObservableObject {
 
     func setAlertVolume(_ volume: Float) {
         alertVolume = volume
+        guard runtimeMode == .live else { return }
         let ud = UserDefaults(suiteName: "com.apple.systemsound")
         ud?.set(volume, forKey: "com.apple.sound.beep.volume")
         ud?.synchronize()
@@ -269,6 +324,7 @@ final class AudioManager: ObservableObject {
     // MARK: – Device activity
 
     func isDeviceActive(_ device: AudioDevice) -> Bool {
+        guard runtimeMode == .live else { return false }
         var addr = AudioObjectPropertyAddress(
             mSelector: kAudioDevicePropertyDeviceIsRunningSomewhere,
             mScope: kAudioObjectPropertyScopeGlobal,
@@ -298,6 +354,7 @@ final class AudioManager: ObservableObject {
     // MARK: – Periodic refresh (battery)
 
     private func startPeriodicRefresh() {
+        guard runtimeMode == .live else { return }
         // Batteries on Bluetooth devices can change while connected without
         // triggering a device-list change event, so a periodic refresh is needed.
         Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { [weak self] _ in
@@ -308,6 +365,10 @@ final class AudioManager: ObservableObject {
     // MARK: – Input level (AVAudioEngine)
 
     private func startInputLevelMonitor() {
+        guard runtimeMode == .live else {
+            inputLevel = 0
+            return
+        }
         stopInputLevelMonitor()
 
         switch AVCaptureDevice.authorizationStatus(for: .audio) {
@@ -394,7 +455,7 @@ final class AudioManager: ObservableObject {
             let name = stringProperty(id, kAudioDevicePropertyDeviceNameCFString)
         else { return nil }
 
-        let transport = fetchTransportType(id)
+        var transport = fetchTransportType(id)
 
         // Filter all aggregate devices — this removes macOS-internal auto-aggregates
         // (CADefaultDeviceAggregate-*, created and destroyed on every device change)
@@ -406,6 +467,16 @@ final class AudioManager: ObservableObject {
         guard hasIn || hasOut else { return nil }
 
         let modelUID = stringProperty(id, kAudioDevicePropertyModelUID)
+        if transport == .unknown,
+           Self.requiresManualConnection(
+               uid: uid,
+               name: name,
+               transportType: transport,
+               modelUID: modelUID
+           )
+        {
+            transport = .continuity
+        }
 
         let (iconBase, isAppleFromIconPath) = fetchIconInfo(id)
         var isAppleMade = isAppleFromIconPath
@@ -1035,6 +1106,7 @@ final class AudioManager: ObservableObject {
     // MARK: – Listeners
 
     private func addListeners() {
+        guard runtimeMode == .live else { return }
         let sys = AudioObjectID(kAudioObjectSystemObject)
         addListener(on: sys, selector: kAudioHardwarePropertyDevices) { [weak self] in
             self?.refreshDevicesAsync()
@@ -1082,6 +1154,9 @@ final class AudioManager: ObservableObject {
         transportType: AudioDevice.TransportType,
         modelUID: String?
     ) -> Bool {
+        if transportType == .continuity {
+            return true
+        }
         let model = modelUID?.lowercased() ?? ""
         if model.contains("iphone mic") || model.contains("continuity") {
             return true

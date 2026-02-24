@@ -9,6 +9,7 @@ swift build
 swift test
 bash scripts/check.sh
 bash scripts/format.sh
+bash scripts/generate-doc-screenshots.sh
 ```
 
 ## Repo Navigation
@@ -48,6 +49,9 @@ bash scripts/format.sh
 
 - `Tests/SentrioTests/`  
   XCTest suite for `SentrioCore`.
+
+- `scripts/generate-doc-screenshots.sh`  
+  On-demand documentation screenshots (menu + each Preferences tab), using isolated runtime test fixtures.
 
 ## Runtime Data Flow
 
@@ -90,8 +94,15 @@ bash scripts/format.sh
 ## Audio Product Decisions (Current)
 
 - Continuity/iPhone-style routes require explicit user-triggered connect (no background auto-connect while in auto mode).
+- Continuity/iPhone-style routes should be labeled as transport **Continuity** in UI (not Unknown).
 - If a manual Continuity connect attempt fails, immediately fall back to the next eligible priority device.
 - Menu bar priority badges should be contiguous across visible rows and must not expose gaps from hidden/grouped entries.
+
+## Documentation Screenshots
+
+- Screenshots are generated on demand only (no automatic CI workflow).
+- Generation must use isolated runtime mode (no live CoreAudio/HID/system state interaction).
+- Generated files live in `docs/screenshots/generated/` and should be used in markdown docs.
 
 ## Style + Testing
 

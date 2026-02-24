@@ -80,6 +80,17 @@ final class AudioManagerTests: XCTestCase {
         )
     }
 
+    func test_requiresManualConnection_whenTransportIsContinuity_returnsTrue() {
+        XCTAssertTrue(
+            AudioManager.requiresManualConnection(
+                uid: "8FD81C81-7471-4F4C-A9F3-3C0100000003",
+                name: "HellishSky iPhone",
+                transportType: .continuity,
+                modelUID: nil
+            )
+        )
+    }
+
     func test_looksLikeCoreAudioUUID_detectsUUIDShape() {
         XCTAssertTrue(AudioManager.looksLikeCoreAudioUUID("8FD81C81-7471-4F4C-A9F3-3C0100000003"))
         XCTAssertFalse(AudioManager.looksLikeCoreAudioUUID("BuiltInMicrophoneDevice"))

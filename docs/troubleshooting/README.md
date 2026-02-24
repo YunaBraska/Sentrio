@@ -8,8 +8,8 @@ Quick fixes for common issues.
 
 - Confirm **Auto** is enabled.
 - Check device priority order.
-- Ensure device is not disabled.
-- For Continuity/iPhone routes, use **Connect now** explicitly. These routes do not auto-connect in the background.
+- Ensure device is not hidden.
+- For Continuity/iPhone routes, use **Connect now** explicitly. These routes are shown as transport **Continuity** and do not auto-connect in the background.
 
 ## Device appears but does not win
 

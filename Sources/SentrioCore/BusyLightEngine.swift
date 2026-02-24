@@ -56,6 +56,11 @@ enum BusyLightExternalCommandError: Error {
 }
 
 final class BusyLightEngine: ObservableObject {
+    enum RuntimeMode {
+        case live
+        case isolated
+    }
+
     @Published private(set) var connectedDevices: [BusyLightUSBDevice] = []
     @Published private(set) var signals = BusyLightSignals(
         microphoneInUse: false,
@@ -71,6 +76,7 @@ final class BusyLightEngine: ObservableObject {
     private let settings: AppSettings
     private let usb: BusyLightUSBClient
     private let monitor: BusyLightSignalsMonitor
+    private let runtimeMode: RuntimeMode
 
     private lazy var restServer: BusyLightRESTServer = {
         let server = BusyLightRESTServer { [weak self] request in
@@ -120,10 +126,11 @@ final class BusyLightEngine: ObservableObject {
         BusyLightHelloFrame(color: .greenColor, duration: 0.12),
     ]
 
-    init(audio: AudioManager, settings: AppSettings) {
+    init(audio: AudioManager, settings: AppSettings, mode: RuntimeMode = .live) {
         self.settings = settings
-        usb = BusyLightUSBClient()
-        monitor = BusyLightSignalsMonitor(audio: audio)
+        runtimeMode = mode
+        usb = BusyLightUSBClient(mode: mode == .live ? .live : .isolated)
+        monitor = BusyLightSignalsMonitor(audio: audio, mode: mode == .live ? .live : .isolated)
 
         usb.$devices
             .receive(on: DispatchQueue.main)
@@ -167,13 +174,18 @@ final class BusyLightEngine: ObservableObject {
             .sink { [weak self] _ in self?.applyFromSettings(source: "Manual") }
             .store(in: &cancellables)
 
-        settings.$busyLightAPIEnabled
-            .combineLatest(settings.$busyLightAPIPort)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] enabled, port in
-                self?.configureRESTServer(enabled: enabled, port: port)
-            }
-            .store(in: &cancellables)
+        if runtimeMode == .live {
+            settings.$busyLightAPIEnabled
+                .combineLatest(settings.$busyLightAPIPort)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] enabled, port in
+                    self?.configureRESTServer(enabled: enabled, port: port)
+                }
+                .store(in: &cancellables)
+        } else {
+            apiServerRunning = false
+            apiServerError = nil
+        }
 
         applyIfNeeded(force: true, source: "Startup")
     }
@@ -204,6 +216,34 @@ final class BusyLightEngine: ObservableObject {
         connectHelloFrames
     }
 
+    func setSnapshotForTesting(
+        connectedDevices: [BusyLightUSBDevice]? = nil,
+        signals: BusyLightSignals? = nil,
+        currentAction: BusyLightAction? = nil,
+        recentEvents: [BusyLightEvent]? = nil,
+        apiServerRunning: Bool? = nil,
+        apiServerError: String? = nil
+    ) {
+        if let connectedDevices {
+            self.connectedDevices = connectedDevices
+        }
+        if let signals {
+            self.signals = signals
+        }
+        if let currentAction {
+            self.currentAction = currentAction
+        }
+        if let recentEvents {
+            self.recentEvents = recentEvents
+        }
+        if let apiServerRunning {
+            self.apiServerRunning = apiServerRunning
+        }
+        if let apiServerError {
+            self.apiServerError = apiServerError
+        }
+    }
+
     func shutdown() {
         finalizeRuleActivity(at: Date())
         cancelConnectHelloSequence()
@@ -212,7 +252,9 @@ final class BusyLightEngine: ObservableObject {
         previewOverride = nil
         stopAnimation()
         _ = usb.turnOff()
-        restServer.stop()
+        if runtimeMode == .live {
+            restServer.stop()
+        }
         apiServerRunning = false
         apiServerError = nil
     }

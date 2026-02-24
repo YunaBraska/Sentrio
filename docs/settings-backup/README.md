@@ -4,6 +4,8 @@
 
 Use this page for app-wide options and safe migration.
 
+![Preferences - General tab](../screenshots/generated/preferences_general.png)
+
 ## General settings
 
 - Auto-switching master toggle
@@ -23,9 +25,10 @@ Use **Import Settings...** to restore from a previous export.
 ## What backup includes
 
 - Output/Input priority lists
-- Disabled devices
+- Hidden devices
 - Custom names and icons
 - Volume memory
+- Group-by-model preferences
 - BusyLight settings and rules
 - BusyLight per-rule activity metrics (totals + rolling windows)
 

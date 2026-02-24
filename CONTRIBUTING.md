@@ -36,6 +36,9 @@ swift build
 # Run tests — always run before submitting a PR
 swift test
 
+# Regenerate docs screenshots (on demand)
+bash scripts/generate-doc-screenshots.sh
+
 # Build distributable .app
 ./build.sh
 ```
@@ -55,6 +58,7 @@ Requirements: macOS 13+, Swift 5.9+. No Xcode required (though it can be opened 
 3. **Follow existing code style** — SwiftUI/Swift conventions, `// MARK: –` section headers, minimal comments that explain *why* not *what*.
 4. **Keep PRs focused** — one logical change per PR makes review easier.
 5. **Update documentation** if your change affects user-facing behaviour (README, inline comments).
+   If screenshots are affected, regenerate with `bash scripts/generate-doc-screenshots.sh`.
 6. Open the PR against the `main` branch and fill in the PR template.
 
 ---

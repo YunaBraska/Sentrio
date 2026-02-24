@@ -58,6 +58,11 @@ final class AudioDeviceTests: XCTestCase {
         XCTAssertEqual(device.deviceTypeSystemImage, AudioDevice.TransportType.thunderbolt.connectionSystemImage)
     }
 
+    func test_continuityTransportHasIPhoneIconAndLabel() {
+        XCTAssertEqual(AudioDevice.TransportType.continuity.connectionSystemImage, "iphone")
+        XCTAssertEqual(AudioDevice.TransportType.continuity.label, L10n.tr("transport.continuity"))
+    }
+
     // MARK: – Device-type icon heuristic (name-based)
 
     func test_airPodsProIcon() {

@@ -4,6 +4,9 @@
 
 This guide explains how audio switching works.
 
+![Preferences - Output tab](../screenshots/generated/preferences_output.png)
+![Preferences - Input tab](../screenshots/generated/preferences_input.png)
+
 ## Core behavior
 
 - Sentrio checks each priority list from top to bottom.
@@ -15,15 +18,15 @@ This guide explains how audio switching works.
 
 - **Auto ON**: Sentrio controls default output/input.
 - **Auto OFF**: you select devices manually from the menu panel.
-- **Continuity routes (for example iPhone as mic/speaker)**: explicit **Connect now** user action is required before they can become active. If that connect attempt fails, Sentrio immediately tries the next eligible device by priority.
+- **Continuity routes (for example iPhone as mic/speaker)**: shown as transport **Continuity** and require explicit **Connect now** user action before they can become active. If that connect attempt fails, Sentrio immediately tries the next eligible device by priority.
 
 ## Common actions in Preferences
 
 | Action | Result |
 |---|---|
 | Drag a row up/down | Changes priority |
-| Disable device (`-`) | Excluded from auto-switch |
-| Enable disabled device | Returns device to active list |
+| Hide device | Excluded from auto-switch |
+| Enable hidden device | Returns device to active list |
 | Forget disconnected device (trash) | Removes stored metadata |
 
 ## Practical example

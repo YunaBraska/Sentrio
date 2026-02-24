@@ -21,12 +21,24 @@ struct BusyLightUSBSendResult: Codable, Equatable {
 }
 
 final class BusyLightUSBClient: ObservableObject {
+    enum RuntimeMode {
+        case live
+        case isolated
+    }
+
     @Published private(set) var devices: [BusyLightUSBDevice] = []
 
-    private let manager: IOHIDManager
+    private let manager: IOHIDManager?
+    private let runtimeMode: RuntimeMode
     private var hidDevices: [String: IOHIDDevice] = [:]
 
-    init() {
+    init(mode: RuntimeMode = .live) {
+        runtimeMode = mode
+        guard mode == .live else {
+            manager = nil
+            return
+        }
+
         manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
 
         let match: [[String: Any]] = [
@@ -35,10 +47,10 @@ final class BusyLightUSBClient: ObservableObject {
             // Older Microchip VID used by some models (seen in reference implementations)
             [kIOHIDVendorIDKey as String: 1240],
         ]
-        IOHIDManagerSetDeviceMatchingMultiple(manager, match as CFArray)
+        IOHIDManagerSetDeviceMatchingMultiple(manager!, match as CFArray)
 
         let ctx = Unmanaged.passUnretained(self).toOpaque()
-        IOHIDManagerRegisterDeviceMatchingCallback(manager, { context, _, _, device in
+        IOHIDManagerRegisterDeviceMatchingCallback(manager!, { context, _, _, device in
             guard let context else { return }
             let client = Unmanaged<BusyLightUSBClient>.fromOpaque(context).takeUnretainedValue()
             DispatchQueue.main.async {
@@ -46,7 +58,7 @@ final class BusyLightUSBClient: ObservableObject {
             }
         }, ctx)
 
-        IOHIDManagerRegisterDeviceRemovalCallback(manager, { context, _, _, device in
+        IOHIDManagerRegisterDeviceRemovalCallback(manager!, { context, _, _, device in
             guard let context else { return }
             let client = Unmanaged<BusyLightUSBClient>.fromOpaque(context).takeUnretainedValue()
             DispatchQueue.main.async {
@@ -54,14 +66,15 @@ final class BusyLightUSBClient: ObservableObject {
             }
         }, ctx)
 
-        IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
-        IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
+        IOHIDManagerScheduleWithRunLoop(manager!, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
+        IOHIDManagerOpen(manager!, IOOptionBits(kIOHIDOptionsTypeNone))
 
         // Seed devices list if already connected
         refreshDevicesFromManager()
     }
 
     deinit {
+        guard runtimeMode == .live, let manager else { return }
         IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
         IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
     }
@@ -79,6 +92,7 @@ final class BusyLightUSBClient: ObservableObject {
     // MARK: - Private
 
     private func refreshDevicesFromManager() {
+        guard let manager else { return }
         guard let set = IOHIDManagerCopyDevices(manager) as? Set<IOHIDDevice> else { return }
         for dev in set {
             addDevice(dev)

@@ -97,6 +97,17 @@ This ADR records non-negotiable guardrails for all future changes.
 - Persist metrics in settings and include them in import/export.
 - When a rule is deleted, delete its associated metrics.
 
+14. Documentation screenshot generation must be isolated and explicit.
+
+- Documentation screenshots must be generated on demand only (no always-on scheduled workflow).
+- Screenshot generation must not touch live CoreAudio/HID/system integrations.
+- Use isolated test fixtures and deterministic seeded data for docs images.
+
+15. Continuity transport labeling must be explicit.
+
+- Continuity/iPhone-style routes must be displayed as `Continuity` transport in UI.
+- `Unknown` transport should not be shown for detected Continuity routes.
+
 ## Consequences
 
 - Slightly more implementation overhead per feature, but fewer regressions.

@@ -13,7 +13,7 @@ A lightweight macOS menu bar app that keeps your audio routing and BusyLight beh
 ## What Sentrio does
 
 - Auto-switches output and input devices based on your priority order
-- Uses explicit manual connect for Continuity/iPhone routes; failed manual connects fall back to next eligible priority
+- Uses explicit manual connect for Continuity/iPhone routes (shown as `Continuity` transport); failed manual connects fall back to next eligible priority
 - Restores per-device Output, Input, and Alert volumes
 - Supports custom device names and icons
 - Shows battery info when macOS exposes it
@@ -48,8 +48,17 @@ open build/Sentrio.app
 
 ## Screenshots
 
-![Menu bar panel](docs/screenshots/bar_menu.png)
-![Preferences](docs/screenshots/preferences.png)
+![Menu bar panel](docs/screenshots/generated/bar_menu.png)
+![Preferences - Output](docs/screenshots/generated/preferences_output.png)
+![Preferences - Input](docs/screenshots/generated/preferences_input.png)
+![Preferences - Busy Light](docs/screenshots/generated/preferences_busy_light.png)
+![Preferences - General](docs/screenshots/generated/preferences_general.png)
+
+## Regenerate Screenshots
+
+```bash
+bash scripts/generate-doc-screenshots.sh
+```
 
 ## Contributing
 

@@ -301,6 +301,32 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(settings.outputPriority, [a, b, "X", "Y"])
     }
 
+    func test_reorderPriorityForDragMovesWholeGroupIncludingDisconnectedPeer() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:A:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:B:2,3"
+        let c = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:C:2,3"
+        settings.registerDevice(uid: a, name: "Shure A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure B", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: c, name: "Shure C", isOutput: true, transportType: .usb)
+        settings.outputPriority = [a, b, c, "X", "Y"]
+
+        settings.reorderPriorityForDrag(uid: b, over: "Y", isOutput: true)
+
+        XCTAssertEqual(settings.outputPriority, ["X", "Y", a, b, c])
+    }
+
+    func test_reorderPriorityForDragWithSourceAndTargetInSameGroupIsNoop() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:A:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:B:2,3"
+        settings.registerDevice(uid: a, name: "Shure A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure B", isOutput: true, transportType: .usb)
+        settings.outputPriority = [a, b, "X"]
+
+        settings.reorderPriorityForDrag(uid: a, over: b, isOutput: true)
+
+        XCTAssertEqual(settings.outputPriority, [a, b, "X"])
+    }
+
     func test_exportIncludesGroupByModelEnabledByGroup() throws {
         let uid = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
         settings.registerDevice(uid: uid, name: "Shure MV7+", isOutput: true, transportType: .usb)

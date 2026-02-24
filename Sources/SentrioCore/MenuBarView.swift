@@ -1,6 +1,22 @@
 import AppKit
 import SwiftUI
 
+private struct MenuReorderGestureState {
+    let sourceUID: String
+    var lastTranslation: CGFloat
+    var carryTranslation: CGFloat
+}
+
+enum MenuPriorityReorderPath {
+    static func targetUID(for sourceUID: String, direction: Int, orderedUIDs: [String]) -> String? {
+        guard direction == -1 || direction == 1 else { return nil }
+        guard let sourceIndex = orderedUIDs.firstIndex(of: sourceUID) else { return nil }
+        let targetIndex = sourceIndex + direction
+        guard orderedUIDs.indices.contains(targetIndex) else { return nil }
+        return orderedUIDs[targetIndex]
+    }
+}
+
 enum MenuPriorityRanker {
     static func rankMap(for visibleUIDs: [String]) -> [String: Int] {
         var ranks: [String: Int] = [:]
@@ -19,6 +35,8 @@ struct MenuBarView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var appState: AppState
+    @State private var outputDragState: MenuReorderGestureState?
+    @State private var inputDragState: MenuReorderGestureState?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -31,14 +49,18 @@ struct MenuBarView: View {
                               audio.outputDevices.filter { !settings.disabledOutputDevices.contains($0.uid) },
                               by: settings.outputPriority
                           ),
-                          defaultUID: audio.defaultOutput?.uid, isInput: false)
+                          defaultUID: audio.defaultOutput?.uid,
+                          isInput: false,
+                          gestureDragState: $outputDragState)
             Divider()
             deviceSection(title: L10n.tr("label.input"), systemImage: "mic",
                           devices: sorted(
                               audio.inputDevices.filter { !settings.disabledInputDevices.contains($0.uid) },
                               by: settings.inputPriority
                           ),
-                          defaultUID: audio.defaultInput?.uid, isInput: true)
+                          defaultUID: audio.defaultInput?.uid,
+                          isInput: true,
+                          gestureDragState: $inputDragState)
             Divider()
             footerRow
         }
@@ -109,7 +131,8 @@ struct MenuBarView: View {
 
     private func deviceSection(
         title: String, systemImage: String,
-        devices: [AudioDevice], defaultUID: String?, isInput: Bool
+        devices: [AudioDevice], defaultUID: String?, isInput: Bool,
+        gestureDragState: Binding<MenuReorderGestureState?>
     ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Label(title, systemImage: systemImage)
@@ -130,7 +153,47 @@ struct MenuBarView: View {
                         device: device,
                         isDefault: device.uid == defaultUID,
                         isInput: isInput,
-                        priorityRank: rankByUID[device.uid]
+                        priorityRank: rankByUID[device.uid],
+                        isGestureDragging: gestureDragState.wrappedValue?.sourceUID == device.uid,
+                        onGestureDragChanged: { sourceUID, translationHeight in
+                            if gestureDragState.wrappedValue?.sourceUID != sourceUID {
+                                gestureDragState.wrappedValue = MenuReorderGestureState(
+                                    sourceUID: sourceUID,
+                                    lastTranslation: 0,
+                                    carryTranslation: 0
+                                )
+                            }
+                            guard var state = gestureDragState.wrappedValue else { return }
+
+                            let delta = translationHeight - state.lastTranslation
+                            state.lastTranslation = translationHeight
+                            state.carryTranslation += delta
+
+                            let stepHeight: CGFloat = 28
+                            if abs(state.carryTranslation) >= stepHeight {
+                                let direction = state.carryTranslation > 0 ? 1 : -1
+                                if let targetUID = MenuPriorityReorderPath.targetUID(
+                                    for: sourceUID,
+                                    direction: direction,
+                                    orderedUIDs: devices.map(\.uid)
+                                ) {
+                                    withAnimation(.easeInOut(duration: 0.16)) {
+                                        settings.reorderPriorityForDrag(
+                                            uid: sourceUID,
+                                            over: targetUID,
+                                            isOutput: !isInput
+                                        )
+                                    }
+                                    state.carryTranslation -= CGFloat(direction) * stepHeight
+                                } else {
+                                    state.carryTranslation = 0
+                                }
+                            }
+                            gestureDragState.wrappedValue = state
+                        },
+                        onGestureDragEnded: {
+                            gestureDragState.wrappedValue = nil
+                        }
                     )
                 }
             }
@@ -222,6 +285,9 @@ private struct MenuDeviceRow: View {
     let isDefault: Bool
     let isInput: Bool
     let priorityRank: Int?
+    let isGestureDragging: Bool
+    let onGestureDragChanged: (String, CGFloat) -> Void
+    let onGestureDragEnded: () -> Void
 
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
@@ -254,62 +320,33 @@ private struct MenuDeviceRow: View {
     }
 
     var body: some View {
-        // ── Name row ────────────────────────────────────────────
-        Button {
-            guard !settings.isAutoMode || requiresManualConnect else { return }
-            appState.rules.switchTo(device, isInput: isInput)
-        } label: {
-            HStack(spacing: 10) {
-                // Device icon — volume-reactive for active output speaker icons
-                let baseIcon = settings.iconName(for: device, isOutput: !isInput)
-                let icon = (!isInput && isDefault)
-                    ? AudioDevice.volumeAdaptedIcon(
-                        baseIcon,
-                        volume: audio.outputVolume,
-                        isMuted: audio.isOutputMuted
-                    )
-                    : baseIcon
-                Image(systemName: icon)
-                    .font(.system(size: 15))
-                    .foregroundStyle(isDefault ? Color.accentColor : .secondary)
-                    .frame(width: 22)
+        HStack(spacing: 8) {
+            Image(systemName: "line.3.horizontal")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(.tertiary)
+                .frame(width: 16, height: 22)
+                .help(L10n.tr("prefs.dragToReorder"))
 
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(settings.displayName(
-                        for: device.uid,
-                        isOutput: !isInput,
-                        fallbackName: device.name
-                    ))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    HStack(spacing: 4) {
-                        Text(device.transportType.label)
-                            .font(.caption2).foregroundStyle(.tertiary)
-                        if requiresManualConnect {
-                            Label(L10n.tr("label.manualConnect"), systemImage: "hand.tap")
-                                .font(.caption2)
-                                .foregroundStyle(.orange)
-                        }
-                        if !device.batteryStates.isEmpty {
-                            BatteryIconsInlineView(states: device.batteryStates)
-                        }
-                    }
+            rowContent
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    guard !settings.isAutoMode || requiresManualConnect else { return }
+                    appState.rules.switchTo(device, isInput: isInput)
                 }
-
-                Spacer()
-
-                // Priority rank
-                if let rank = priorityRank {
-                    Text("#\(rank)").font(.caption2).foregroundStyle(.tertiary).frame(width: 22)
-                }
-            }
-            .contentShape(Rectangle())
-            .padding(.horizontal, 16)
-            .padding(.vertical, 4)
+                .help(settings.isAutoMode && !requiresManualConnect ? L10n.tr("menu.deviceRow.autoModeHelp") : "")
         }
-        .buttonStyle(.plain)
-        .background(isDefault ? Color.accentColor.opacity(0.08) : Color.clear)
-        .help(settings.isAutoMode && !requiresManualConnect ? L10n.tr("menu.deviceRow.autoModeHelp") : "")
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
+        .highPriorityGesture(
+            DragGesture(minimumDistance: 1)
+                .onChanged { value in
+                    onGestureDragChanged(device.uid, value.translation.height)
+                }
+                .onEnded { _ in
+                    onGestureDragEnded()
+                }
+        )
+        .background(rowBackground)
         .contextMenu {
             if requiresManualConnect {
                 Button(L10n.tr("action.connectNow")) { appState.rules.switchTo(device, isInput: isInput) }
@@ -340,6 +377,68 @@ private struct MenuDeviceRow: View {
                 Button(L10n.tr("action.bluetoothSettings")) { openBluetoothSettings() }
             }
         }
+    }
+
+    private var rowBackground: Color {
+        if isGestureDragging {
+            return Color.accentColor.opacity(0.06)
+        }
+        if isDefault {
+            return Color.accentColor.opacity(0.08)
+        }
+        return Color.clear
+    }
+
+    private var rowContent: some View {
+        HStack(spacing: 10) {
+            // Device icon — volume-reactive for active output speaker icons
+            let baseIcon = settings.iconName(for: device, isOutput: !isInput)
+            let icon = (!isInput && isDefault)
+                ? AudioDevice.volumeAdaptedIcon(
+                    baseIcon,
+                    volume: audio.outputVolume,
+                    isMuted: audio.isOutputMuted
+                )
+                : baseIcon
+            Image(systemName: icon)
+                .font(.system(size: 15))
+                .foregroundStyle(isDefault ? Color.accentColor : .secondary)
+                .frame(width: 22)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(settings.displayName(
+                    for: device.uid,
+                    isOutput: !isInput,
+                    fallbackName: device.name
+                ))
+                .lineLimit(1)
+                .truncationMode(.tail)
+
+                HStack(spacing: 4) {
+                    Text(device.transportType.label)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                    if requiresManualConnect {
+                        Label(L10n.tr("label.manualConnect"), systemImage: "hand.tap")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                    }
+                    if !device.batteryStates.isEmpty {
+                        BatteryIconsInlineView(states: device.batteryStates)
+                    }
+                }
+            }
+
+            Spacer()
+
+            if let rank = priorityRank {
+                Text("#\(rank)")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .frame(width: 22)
+            }
+        }
+        .contentShape(Rectangle())
     }
 
     private var isAirPodsFamily: Bool {

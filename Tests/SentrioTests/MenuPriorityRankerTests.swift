@@ -21,4 +21,52 @@ final class MenuPriorityRankerTests: XCTestCase {
     func test_rankMap_emptyInputProducesEmptyMap() {
         XCTAssertTrue(MenuPriorityRanker.rankMap(for: []).isEmpty)
     }
+
+    func test_reorderPath_returnsNextUIDWhenMovingDown() {
+        let uid = MenuPriorityReorderPath.targetUID(
+            for: "B",
+            direction: 1,
+            orderedUIDs: ["A", "B", "C", "D"]
+        )
+        XCTAssertEqual(uid, "C")
+    }
+
+    func test_reorderPath_returnsPreviousUIDWhenMovingUp() {
+        let uid = MenuPriorityReorderPath.targetUID(
+            for: "C",
+            direction: -1,
+            orderedUIDs: ["A", "B", "C", "D"]
+        )
+        XCTAssertEqual(uid, "B")
+    }
+
+    func test_reorderPath_returnsNilWhenSourceMissing() {
+        let uid = MenuPriorityReorderPath.targetUID(
+            for: "X",
+            direction: 1,
+            orderedUIDs: ["A", "B", "C"]
+        )
+        XCTAssertNil(uid)
+    }
+
+    func test_reorderPath_returnsNilAtBoundaries() {
+        XCTAssertNil(MenuPriorityReorderPath.targetUID(
+            for: "A",
+            direction: -1,
+            orderedUIDs: ["A", "B", "C"]
+        ))
+        XCTAssertNil(MenuPriorityReorderPath.targetUID(
+            for: "C",
+            direction: 1,
+            orderedUIDs: ["A", "B", "C"]
+        ))
+    }
+
+    func test_reorderPath_rejectsInvalidDirection() {
+        XCTAssertNil(MenuPriorityReorderPath.targetUID(
+            for: "B",
+            direction: 0,
+            orderedUIDs: ["A", "B", "C"]
+        ))
+    }
 }

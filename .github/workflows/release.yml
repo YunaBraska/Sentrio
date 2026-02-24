@@ -110,6 +110,7 @@ jobs:
             Automated build from ${{ github.sha }}.
 
             **Install:** download the zip, unzip, drag `Sentrio.app` to `/Applications`, then right-click → **Open** on first launch (not notarized).
+          generate_release_notes: true
           files: build/Sentrio-${{ steps.version.outputs.tag }}.zip
           draft: false
           prerelease: false

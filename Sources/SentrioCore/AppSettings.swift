@@ -6,11 +6,11 @@ final class AppSettings: ObservableObject {
     // MARK: – Priority lists (enabled devices, in order)
 
     @Published var outputPriority: [String] {
-        didSet { save("outputPriority", outputPriority) }
+        didSet { normalizeAndPersistPriority(isOutput: true) }
     }
 
     @Published var inputPriority: [String] {
-        didSet { save("inputPriority", inputPriority) }
+        didSet { normalizeAndPersistPriority(isOutput: false) }
     }
 
     // MARK: – Disabled device sets (not used as fallbacks)
@@ -21,6 +21,16 @@ final class AppSettings: ObservableObject {
 
     @Published var disabledInputDevices: Set<String> {
         didSet { save("disabledInputDevices", Array(disabledInputDevices)) }
+    }
+
+    // MARK: – Hidden-device restore anchors (uid → last known priority index)
+
+    @Published var hiddenOutputPriorityPositions: [String: Int] {
+        didSet { save("hiddenOutputPriorityPositions", hiddenOutputPriorityPositions) }
+    }
+
+    @Published var hiddenInputPriorityPositions: [String: Int] {
+        didSet { save("hiddenInputPriorityPositions", hiddenInputPriorityPositions) }
     }
 
     // MARK: – Volume memory   [uid: ["output": Float, "input": Float, "alert": Float]]
@@ -73,6 +83,12 @@ final class AppSettings: ObservableObject {
     /// Last-seen Bluetooth minor type from system_profiler (e.g. "Headphones", "Headset", "Phone").
     @Published var knownDeviceBluetoothMinorTypes: [String: String] {
         didSet { save("knownDeviceBluetoothMinorTypes", knownDeviceBluetoothMinorTypes) }
+    }
+
+    /// Model groups where "group by model" is explicitly disabled.
+    /// Missing key means enabled (default).
+    @Published var disabledModelGroupKeys: Set<String> {
+        didSet { save("disabledModelGroupKeys", Array(disabledModelGroupKeys).sorted()) }
     }
 
     // MARK: – General
@@ -159,6 +175,7 @@ final class AppSettings: ObservableObject {
     // MARK: – Storage
 
     private let defaults: UserDefaults
+    private var isNormalizingPriority = false
 
     // MARK: – Init (injectable for testing)
 
@@ -168,6 +185,8 @@ final class AppSettings: ObservableObject {
         inputPriority = defaults.jsonStringArray(forKey: "inputPriority") ?? []
         disabledOutputDevices = Set(defaults.jsonStringArray(forKey: "disabledOutputDevices") ?? [])
         disabledInputDevices = Set(defaults.jsonStringArray(forKey: "disabledInputDevices") ?? [])
+        hiddenOutputPriorityPositions = defaults.jsonDecode([String: Int].self, forKey: "hiddenOutputPriorityPositions") ?? [:]
+        hiddenInputPriorityPositions = defaults.jsonDecode([String: Int].self, forKey: "hiddenInputPriorityPositions") ?? [:]
 
         let storedLanguage = defaults.string(forKey: "appLanguage") ?? "system"
         if storedLanguage == "system" || L10n.supportedLocalizations.contains(storedLanguage) {
@@ -178,7 +197,7 @@ final class AppSettings: ObservableObject {
 
         isAutoMode = defaults.object(forKey: "isAutoMode") as? Bool ?? true
         hideMenuBarIcon = defaults.object(forKey: "hideMenuBarIcon") as? Bool ?? false
-        showInputLevelMeter = defaults.object(forKey: "showInputLevelMeter") as? Bool ?? true
+        showInputLevelMeter = defaults.object(forKey: "showInputLevelMeter") as? Bool ?? false
         autoSwitchCount = defaults.integer(forKey: "autoSwitchCount")
         millisecondsSaved = defaults.integer(forKey: "millisecondsSaved")
         signalIntegrityScore = defaults.integer(forKey: "signalIntegrityScore")
@@ -191,6 +210,7 @@ final class AppSettings: ObservableObject {
         knownDeviceIsAppleMade = defaults.jsonDecode([String: Bool].self, forKey: "knownDeviceIsAppleMade") ?? [:]
         knownDeviceModelUIDs = defaults.jsonDecode([String: String].self, forKey: "knownDeviceModelUIDs") ?? [:]
         knownDeviceBluetoothMinorTypes = defaults.jsonDecode([String: String].self, forKey: "knownDeviceBluetoothMinorTypes") ?? [:]
+        disabledModelGroupKeys = Set(defaults.jsonStringArray(forKey: "disabledModelGroupKeys") ?? [])
         testSound = defaults.jsonDecode(AppSound.self, forKey: "testSound") ?? .defaultTestSound
         alertSound = defaults.jsonDecode(AppSound.self, forKey: "alertSound") ?? .defaultAlertSound
 
@@ -202,6 +222,8 @@ final class AppSettings: ObservableObject {
         let storedBusyLightPort = defaults.object(forKey: "busyLightAPIPort") as? Int
         busyLightAPIPort = Self.normalizedBusyLightAPIPort(storedBusyLightPort ?? 47833)
         busyLightRules = defaults.jsonDecode([BusyLightRule].self, forKey: "busyLightRules") ?? BusyLightRule.defaultRules()
+        outputPriority = normalizePriorityList(outputPriority)
+        inputPriority = normalizePriorityList(inputPriority)
 
         // Property observers do not fire during init.
         L10n.overrideLocalization = appLanguage == "system" ? nil : appLanguage
@@ -283,9 +305,20 @@ final class AppSettings: ObservableObject {
     // MARK: – Custom device names
 
     /// The display name for a device in a given role.
-    /// Priority: custom role name → known device name → UID.
-    func displayName(for uid: String, isOutput: Bool) -> String {
-        customDeviceNames[uid]?[isOutput ? "output" : "input"] ?? knownDevices[uid] ?? uid
+    /// Priority: custom role name → known device name → provided fallback → inferred UID name → UID.
+    func displayName(for uid: String, isOutput: Bool, fallbackName: String? = nil) -> String {
+        if let custom = customDeviceNames[uid]?[isOutput ? "output" : "input"] {
+            return custom
+        }
+        if let known = knownDevices[uid] {
+            return known
+        }
+        if let fallback = fallbackName?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !fallback.isEmpty
+        {
+            return fallback
+        }
+        return Self.inferredDisplayName(fromUID: uid) ?? uid
     }
 
     /// Sets a custom display name for a device in a given role.
@@ -340,14 +373,57 @@ final class AppSettings: ObservableObject {
     }
 
     func setIcon(_ symbol: String, for uid: String, isOutput: Bool) {
-        var entry = deviceIcons[uid] ?? [:]
-        entry[isOutput ? "output" : "input"] = symbol
-        deviceIcons[uid] = entry
+        let key = isOutput ? "output" : "input"
+        for target in groupedActionUIDs(for: uid) {
+            var entry = deviceIcons[target] ?? [:]
+            entry[key] = symbol
+            deviceIcons[target] = entry
+        }
     }
 
     func clearIcon(for uid: String, isOutput: Bool) {
-        deviceIcons[uid]?[isOutput ? "output" : "input"] = nil
-        if deviceIcons[uid]?.isEmpty == true { deviceIcons.removeValue(forKey: uid) }
+        let key = isOutput ? "output" : "input"
+        for target in groupedActionUIDs(for: uid) {
+            deviceIcons[target]?[key] = nil
+            if deviceIcons[target]?.isEmpty == true { deviceIcons.removeValue(forKey: target) }
+        }
+    }
+
+    /// Reorders priority by moving the source device (or source group block)
+    /// before the target device (or target group block).
+    func movePriority(uid sourceUID: String, before targetUID: String, isOutput: Bool) {
+        let list = isOutput ? outputPriority : inputPriority
+        let reordered = Self.reorderedPriorityList(
+            list,
+            sourceUID: sourceUID,
+            targetUID: targetUID,
+            groupKeyForUID: { [weak self] uid in
+                guard let self, isGroupByModelEnabled(for: uid) else { return nil }
+                return modelGroupKey(for: uid)
+            }
+        )
+        guard reordered != list else { return }
+        if isOutput { outputPriority = reordered }
+        else { inputPriority = reordered }
+    }
+
+    /// Reorders priority while dragging.
+    /// If dragging downward, the source block is inserted after the target block.
+    /// If dragging upward, the source block is inserted before the target block.
+    func reorderPriorityForDrag(uid sourceUID: String, over targetUID: String, isOutput: Bool) {
+        let list = isOutput ? outputPriority : inputPriority
+        let reordered = Self.reorderedPriorityListForDrag(
+            list,
+            sourceUID: sourceUID,
+            targetUID: targetUID,
+            groupKeyForUID: { [weak self] uid in
+                guard let self, isGroupByModelEnabled(for: uid) else { return nil }
+                return modelGroupKey(for: uid)
+            }
+        )
+        guard reordered != list else { return }
+        if isOutput { outputPriority = reordered }
+        else { inputPriority = reordered }
     }
 
     // MARK: – Priority management
@@ -369,6 +445,7 @@ final class AppSettings: ObservableObject {
         if let modelUID { knownDeviceModelUIDs[uid] = modelUID }
         if let isAppleMade { knownDeviceIsAppleMade[uid] = isAppleMade }
         if let bluetoothMinorType { knownDeviceBluetoothMinorTypes[uid] = bluetoothMinorType }
+        synchronizeGroupIcons(for: uid)
 
         let disabled = isOutput ? disabledOutputDevices : disabledInputDevices
         guard !disabled.contains(uid) else { return }
@@ -379,22 +456,33 @@ final class AppSettings: ObservableObject {
     }
 
     func disableDevice(uid: String, isOutput: Bool) {
-        if isOutput {
-            outputPriority.removeAll { $0 == uid }
-            disabledOutputDevices.insert(uid)
-        } else {
-            inputPriority.removeAll { $0 == uid }
-            disabledInputDevices.insert(uid)
+        hideSingleDevice(uid: uid, isOutput: isOutput)
+    }
+
+    /// Hide device from auto-switching. When model grouping is enabled for this UID,
+    /// hide applies to every device in that group across input and output roles.
+    func hideDevice(uid: String, isOutput: Bool) {
+        let targets = groupedActionUIDs(for: uid)
+        if targets.count <= 1 {
+            hideSingleDevice(uid: uid, isOutput: isOutput)
+            return
+        }
+        for target in targets {
+            hideSingleDevice(uid: target, isOutput: true)
+            hideSingleDevice(uid: target, isOutput: false)
         }
     }
 
     /// Permanently removes a device from all lists, known devices, and memory.
     /// It will reappear automatically if it reconnects (registered fresh).
     func deleteDevice(uid: String) {
+        let groupKey = modelGroupKey(for: uid)
         outputPriority.removeAll { $0 == uid }
         inputPriority.removeAll { $0 == uid }
         disabledOutputDevices.remove(uid)
         disabledInputDevices.remove(uid)
+        hiddenOutputPriorityPositions.removeValue(forKey: uid)
+        hiddenInputPriorityPositions.removeValue(forKey: uid)
         knownDevices.removeValue(forKey: uid)
         knownDeviceTransportTypes.removeValue(forKey: uid)
         knownDeviceIconBaseNames.removeValue(forKey: uid)
@@ -404,15 +492,142 @@ final class AppSettings: ObservableObject {
         volumeMemory.removeValue(forKey: uid)
         deviceIcons.removeValue(forKey: uid)
         customDeviceNames.removeValue(forKey: uid)
+        if let groupKey,
+           !knownDevices.keys.contains(where: { modelGroupKey(for: $0) == groupKey })
+        {
+            disabledModelGroupKeys.remove(groupKey)
+        }
     }
 
     func enableDevice(uid: String, isOutput: Bool) {
         if isOutput {
             disabledOutputDevices.remove(uid)
-            if !outputPriority.contains(uid) { outputPriority.append(uid) }
+            insertWithStoredPriority(uid: uid, isOutput: true)
         } else {
             disabledInputDevices.remove(uid)
-            if !inputPriority.contains(uid) { inputPriority.append(uid) }
+            insertWithStoredPriority(uid: uid, isOutput: false)
+        }
+    }
+
+    /// Permanently removes disconnected devices. When grouping is active, removal applies
+    /// to all disconnected members of that model group.
+    func forgetDevice(uid: String, connectedUIDs: Set<String>) {
+        for target in forgettableUIDs(for: uid, connectedUIDs: connectedUIDs) {
+            deleteDevice(uid: target)
+        }
+    }
+
+    func forgettableUIDs(for uid: String, connectedUIDs: Set<String>) -> [String] {
+        groupedActionUIDs(for: uid).filter { !connectedUIDs.contains($0) }
+    }
+
+    func canForgetDevice(uid: String, connectedUIDs: Set<String>) -> Bool {
+        !forgettableUIDs(for: uid, connectedUIDs: connectedUIDs).isEmpty
+    }
+
+    /// Default is enabled when a model key can be derived.
+    func isGroupByModelEnabled(for uid: String) -> Bool {
+        guard let key = modelGroupKey(for: uid) else { return false }
+        return !disabledModelGroupKeys.contains(key)
+    }
+
+    func setGroupByModelEnabled(_ enabled: Bool, for uid: String) {
+        guard let key = modelGroupKey(for: uid) else { return }
+        if enabled {
+            disabledModelGroupKeys.remove(key)
+            synchronizeGroupIcons(for: uid)
+        } else {
+            disabledModelGroupKeys.insert(key)
+        }
+        normalizeAllPriorities()
+    }
+
+    /// Number of known devices that belong to the same model group as `uid`.
+    /// Returns at least 1 when a model group key is available.
+    func groupByModelDeviceCount(for uid: String) -> Int {
+        guard let key = modelGroupKey(for: uid) else { return 0 }
+        var members = Set(knownDevices.keys.filter { modelGroupKey(for: $0) == key })
+        members.insert(uid)
+        return members.count
+    }
+
+    func modelGroupKey(for uid: String) -> String? {
+        if let transport = knownDeviceTransportTypes[uid], transport != .usb {
+            return nil
+        }
+        if let key = Self.usbVendorProductGroupKey(fromUID: uid) { return key }
+        guard let modelUID = knownDeviceModelUIDs[uid],
+              let key = Self.usbVendorProductGroupKey(fromModelUID: modelUID)
+        else { return nil }
+        return key
+    }
+
+    private func groupedActionUIDs(for uid: String) -> [String] {
+        guard isGroupByModelEnabled(for: uid), let key = modelGroupKey(for: uid) else { return [uid] }
+        var targets = Set(knownDevices.keys.filter {
+            modelGroupKey(for: $0) == key && isGroupByModelEnabled(for: $0)
+        })
+        targets.insert(uid)
+        if targets.count <= 1 { return [uid] }
+        return orderedUIDs(from: targets)
+    }
+
+    private func orderedUIDs(from uids: Set<String>) -> [String] {
+        var seen = Set<String>()
+        var ordered: [String] = []
+        for uid in outputPriority + inputPriority {
+            guard uids.contains(uid), seen.insert(uid).inserted else { continue }
+            ordered.append(uid)
+        }
+        for uid in knownDevices.keys.sorted() {
+            guard uids.contains(uid), seen.insert(uid).inserted else { continue }
+            ordered.append(uid)
+        }
+        return ordered
+    }
+
+    private func synchronizeGroupIcons(for uid: String) {
+        let members = groupedActionUIDs(for: uid)
+        guard members.count > 1 else { return }
+
+        for key in ["output", "input"] {
+            guard let symbol = members.compactMap({ deviceIcons[$0]?[key] }).first else { continue }
+            for member in members {
+                var entry = deviceIcons[member] ?? [:]
+                guard entry[key] != symbol else { continue }
+                entry[key] = symbol
+                deviceIcons[member] = entry
+            }
+        }
+    }
+
+    private func hideSingleDevice(uid: String, isOutput: Bool) {
+        if isOutput {
+            if let index = outputPriority.firstIndex(of: uid) {
+                hiddenOutputPriorityPositions[uid] = index
+            }
+            outputPriority.removeAll { $0 == uid }
+            disabledOutputDevices.insert(uid)
+        } else {
+            if let index = inputPriority.firstIndex(of: uid) {
+                hiddenInputPriorityPositions[uid] = index
+            }
+            inputPriority.removeAll { $0 == uid }
+            disabledInputDevices.insert(uid)
+        }
+    }
+
+    private func insertWithStoredPriority(uid: String, isOutput: Bool) {
+        if isOutput {
+            guard !outputPriority.contains(uid) else { return }
+            let target = min(max(hiddenOutputPriorityPositions[uid] ?? outputPriority.count, 0), outputPriority.count)
+            outputPriority.insert(uid, at: target)
+            hiddenOutputPriorityPositions.removeValue(forKey: uid)
+        } else {
+            guard !inputPriority.contains(uid) else { return }
+            let target = min(max(hiddenInputPriorityPositions[uid] ?? inputPriority.count, 0), inputPriority.count)
+            inputPriority.insert(uid, at: target)
+            hiddenInputPriorityPositions.removeValue(forKey: uid)
         }
     }
 
@@ -437,8 +652,12 @@ final class AppSettings: ObservableObject {
 
         var outputPriority: [String]
         var inputPriority: [String]
-        var disabledOutputDevices: [String]
-        var disabledInputDevices: [String]
+        var hiddenOutputDevices: [String]?
+        var hiddenInputDevices: [String]?
+        var disabledOutputDevices: [String]?
+        var disabledInputDevices: [String]?
+        var hiddenOutputPriorityPositions: [String: Int]?
+        var hiddenInputPriorityPositions: [String: Int]?
 
         var volumeMemory: [String: [String: Float]]
         var customDeviceNames: [String: [String: String]]
@@ -449,6 +668,8 @@ final class AppSettings: ObservableObject {
         var knownDeviceIsAppleMade: [String: Bool]?
         var knownDeviceModelUIDs: [String: String]?
         var knownDeviceBluetoothMinorTypes: [String: String]?
+        var disabledModelGroupKeys: [String]?
+        var groupByModelEnabledByGroup: [String: Bool]?
 
         var appLanguage: String?
         var isAutoMode: Bool
@@ -483,12 +704,16 @@ final class AppSettings: ObservableObject {
 
     func exportSettingsData() throws -> Data {
         let export = ExportedSettings(
-            schemaVersion: 3,
+            schemaVersion: 5,
             exportedAt: Date(),
             outputPriority: outputPriority,
             inputPriority: inputPriority,
-            disabledOutputDevices: Array(disabledOutputDevices).sorted(),
-            disabledInputDevices: Array(disabledInputDevices).sorted(),
+            hiddenOutputDevices: Array(disabledOutputDevices).sorted(),
+            hiddenInputDevices: Array(disabledInputDevices).sorted(),
+            disabledOutputDevices: nil,
+            disabledInputDevices: nil,
+            hiddenOutputPriorityPositions: hiddenOutputPriorityPositions,
+            hiddenInputPriorityPositions: hiddenInputPriorityPositions,
             volumeMemory: volumeMemory,
             customDeviceNames: customDeviceNames,
             deviceIcons: deviceIcons,
@@ -498,6 +723,8 @@ final class AppSettings: ObservableObject {
             knownDeviceIsAppleMade: knownDeviceIsAppleMade,
             knownDeviceModelUIDs: knownDeviceModelUIDs,
             knownDeviceBluetoothMinorTypes: knownDeviceBluetoothMinorTypes,
+            disabledModelGroupKeys: Array(disabledModelGroupKeys).sorted(),
+            groupByModelEnabledByGroup: exportGroupByModelEnabledByGroup(),
             appLanguage: appLanguage,
             isAutoMode: isAutoMode,
             hideMenuBarIcon: hideMenuBarIcon,
@@ -540,14 +767,18 @@ final class AppSettings: ObservableObject {
             throw ImportExportError.invalidFile
         }
 
-        guard export.schemaVersion == 1 || export.schemaVersion == 2 || export.schemaVersion == 3 else {
+        guard (1 ... 5).contains(export.schemaVersion) else {
             throw ImportExportError.unsupportedSchema(export.schemaVersion)
         }
 
         outputPriority = Self.deduped(export.outputPriority)
         inputPriority = Self.deduped(export.inputPriority)
-        disabledOutputDevices = Set(export.disabledOutputDevices)
-        disabledInputDevices = Set(export.disabledInputDevices)
+        let importedHiddenOutputDevices = export.hiddenOutputDevices ?? export.disabledOutputDevices ?? []
+        let importedHiddenInputDevices = export.hiddenInputDevices ?? export.disabledInputDevices ?? []
+        disabledOutputDevices = Set(importedHiddenOutputDevices)
+        disabledInputDevices = Set(importedHiddenInputDevices)
+        hiddenOutputPriorityPositions = export.hiddenOutputPriorityPositions ?? [:]
+        hiddenInputPriorityPositions = export.hiddenInputPriorityPositions ?? [:]
         volumeMemory = export.volumeMemory
         customDeviceNames = export.customDeviceNames
         deviceIcons = export.deviceIcons
@@ -557,6 +788,17 @@ final class AppSettings: ObservableObject {
         knownDeviceIsAppleMade = export.knownDeviceIsAppleMade ?? [:]
         knownDeviceModelUIDs = export.knownDeviceModelUIDs ?? [:]
         knownDeviceBluetoothMinorTypes = export.knownDeviceBluetoothMinorTypes ?? [:]
+        var importedDisabledModelGroupKeys = Set(export.disabledModelGroupKeys ?? [])
+        if let explicitGroupMap = export.groupByModelEnabledByGroup {
+            for (key, isEnabled) in explicitGroupMap {
+                if isEnabled {
+                    importedDisabledModelGroupKeys.remove(key)
+                } else {
+                    importedDisabledModelGroupKeys.insert(key)
+                }
+            }
+        }
+        disabledModelGroupKeys = importedDisabledModelGroupKeys
 
         let importedLanguage = export.appLanguage ?? "system"
         if importedLanguage == "system" || L10n.supportedLocalizations.contains(importedLanguage) {
@@ -567,7 +809,7 @@ final class AppSettings: ObservableObject {
 
         isAutoMode = export.isAutoMode
         hideMenuBarIcon = export.hideMenuBarIcon
-        showInputLevelMeter = export.showInputLevelMeter ?? true
+        showInputLevelMeter = export.showInputLevelMeter ?? false
         testSound = export.testSound ?? .defaultTestSound
         alertSound = export.alertSound ?? .defaultAlertSound
 
@@ -581,6 +823,164 @@ final class AppSettings: ObservableObject {
         busyLightAPIEnabled = export.busyLightAPIEnabled ?? false
         busyLightAPIPort = Self.normalizedBusyLightAPIPort(export.busyLightAPIPort ?? 47833)
         busyLightRules = export.busyLightRules ?? BusyLightRule.defaultRules()
+        outputPriority = normalizePriorityList(outputPriority)
+        inputPriority = normalizePriorityList(inputPriority)
+    }
+
+    private func normalizeAndPersistPriority(isOutput: Bool) {
+        if isNormalizingPriority {
+            save(isOutput ? "outputPriority" : "inputPriority", isOutput ? outputPriority : inputPriority)
+            return
+        }
+        let current = isOutput ? outputPriority : inputPriority
+        let normalized = normalizePriorityList(current)
+        if normalized != current {
+            isNormalizingPriority = true
+            if isOutput { outputPriority = normalized }
+            else { inputPriority = normalized }
+            isNormalizingPriority = false
+            return
+        }
+        save(isOutput ? "outputPriority" : "inputPriority", current)
+    }
+
+    private func normalizeAllPriorities() {
+        let normalizedOutput = normalizePriorityList(outputPriority)
+        let normalizedInput = normalizePriorityList(inputPriority)
+        guard normalizedOutput != outputPriority || normalizedInput != inputPriority else { return }
+        isNormalizingPriority = true
+        outputPriority = normalizedOutput
+        inputPriority = normalizedInput
+        isNormalizingPriority = false
+    }
+
+    private func normalizePriorityList(_ items: [String]) -> [String] {
+        let deduped = Self.deduped(items)
+        var result: [String] = []
+        var consumed = Set<String>()
+
+        for uid in deduped {
+            guard consumed.insert(uid).inserted else { continue }
+            guard isGroupByModelEnabled(for: uid), let groupKey = modelGroupKey(for: uid) else {
+                result.append(uid)
+                continue
+            }
+            let members = deduped.filter {
+                !consumed.contains($0) &&
+                    isGroupByModelEnabled(for: $0) &&
+                    modelGroupKey(for: $0) == groupKey
+            }
+            result.append(uid)
+            for member in members {
+                consumed.insert(member)
+                result.append(member)
+            }
+        }
+        return result
+    }
+
+    private static func reorderedPriorityList(
+        _ list: [String],
+        sourceUID: String,
+        targetUID: String,
+        groupKeyForUID: (String) -> String?
+    ) -> [String] {
+        guard sourceUID != targetUID else { return list }
+        guard list.contains(sourceUID), list.contains(targetUID) else { return list }
+
+        let sourceBlock = block(for: sourceUID, in: list, groupKeyForUID: groupKeyForUID)
+        let targetBlock = block(for: targetUID, in: list, groupKeyForUID: groupKeyForUID)
+        guard !sourceBlock.isEmpty, !targetBlock.isEmpty else { return list }
+        guard Set(sourceBlock) != Set(targetBlock) else { return list }
+
+        let sourceSet = Set(sourceBlock)
+        var withoutSource = list.filter { !sourceSet.contains($0) }
+        guard let targetHead = targetBlock.first,
+              let targetInsertIndex = withoutSource.firstIndex(of: targetHead)
+        else { return list }
+
+        withoutSource.insert(contentsOf: sourceBlock, at: targetInsertIndex)
+        return withoutSource
+    }
+
+    private static func reorderedPriorityListForDrag(
+        _ list: [String],
+        sourceUID: String,
+        targetUID: String,
+        groupKeyForUID: (String) -> String?
+    ) -> [String] {
+        guard sourceUID != targetUID else { return list }
+        guard list.contains(sourceUID), list.contains(targetUID) else { return list }
+
+        let sourceBlock = block(for: sourceUID, in: list, groupKeyForUID: groupKeyForUID)
+        let targetBlock = block(for: targetUID, in: list, groupKeyForUID: groupKeyForUID)
+        guard !sourceBlock.isEmpty, !targetBlock.isEmpty else { return list }
+        guard Set(sourceBlock) != Set(targetBlock) else { return list }
+
+        guard let sourceHead = sourceBlock.first,
+              let targetHead = targetBlock.first,
+              let sourceHeadIndex = list.firstIndex(of: sourceHead),
+              let targetHeadIndex = list.firstIndex(of: targetHead)
+        else { return list }
+
+        let movingDown = sourceHeadIndex < targetHeadIndex
+
+        let sourceSet = Set(sourceBlock)
+        var withoutSource = list.filter { !sourceSet.contains($0) }
+
+        let insertIndex: Int
+        if movingDown {
+            guard let targetTail = targetBlock.last,
+                  let tailIndex = withoutSource.firstIndex(of: targetTail)
+            else { return list }
+            insertIndex = tailIndex + 1
+        } else {
+            guard let headIndex = withoutSource.firstIndex(of: targetHead) else { return list }
+            insertIndex = headIndex
+        }
+
+        withoutSource.insert(contentsOf: sourceBlock, at: insertIndex)
+        return withoutSource
+    }
+
+    private static func block(
+        for uid: String,
+        in list: [String],
+        groupKeyForUID: (String) -> String?
+    ) -> [String] {
+        guard let key = groupKeyForUID(uid) else { return [uid] }
+        let members = list.filter { groupKeyForUID($0) == key }
+        return members.isEmpty ? [uid] : members
+    }
+
+    private static func usbVendorProductGroupKey(fromUID uid: String) -> String? {
+        let parts = uid.split(separator: ":", omittingEmptySubsequences: false)
+        guard parts.count >= 3, parts[0] == "AppleUSBAudioEngine" else { return nil }
+        let vendor = parts[1].trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let product = parts[2].trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !vendor.isEmpty, !product.isEmpty else { return nil }
+        return "usbname:\(vendor):\(product)"
+    }
+
+    private static func usbVendorProductGroupKey(fromModelUID modelUID: String) -> String? {
+        let parts = modelUID.split(separator: ":")
+        guard parts.count >= 3 else { return nil }
+        let vendor = String(parts[parts.count - 2]).lowercased()
+        let product = String(parts[parts.count - 1]).lowercased()
+        guard Self.isHex(vendor), Self.isHex(product) else { return nil }
+        return "usbid:\(vendor):\(product)"
+    }
+
+    private static func isHex(_ value: String) -> Bool {
+        let hex = CharacterSet(charactersIn: "0123456789abcdef")
+        return !value.isEmpty && value.unicodeScalars.allSatisfy { hex.contains($0) }
+    }
+
+    private static func inferredDisplayName(fromUID uid: String) -> String? {
+        let parts = uid.split(separator: ":", omittingEmptySubsequences: false)
+        guard parts.count >= 3, parts[0] == "AppleUSBAudioEngine" else { return nil }
+        let product = parts[2].trimmingCharacters(in: .whitespacesAndNewlines)
+        return product.isEmpty ? nil : product
     }
 
     private static func deduped(_ items: [String]) -> [String] {
@@ -596,6 +996,22 @@ final class AppSettings: ObservableObject {
 
     private func save(_ key: String, _ value: some Encodable) {
         if let data = try? JSONEncoder().encode(value) { defaults.set(data, forKey: key) }
+    }
+
+    private func exportGroupByModelEnabledByGroup() -> [String: Bool] {
+        var keys = Set<String>()
+        for uid in knownDevices.keys {
+            if let key = modelGroupKey(for: uid) {
+                keys.insert(key)
+            }
+        }
+        guard !keys.isEmpty else { return [:] }
+
+        var map: [String: Bool] = [:]
+        for key in keys {
+            map[key] = !disabledModelGroupKeys.contains(key)
+        }
+        return map
     }
 }
 

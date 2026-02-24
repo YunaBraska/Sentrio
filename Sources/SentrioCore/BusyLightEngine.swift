@@ -19,6 +19,11 @@ private struct BusyLightDecision {
     var trigger: String
 }
 
+struct BusyLightHelloFrame: Equatable {
+    var color: BusyLightColor
+    var duration: TimeInterval
+}
+
 private struct BusyLightAPIStateResponse: Codable {
     var busyLightEnabled: Bool
     var rulesEnabled: Bool
@@ -98,12 +103,19 @@ final class BusyLightEngine: ObservableObject {
     private var previewEndWorkItem: DispatchWorkItem?
     private var lastDeviceIDs = Set<String>()
     private var suppressSettingsApply = false
+    private var connectHelloWorkItems: [DispatchWorkItem] = []
+    private var isConnectHelloRunning = false
+    private var pendingApplyAfterConnectHello: (force: Bool, source: String)?
 
     private static let previewDuration: TimeInterval = 2.5
-    private static let connectFeedbackDuration: TimeInterval = 0.10
     private static let solidKeepaliveInterval: TimeInterval = 20
     private static let maxRecentEvents = 20
     private static let defaultActionPeriodMilliseconds = 600
+    private static let connectHelloFrames: [BusyLightHelloFrame] = [
+        BusyLightHelloFrame(color: BusyLightColor(red: 0, green: 122, blue: 255), duration: 0.12),
+        BusyLightHelloFrame(color: .yellowColor, duration: 0.12),
+        BusyLightHelloFrame(color: .greenColor, duration: 0.12),
+    ]
 
     init(audio: AudioManager, settings: AppSettings) {
         self.settings = settings
@@ -120,8 +132,7 @@ final class BusyLightEngine: ObservableObject {
                 lastDeviceIDs = newIDs
 
                 connectedDevices = devices
-                applyIfNeeded(force: true, source: "Device")
-                if !added.isEmpty { flashOnConnect() }
+                handleDeviceUpdate(addedDeviceCount: added.count)
             }
             .store(in: &cancellables)
 
@@ -165,8 +176,7 @@ final class BusyLightEngine: ObservableObject {
     }
 
     deinit {
-        restServer.stop()
-        stopAnimation()
+        shutdown()
     }
 
     var apiBaseURL: String {
@@ -181,6 +191,26 @@ final class BusyLightEngine: ObservableObject {
 
     func clearRecentEvents() {
         recentEvents.removeAll()
+    }
+
+    static func shouldRunConnectHello(busyLightEnabled: Bool, addedDeviceCount: Int) -> Bool {
+        busyLightEnabled && addedDeviceCount > 0
+    }
+
+    static func connectHelloSequence() -> [BusyLightHelloFrame] {
+        connectHelloFrames
+    }
+
+    func shutdown() {
+        cancelConnectHelloSequence()
+        previewEndWorkItem?.cancel()
+        previewEndWorkItem = nil
+        previewOverride = nil
+        stopAnimation()
+        _ = usb.turnOff()
+        restServer.stop()
+        apiServerRunning = false
+        apiServerError = nil
     }
 
     // MARK: - External control (App Intents / future integrations)
@@ -237,6 +267,14 @@ final class BusyLightEngine: ObservableObject {
     }
 
     private func applyIfNeeded(force: Bool, source: String) {
+        if isConnectHelloRunning {
+            if let pending = pendingApplyAfterConnectHello {
+                pendingApplyAfterConnectHello = (force: pending.force || force, source: source)
+            } else {
+                pendingApplyAfterConnectHello = (force: force, source: source)
+            }
+            return
+        }
         let decision = desiredDecision()
         apply(action: decision.action, force: force, source: source, trigger: decision.trigger)
     }
@@ -411,14 +449,57 @@ final class BusyLightEngine: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.previewDuration, execute: item)
     }
 
-    private func flashOnConnect() {
-        guard settings.busyLightEnabled else { return }
-        guard !connectedDevices.isEmpty else { return }
-
-        _ = usb.turnOff()
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.connectFeedbackDuration) { [weak self] in
-            self?.applyIfNeeded(force: true, source: "Device")
+    private func handleDeviceUpdate(addedDeviceCount: Int) {
+        guard Self.shouldRunConnectHello(
+            busyLightEnabled: settings.busyLightEnabled,
+            addedDeviceCount: addedDeviceCount
+        ), !connectedDevices.isEmpty else {
+            applyIfNeeded(force: true, source: "Device")
+            return
         }
+
+        startConnectHelloSequence()
+    }
+
+    private func startConnectHelloSequence() {
+        cancelConnectHelloSequence()
+        isConnectHelloRunning = true
+        stopAnimation()
+        pendingApplyAfterConnectHello = nil
+
+        var delay: TimeInterval = 0
+        for frame in Self.connectHelloFrames {
+            let item = DispatchWorkItem { [weak self] in
+                guard let self else { return }
+                _ = usb.setSolidColor(frame.color)
+            }
+            connectHelloWorkItems.append(item)
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: item)
+            delay += frame.duration
+        }
+
+        let completion = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            isConnectHelloRunning = false
+            connectHelloWorkItems.removeAll()
+            let pendingApply = pendingApplyAfterConnectHello
+            pendingApplyAfterConnectHello = nil
+            applyIfNeeded(
+                force: pendingApply?.force ?? true,
+                source: pendingApply?.source ?? "Device"
+            )
+        }
+        connectHelloWorkItems.append(completion)
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: completion)
+    }
+
+    private func cancelConnectHelloSequence() {
+        for item in connectHelloWorkItems {
+            item.cancel()
+        }
+        connectHelloWorkItems.removeAll()
+        isConnectHelloRunning = false
+        pendingApplyAfterConnectHello = nil
     }
 
     private func stopAnimation() {

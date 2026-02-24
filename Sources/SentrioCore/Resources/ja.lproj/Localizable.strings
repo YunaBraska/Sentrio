@@ -7,6 +7,7 @@
 "label.auto" = "自動";
 "label.volume" = "音量";
 "label.inputGain" = "入力ゲイン";
+"label.manualConnect" = "手動接続";
 
 /* 共通アクション */
 "action.preferences" = "設定…";
@@ -15,11 +16,16 @@
 "action.quit" = "終了";
 "action.playSound" = "サウンドを再生";
 "action.disableDevice" = "デバイスを無効化";
+"action.hideDevice" = "デバイスを非表示";
+"action.forgetDevice" = "デバイス情報を削除";
+"action.groupByModel" = "モデルでグループ化";
+"action.deviceActions" = "デバイス操作";
 "action.enable" = "有効にする";
 "action.reset" = "リセット";
 "action.resetToDefault" = "デフォルトに戻す";
 "action.rename" = "名前を変更";
 "action.cancel" = "キャンセル";
+"action.connectNow" = "今すぐ接続";
 "action.save" = "保存";
 "action.chooseIcon" = "アイコンを選択";
 "action.setIcon" = "アイコンを設定…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "行をドラッグして優先する入力デバイスを並べ替えます。Sentrio は最上位の接続済みデバイスを有効にします。";
 "prefs.priority.section.title" = "優先順位";
 "prefs.priority.section.hint" = "≡ をつかんで並べ替え";
-"prefs.disabled.section.title" = "無効（フォールバックに使用しない）";
+"prefs.disabled.section.title" = "非表示（フォールバックに使用しない）";
 
 /* 設定: 行 */
 "prefs.dragToReorder" = "ドラッグして並べ替え";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "入力レベルメーターを表示（設定）";
 "prefs.general.showInputLevelMeter.description" = "有効にすると、Sentrio は設定が開いている間のみデフォルト入力デバイスを監視します。その間 macOS はマイク使用中インジケータを表示します。";
 "prefs.general.settings" = "設定";
-"prefs.general.settings.description" = "エクスポートには優先順位リスト、無効化したデバイス、カスタム名/アイコン、音量メモリが含まれます。";
+"prefs.general.settings.description" = "エクスポートには優先順位リスト、非表示のデバイス、カスタム名/アイコン、音量メモリが含まれます。";
 "prefs.general.volumeMemory" = "音量メモリ";
 "prefs.general.volumeMemory.description" = "音量レベルはデバイスごとに保存され、そのデバイスがアクティブになると自動的に復元されます。";
 "prefs.language.title" = "言語";

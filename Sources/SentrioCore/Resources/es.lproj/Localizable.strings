@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Volumen";
 "label.inputGain" = "Ganancia de entrada";
+"label.manualConnect" = "Conexión manual";
 
 /* Acciones comunes */
 "action.preferences" = "Preferencias…";
@@ -15,11 +16,16 @@
 "action.quit" = "Salir";
 "action.playSound" = "Reproducir sonido";
 "action.disableDevice" = "Desactivar dispositivo";
+"action.hideDevice" = "Ocultar dispositivo";
+"action.forgetDevice" = "Olvidar dispositivo";
+"action.groupByModel" = "Agrupar por modelo";
+"action.deviceActions" = "Acciones del dispositivo";
 "action.enable" = "Activar";
 "action.reset" = "Restablecer";
 "action.resetToDefault" = "Restablecer al valor predeterminado";
 "action.rename" = "Renombrar";
 "action.cancel" = "Cancelar";
+"action.connectNow" = "Conectar ahora";
 "action.save" = "Guardar";
 "action.chooseIcon" = "Elegir icono";
 "action.setIcon" = "Establecer icono…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Arrastra las filas para ordenar los dispositivos de entrada preferidos. Sentrio activa el dispositivo conectado con mayor prioridad.";
 "prefs.priority.section.title" = "Orden de prioridad";
 "prefs.priority.section.hint" = "Arrastra ≡ para reordenar";
-"prefs.disabled.section.title" = "Desactivados (no se usan como respaldo)";
+"prefs.disabled.section.title" = "Ocultos (no se usan como respaldo)";
 
 /* Preferencias: filas */
 "prefs.dragToReorder" = "Arrastrar para reordenar";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Mostrar medidor de nivel de entrada en vivo (Preferencias)";
 "prefs.general.showInputLevelMeter.description" = "Si está activado, Sentrio supervisa el dispositivo de entrada predeterminado solo mientras Preferencias está abierto. macOS mostrará el indicador de micrófono en uso durante ese tiempo.";
 "prefs.general.settings" = "Ajustes";
-"prefs.general.settings.description" = "La exportación incluye listas de prioridad, dispositivos desactivados, nombres/iconos personalizados y memoria de volumen.";
+"prefs.general.settings.description" = "La exportación incluye listas de prioridad, dispositivos ocultos, nombres/iconos personalizados y memoria de volumen.";
 "prefs.general.volumeMemory" = "Memoria de volumen";
 "prefs.general.volumeMemory.description" = "Los niveles de volumen se guardan por dispositivo y se restauran automáticamente cuando ese dispositivo se vuelve activo.";
 "prefs.language.title" = "Idioma";

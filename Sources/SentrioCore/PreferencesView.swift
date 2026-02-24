@@ -147,16 +147,24 @@ private struct PriorityTab: View {
         isOutput ? settings.disabledOutputDevices : settings.disabledInputDevices
     }
 
+    private var connectedUIDsForRole: Set<String> {
+        Set((isOutput ? audio.outputDevices : audio.inputDevices).map(\.uid))
+    }
+
     private var allKnownUIDs: [String] {
         let enabled = priority.wrappedValue
         let extra = (isOutput ? audio.outputDevices : audio.inputDevices)
             .map(\.uid).filter { !enabled.contains($0) && !disabled.contains($0) }
-        return enabled + extra
+        return collapseGroupedRowsIfNeeded(deduped(enabled + extra))
     }
 
     private var disabledUIDs: [String] {
-        disabled.filter { settings.knownDevices[$0] != nil }
-            .sorted { (settings.knownDevices[$0] ?? $0) < (settings.knownDevices[$1] ?? $1) }
+        let sorted = disabled.filter { settings.knownDevices[$0] != nil }
+            .sorted {
+                settings.displayName(for: $0, isOutput: isOutput) <
+                    settings.displayName(for: $1, isOutput: isOutput)
+            }
+        return collapseGroupedRowsIfNeeded(sorted)
     }
 
     var body: some View {
@@ -185,8 +193,10 @@ private struct PriorityTab: View {
                                     .onDrop(of: [.plainText],
                                             delegate: PriorityDropDelegate(
                                                 targetUID: uid,
-                                                items: priority,
-                                                draggedUID: $draggedUID
+                                                draggedUID: $draggedUID,
+                                                onMove: { sourceUID, targetUID in
+                                                    settings.reorderPriorityForDrag(uid: sourceUID, over: targetUID, isOutput: isOutput)
+                                                }
                                             ))
                                 Divider().padding(.leading, 52)
                             }
@@ -317,6 +327,50 @@ private struct PriorityTab: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
     }
+
+    private func collapseGroupedRowsIfNeeded(_ orderedUIDs: [String]) -> [String] {
+        var groupMembersByKey: [String: [String]] = [:]
+        for uid in orderedUIDs {
+            guard settings.isGroupByModelEnabled(for: uid),
+                  let key = settings.modelGroupKey(for: uid)
+            else { continue }
+            groupMembersByKey[key, default: []].append(uid)
+        }
+
+        var collapsedKeys = Set<String>()
+        var result: [String] = []
+
+        for uid in orderedUIDs {
+            guard settings.isGroupByModelEnabled(for: uid),
+                  let key = settings.modelGroupKey(for: uid),
+                  let members = groupMembersByKey[key],
+                  members.count > 1
+            else {
+                result.append(uid)
+                continue
+            }
+
+            let activeMembers = members.filter { connectedUIDsForRole.contains($0) }
+            if activeMembers.count == members.count {
+                // If every known row in this group is currently active, grouping has no visual effect.
+                result.append(uid)
+                continue
+            }
+
+            guard !collapsedKeys.contains(key) else { continue }
+            let representative = activeMembers.first ?? members.first ?? uid
+            guard uid == representative else { continue }
+            result.append(uid)
+            collapsedKeys.insert(key)
+        }
+
+        return result
+    }
+
+    private func deduped(_ items: [String]) -> [String] {
+        var seen = Set<String>()
+        return items.filter { seen.insert($0).inserted }
+    }
 }
 
 // MARK: – Drag-and-drop delegate
@@ -328,18 +382,16 @@ private struct PriorityTab: View {
 
 private struct PriorityDropDelegate: DropDelegate {
     let targetUID: String
-    @Binding var items: [String]
     @Binding var draggedUID: String?
+    let onMove: (String, String) -> Void
 
     func dropEntered(info _: DropInfo) {
         guard
-            let source = draggedUID, source != targetUID,
-            let from = items.firstIndex(of: source),
-            let to = items.firstIndex(of: targetUID)
+            let source = draggedUID,
+            source != targetUID
         else { return }
         withAnimation(.easeInOut(duration: 0.18)) {
-            items.move(fromOffsets: IndexSet(integer: from),
-                       toOffset: to > from ? to + 1 : to)
+            onMove(source, targetUID)
         }
     }
 
@@ -362,13 +414,14 @@ private struct PriorityRow: View {
 
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
+    @EnvironmentObject var appState: AppState
 
     @State private var showIconPicker = false
     @State private var showRenamePopover = false
     @State private var pendingName = ""
 
     private var name: String {
-        settings.displayName(for: uid, isOutput: isOutput)
+        settings.displayName(for: uid, isOutput: isOutput, fallbackName: device?.name)
     }
 
     private var device: AudioDevice? {
@@ -377,6 +430,33 @@ private struct PriorityRow: View {
 
     private var isConnected: Bool {
         device != nil
+    }
+
+    private var connectedUIDs: Set<String> {
+        Set(audio.outputDevices.map(\.uid) + audio.inputDevices.map(\.uid))
+    }
+
+    private var canForget: Bool {
+        settings.canForgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+    }
+
+    private var isGroupByModelAvailable: Bool {
+        settings.modelGroupKey(for: uid) != nil
+    }
+
+    private var isGroupByModelEnabled: Bool {
+        settings.isGroupByModelEnabled(for: uid)
+    }
+
+    private var groupByModelActionTitle: String {
+        let base = L10n.tr("action.groupByModel")
+        let count = settings.groupByModelDeviceCount(for: uid)
+        return count > 1 ? "\(base) (\(count))" : base
+    }
+
+    private var requiresManualConnect: Bool {
+        guard let device else { return false }
+        return audio.requiresManualConnection(device)
     }
 
     var body: some View {
@@ -400,7 +480,11 @@ private struct PriorityRow: View {
 
             // Icon button — volume-reactive for active output speaker icons
             let displayedIcon = (isOutput && device?.uid == audio.defaultOutput?.uid)
-                ? AudioDevice.volumeAdaptedIcon(effectiveIcon, volume: audio.outputVolume)
+                ? AudioDevice.volumeAdaptedIcon(
+                    effectiveIcon,
+                    volume: audio.outputVolume,
+                    isMuted: audio.isOutputMuted
+                )
                 : effectiveIcon
             Button { showIconPicker = true } label: {
                 Image(systemName: displayedIcon)
@@ -420,36 +504,29 @@ private struct PriorityRow: View {
 
             // Name + rename button
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 4) {
-                    Text(name)
-                        .foregroundStyle(isConnected ? .primary : .secondary)
-                        .lineLimit(1)
-                    Button {
-                        pendingName = name
-                        showRenamePopover = true
-                    } label: {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 9))
-                            .foregroundStyle(.tertiary)
-                    }
-                    .buttonStyle(.plain)
-                    .help(isOutput ? L10n.tr("prefs.renameHelp.output") : L10n.tr("prefs.renameHelp.input"))
+                Text(name)
+                    .foregroundStyle(isConnected ? .primary : .secondary)
+                    .lineLimit(1)
                     .popover(isPresented: $showRenamePopover, arrowEdge: .trailing) {
                         RenamePopover(
                             uid: uid, isOutput: isOutput,
-                            originalName: settings.knownDevices[uid] ?? uid,
+                            originalName: settings.knownDevices[uid] ?? device?.name ?? uid,
                             name: $pendingName,
                             isPresented: $showRenamePopover
                         )
                         .environmentObject(settings)
                         .padding(14)
                     }
-                }
 
                 HStack(spacing: 6) {
                     if let dev = device {
                         Text(dev.transportType.label)
                             .font(.caption2).foregroundStyle(.tertiary)
+                        if requiresManualConnect {
+                            Label(L10n.tr("label.manualConnect"), systemImage: "hand.tap")
+                                .font(.caption2)
+                                .foregroundStyle(.orange)
+                        }
                         if !dev.batteryStates.isEmpty {
                             BatteryStatesInlineView(states: dev.batteryStates)
                         }
@@ -478,25 +555,42 @@ private struct PriorityRow: View {
                 .frame(width: 36, height: 8)
             }
 
-            // Disable button (always available)
-            Button {
-                settings.disableDevice(uid: uid, isOutput: isOutput)
+            Menu {
+                if requiresManualConnect, let dev = device {
+                    Button(L10n.tr("action.connectNow")) {
+                        appState.rules.switchTo(dev, isInput: !isOutput)
+                    }
+                    Divider()
+                }
+                Button(L10n.tr("action.rename")) {
+                    pendingName = settings.displayName(for: uid, isOutput: isOutput, fallbackName: device?.name)
+                    showRenamePopover = true
+                }
+                iconPickerMenu
+                Divider()
+                Button(L10n.tr("action.hideDevice")) {
+                    settings.hideDevice(uid: uid, isOutput: isOutput)
+                }
+                Button(L10n.tr("action.forgetDevice")) {
+                    settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+                }
+                .disabled(!canForget)
+                Button {
+                    settings.setGroupByModelEnabled(!isGroupByModelEnabled, for: uid)
+                } label: {
+                    if isGroupByModelEnabled {
+                        Label(groupByModelActionTitle, systemImage: "checkmark")
+                    } else {
+                        Text(groupByModelActionTitle)
+                    }
+                }
+                .disabled(!isGroupByModelAvailable)
             } label: {
-                Image(systemName: "minus.circle").foregroundStyle(.secondary)
+                Image(systemName: "gearshape")
+                    .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .help(L10n.tr("prefs.disableHelp"))
-
-            // Delete button — only for disconnected devices
-            if !isConnected {
-                Button {
-                    settings.deleteDevice(uid: uid)
-                } label: {
-                    Image(systemName: "trash").foregroundStyle(.red.opacity(0.7))
-                }
-                .buttonStyle(.plain)
-                .help(L10n.tr("prefs.removePermanentlyHelp"))
-            }
+            .help(L10n.tr("action.deviceActions"))
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
@@ -509,6 +603,20 @@ private struct PriorityRow: View {
                 ?? settings.defaultIconName(for: uid, isOutput: isOutput)
         }
         return settings.iconName(for: dev, isOutput: isOutput)
+    }
+
+    private var iconPickerMenu: some View {
+        Menu(L10n.tr("action.setIcon")) {
+            Button(L10n.tr("action.resetToDefault")) { settings.clearIcon(for: uid, isOutput: isOutput) }
+            Divider()
+            ForEach(AppSettings.iconOptions, id: \.symbol) { opt in
+                Button {
+                    settings.setIcon(opt.symbol, for: uid, isOutput: isOutput)
+                } label: {
+                    Label(L10n.tr(opt.labelKey), systemImage: opt.symbol)
+                }
+            }
+        }
     }
 }
 
@@ -566,7 +674,7 @@ private struct RenamePopover: View {
 
 //
 // Column layout mirrors PriorityRow exactly so both sections feel like one list:
-//   [drag placeholder 20] [dot 7] [icon 24] [name VStack] [Spacer] [Enable] [Trash?]
+//   [drag placeholder 20] [dot 7] [icon 24] [name VStack] [Spacer] [gear actions]
 
 private struct DisabledRow: View {
     let uid: String
@@ -584,6 +692,28 @@ private struct DisabledRow: View {
 
     private var isConnected: Bool {
         device != nil
+    }
+
+    private var connectedUIDs: Set<String> {
+        Set(audio.outputDevices.map(\.uid) + audio.inputDevices.map(\.uid))
+    }
+
+    private var canForget: Bool {
+        settings.canForgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+    }
+
+    private var isGroupByModelAvailable: Bool {
+        settings.modelGroupKey(for: uid) != nil
+    }
+
+    private var isGroupByModelEnabled: Bool {
+        settings.isGroupByModelEnabled(for: uid)
+    }
+
+    private var groupByModelActionTitle: String {
+        let base = L10n.tr("action.groupByModel")
+        let count = settings.groupByModelDeviceCount(for: uid)
+        return count > 1 ? "\(base) (\(count))" : base
     }
 
     /// Best-effort icon: live device → custom stored → generic fallback.
@@ -610,31 +740,19 @@ private struct DisabledRow: View {
                 .frame(width: 24, height: 24)
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 4) {
-                    Text(settings.displayName(for: uid, isOutput: isOutput))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                    Button {
-                        pendingName = settings.displayName(for: uid, isOutput: isOutput)
-                        showRenamePopover = true
-                    } label: {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 9))
-                            .foregroundStyle(.tertiary)
-                    }
-                    .buttonStyle(.plain)
-                    .help(isOutput ? L10n.tr("prefs.renameHelp.output") : L10n.tr("prefs.renameHelp.input"))
+                Text(settings.displayName(for: uid, isOutput: isOutput, fallbackName: device?.name))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
                     .popover(isPresented: $showRenamePopover, arrowEdge: .trailing) {
                         RenamePopover(
                             uid: uid, isOutput: isOutput,
-                            originalName: settings.knownDevices[uid] ?? uid,
+                            originalName: settings.knownDevices[uid] ?? device?.name ?? uid,
                             name: $pendingName,
                             isPresented: $showRenamePopover
                         )
                         .environmentObject(settings)
                         .padding(14)
                     }
-                }
                 HStack(spacing: 6) {
                     Text(isConnected ? L10n.tr("status.connected") : L10n.tr("status.disconnected"))
                         .font(.caption2)
@@ -649,24 +767,54 @@ private struct DisabledRow: View {
 
             Spacer()
 
-            Button(L10n.tr("action.enable")) { settings.enableDevice(uid: uid, isOutput: isOutput) }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-
-            // Trash only when disconnected — connected devices must be enabled first
-            if !isConnected {
-                Button {
-                    settings.deleteDevice(uid: uid)
-                } label: {
-                    Image(systemName: "trash").foregroundStyle(.red.opacity(0.7))
+            Menu {
+                Button(L10n.tr("action.rename")) {
+                    pendingName = settings.displayName(for: uid, isOutput: isOutput, fallbackName: device?.name)
+                    showRenamePopover = true
                 }
-                .buttonStyle(.plain)
-                .help(L10n.tr("prefs.removePermanentlyShort"))
+                iconPickerMenu
+                Divider()
+                Button(L10n.tr("action.enable")) {
+                    settings.enableDevice(uid: uid, isOutput: isOutput)
+                }
+                Button(L10n.tr("action.forgetDevice")) {
+                    settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+                }
+                .disabled(!canForget)
+                Button {
+                    settings.setGroupByModelEnabled(!isGroupByModelEnabled, for: uid)
+                } label: {
+                    if isGroupByModelEnabled {
+                        Label(groupByModelActionTitle, systemImage: "checkmark")
+                    } else {
+                        Text(groupByModelActionTitle)
+                    }
+                }
+                .disabled(!isGroupByModelAvailable)
+            } label: {
+                Image(systemName: "gearshape")
+                    .foregroundStyle(.secondary)
             }
+            .buttonStyle(.plain)
+            .help(L10n.tr("action.deviceActions"))
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .opacity(0.82)
+    }
+
+    private var iconPickerMenu: some View {
+        Menu(L10n.tr("action.setIcon")) {
+            Button(L10n.tr("action.resetToDefault")) { settings.clearIcon(for: uid, isOutput: isOutput) }
+            Divider()
+            ForEach(AppSettings.iconOptions, id: \.symbol) { opt in
+                Button {
+                    settings.setIcon(opt.symbol, for: uid, isOutput: isOutput)
+                } label: {
+                    Label(L10n.tr(opt.labelKey), systemImage: opt.symbol)
+                }
+            }
+        }
     }
 }
 

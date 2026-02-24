@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Volym";
 "label.inputGain" = "Ingångsförstärkning";
+"label.manualConnect" = "Manuell anslutning";
 
 /* Vanliga åtgärder */
 "action.preferences" = "Inställningar…";
@@ -15,11 +16,16 @@
 "action.quit" = "Avsluta";
 "action.playSound" = "Spela upp ljud";
 "action.disableDevice" = "Inaktivera enhet";
+"action.hideDevice" = "Dölj enhet";
+"action.forgetDevice" = "Glöm enhet";
+"action.groupByModel" = "Gruppera efter modell";
+"action.deviceActions" = "Enhetsåtgärder";
 "action.enable" = "Aktivera";
 "action.reset" = "Återställ";
 "action.resetToDefault" = "Återställ till standard";
 "action.rename" = "Byt namn";
 "action.cancel" = "Avbryt";
+"action.connectNow" = "Anslut nu";
 "action.save" = "Spara";
 "action.chooseIcon" = "Välj ikon";
 "action.setIcon" = "Ange ikon…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Dra rader för att ordna föredragna indataenheter. Sentrio aktiverar den högst rankade anslutna enheten.";
 "prefs.priority.section.title" = "Prioritetsordning";
 "prefs.priority.section.hint" = "Dra ≡ för att ändra ordning";
-"prefs.disabled.section.title" = "Inaktiverade (används inte som reserv)";
+"prefs.disabled.section.title" = "Dolda (används inte som reserv)";
 
 /* Inställningar: rader */
 "prefs.dragToReorder" = "Dra för att ändra ordning";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Visa live-mätare för ingångsnivå (Inställningar)";
 "prefs.general.showInputLevelMeter.description" = "Om aktiverad övervakar Sentrio standardindataenheten endast när Inställningar är öppet. macOS visar mikrofonindikatorn under den tiden.";
 "prefs.general.settings" = "Inställningar";
-"prefs.general.settings.description" = "Exporten innehåller prioritetslistor, inaktiverade enheter, anpassade namn/ikoner och volymminne.";
+"prefs.general.settings.description" = "Exporten innehåller prioritetslistor, dolda enheter, anpassade namn/ikoner och volymminne.";
 "prefs.general.volumeMemory" = "Volymminne";
 "prefs.general.volumeMemory.description" = "Volymnivåer sparas per enhet och återställs automatiskt när den enheten blir aktiv.";
 "prefs.language.title" = "Språk";

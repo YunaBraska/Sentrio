@@ -75,6 +75,14 @@ bash scripts/format.sh
 - BusyLight tab visibility follows hardware presence: hide when no device, show on reconnect.
 - BusyLight API port input is integer-only UX in Preferences; normalize to valid range in settings.
 - Signal label uses **Alert sounds** (not guaranteed per-app media truth).
+- BusyLight startup sequence: on first device detection, run a short hello sequence before applying rules/manual action.
+- App shutdown behavior: always send BusyLight `off` on application termination.
+
+## Audio Product Decisions (Current)
+
+- Continuity/iPhone-style routes require explicit user-triggered connect (no background auto-connect while in auto mode).
+- If a manual Continuity connect attempt fails, immediately fall back to the next eligible priority device.
+- Menu bar priority badges should be contiguous across visible rows and must not expose gaps from hidden/grouped entries.
 
 ## Style + Testing
 

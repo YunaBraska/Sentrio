@@ -7,6 +7,7 @@
 "label.auto" = "Oto";
 "label.volume" = "Ses";
 "label.inputGain" = "Giriş kazancı";
+"label.manualConnect" = "Manuel bağlantı";
 
 /* Ortak eylemler */
 "action.preferences" = "Tercihler…";
@@ -15,11 +16,16 @@
 "action.quit" = "Çıkış";
 "action.playSound" = "Sesi çal";
 "action.disableDevice" = "Aygıtı devre dışı bırak";
+"action.hideDevice" = "Aygıtı gizle";
+"action.forgetDevice" = "Aygıtı unut";
+"action.groupByModel" = "Modele göre grupla";
+"action.deviceActions" = "Aygıt eylemleri";
 "action.enable" = "Etkinleştir";
 "action.reset" = "Sıfırla";
 "action.resetToDefault" = "Varsayılanlara döndür";
 "action.rename" = "Yeniden adlandır";
 "action.cancel" = "İptal";
+"action.connectNow" = "Şimdi bağlan";
 "action.save" = "Kaydet";
 "action.chooseIcon" = "Simge seç";
 "action.setIcon" = "Simge ayarla…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Tercih edilen giriş aygıtlarını sıralamak için satırları sürükleyin. Sentrio en yüksek öncelikli bağlı aygıtı etkinleştirir.";
 "prefs.priority.section.title" = "Öncelik sırası";
 "prefs.priority.section.hint" = "Yeniden sıralamak için ≡ tutup sürükle";
-"prefs.disabled.section.title" = "Devre dışı (yedek olarak kullanılmaz)";
+"prefs.disabled.section.title" = "Gizli (yedek olarak kullanılmaz)";
 
 /* Tercihler: satırlar */
 "prefs.dragToReorder" = "Yeniden sıralamak için sürükle";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Canlı giriş seviye göstergesini göster (Tercihler)";
 "prefs.general.showInputLevelMeter.description" = "Etkinleştirildiğinde Sentrio, Tercihler açıkken yalnızca varsayılan giriş aygıtını izler. macOS bu süre boyunca mikrofon göstergesini gösterir.";
 "prefs.general.settings" = "Ayarlar";
-"prefs.general.settings.description" = "Dışa aktarma; öncelik listeleri, devre dışı aygıtlar, özel adlar/simgeler ve ses hafızasını içerir.";
+"prefs.general.settings.description" = "Dışa aktarma; öncelik listeleri, gizli aygıtlar, özel adlar/simgeler ve ses hafızasını içerir.";
 "prefs.general.volumeMemory" = "Ses Hafızası";
 "prefs.general.volumeMemory.description" = "Ses seviyeleri aygıt başına kaydedilir ve aygıt etkin olduğunda otomatik olarak geri yüklenir.";
 "prefs.language.title" = "Dil";

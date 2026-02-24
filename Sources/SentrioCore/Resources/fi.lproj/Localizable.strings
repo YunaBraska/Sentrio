@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Äänenvoimakkuus";
 "label.inputGain" = "Tulovahvistus";
+"label.manualConnect" = "Manuaalinen yhteys";
 
 /* Yleiset toiminnot */
 "action.preferences" = "Asetukset…";
@@ -15,11 +16,16 @@
 "action.quit" = "Lopeta";
 "action.playSound" = "Toista ääni";
 "action.disableDevice" = "Poista laite käytöstä";
+"action.hideDevice" = "Piilota laite";
+"action.forgetDevice" = "Unohda laite";
+"action.groupByModel" = "Ryhmittele mallin mukaan";
+"action.deviceActions" = "Laitevalinnat";
 "action.enable" = "Ota käyttöön";
 "action.reset" = "Nollaa";
 "action.resetToDefault" = "Palauta oletuksiin";
 "action.rename" = "Nimeä uudelleen";
 "action.cancel" = "Peruuta";
+"action.connectNow" = "Yhdistä nyt";
 "action.save" = "Tallenna";
 "action.chooseIcon" = "Valitse kuvake";
 "action.setIcon" = "Aseta kuvake…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Vedä rivejä järjestääksesi ensisijaiset tulolaitteet. Sentrio aktivoi korkeimmalle sijoitetun yhdistetyn laitteen.";
 "prefs.priority.section.title" = "Prioriteettijärjestys";
 "prefs.priority.section.hint" = "Tartu ≡ ja järjestä uudelleen";
-"prefs.disabled.section.title" = "Poistetut käytöstä (ei käytetä varalaitteena)";
+"prefs.disabled.section.title" = "Piilotetut (ei käytetä varalaitteena)";
 
 /* Asetukset: rivit */
 "prefs.dragToReorder" = "Vedä järjestääksesi uudelleen";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Näytä reaaliaikainen tulotason mittari (Asetukset)";
 "prefs.general.showInputLevelMeter.description" = "Jos käytössä, Sentrio seuraa oletustulolaitetta vain, kun Asetukset on auki. macOS näyttää mikrofonin käytössä -ilmaisimen tuona aikana.";
 "prefs.general.settings" = "Asetukset";
-"prefs.general.settings.description" = "Vienti sisältää prioriteettilistat, käytöstä poistetut laitteet, mukautetut nimet/kuvakkeet ja äänenvoimakkuusmuistin.";
+"prefs.general.settings.description" = "Vienti sisältää prioriteettilistat, piilotetut laitteet, mukautetut nimet/kuvakkeet ja äänenvoimakkuusmuistin.";
 "prefs.general.volumeMemory" = "Äänenvoimakkuusmuisti";
 "prefs.general.volumeMemory.description" = "Äänenvoimakkuudet tallennetaan laitekohtaisesti ja palautetaan automaattisesti, kun laite aktivoituu.";
 "prefs.language.title" = "Kieli";

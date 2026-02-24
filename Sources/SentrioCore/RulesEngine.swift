@@ -14,6 +14,9 @@ final class RulesEngine {
         self.audio = audio
         self.settings = settings
         subscribe()
+        DispatchQueue.main.async { [weak self] in
+            self?.onDevicesChanged()
+        }
     }
 
     // MARK: – Subscriptions
@@ -99,8 +102,12 @@ final class RulesEngine {
         current: AudioDevice?,
         isInput: Bool
     ) {
-        let eligible = connected.filter { !disabled.contains($0.uid) }
-        guard let target = RulesEngine.selectDevice(from: eligible, priority: priority) else { return }
+        let eligible = connected.filter {
+            !disabled.contains($0.uid) &&
+                !audio.requiresManualConnection($0) &&
+                !audio.isTemporarilyUnavailable($0.uid)
+        }
+        guard let target = RulesEngine.selectDeviceWithFallback(from: eligible, priority: priority) else { return }
         guard current?.uid != target.uid else { return }
 
         recordAutoSwitch(isInput: isInput)
@@ -116,37 +123,38 @@ final class RulesEngine {
             }
         }
 
-        audio.setDefault(target, isInput: isInput)
-
-        // Restore incoming device volumes
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
-            guard let self else { return }
-            let expectedVol = settings.savedVolume(for: target.uid, isOutput: isOutput)
-            let expectedAlertVol = !isInput ? settings.savedAlertVolume(for: target.uid) : nil
-
-            var didApplyAny = false
-            if let vol = expectedVol {
-                audio.setVolume(vol, for: target, isOutput: isOutput)
-                didApplyAny = true
-            }
-            if let alertVol = expectedAlertVol {
-                audio.setAlertVolume(alertVol)
-                didApplyAny = true
-            }
-
-            guard didApplyAny else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+        audio.setDefault(target, isInput: isInput) { [weak self] success in
+            guard let self, success else { return }
+            // Restore incoming device volumes
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
                 guard let self else { return }
-                var ok = true
-                if let expectedVol {
-                    let actual = audio.volume(for: target, isOutput: isOutput) ?? expectedVol
-                    if abs(actual - expectedVol) > 0.03 { ok = false }
+                let expectedVol = settings.savedVolume(for: target.uid, isOutput: isOutput)
+                let expectedAlertVol = !isInput ? settings.savedAlertVolume(for: target.uid) : nil
+
+                var didApplyAny = false
+                if let vol = expectedVol {
+                    audio.setVolume(vol, for: target, isOutput: isOutput)
+                    didApplyAny = true
                 }
-                if let expectedAlertVol {
-                    let actualAlert = AudioManager.readAlertVolume()
-                    if abs(actualAlert - expectedAlertVol) > 0.03 { ok = false }
+                if let alertVol = expectedAlertVol {
+                    audio.setAlertVolume(alertVol)
+                    didApplyAny = true
                 }
-                if ok { settings.signalIntegrityScore += 5 }
+
+                guard didApplyAny else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+                    guard let self else { return }
+                    var ok = true
+                    if let expectedVol {
+                        let actual = audio.volume(for: target, isOutput: isOutput) ?? expectedVol
+                        if abs(actual - expectedVol) > 0.03 { ok = false }
+                    }
+                    if let expectedAlertVol {
+                        let actualAlert = AudioManager.readAlertVolume()
+                        if abs(actualAlert - expectedAlertVol) > 0.03 { ok = false }
+                    }
+                    if ok { settings.signalIntegrityScore += 5 }
+                }
             }
         }
     }
@@ -157,6 +165,10 @@ final class RulesEngine {
         guard let uid = priority.first(where: { uid in connected.contains { $0.uid == uid } })
         else { return nil }
         return connected.first { $0.uid == uid }
+    }
+
+    static func selectDeviceWithFallback(from connected: [AudioDevice], priority: [String]) -> AudioDevice? {
+        selectDevice(from: connected, priority: priority) ?? connected.first
     }
 
     // MARK: – Manual switch (from UI)
@@ -174,14 +186,49 @@ final class RulesEngine {
             }
             if !isInput { settings.saveAlertVolume(AudioManager.readAlertVolume(), for: current.uid) }
         }
-        audio.setDefault(device, isInput: isInput)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+        audio.setDefault(device, isInput: isInput) { [weak self] success in
             guard let self else { return }
-            if let vol = settings.savedVolume(for: device.uid, isOutput: isOutput) {
-                audio.setVolume(vol, for: device, isOutput: isOutput)
+            if success {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+                    guard let self else { return }
+                    if let vol = settings.savedVolume(for: device.uid, isOutput: isOutput) {
+                        audio.setVolume(vol, for: device, isOutput: isOutput)
+                    }
+                    if !isInput, let alertVol = settings.savedAlertVolume(for: device.uid) {
+                        audio.setAlertVolume(alertVol)
+                    }
+                }
+                return
             }
-            if !isInput, let alertVol = settings.savedAlertVolume(for: device.uid) {
-                audio.setAlertVolume(alertVol)
+
+            fallbackAfterManualSwitchFailure(failedUID: device.uid, isInput: isInput)
+        }
+    }
+
+    private func fallbackAfterManualSwitchFailure(failedUID: String, isInput: Bool) {
+        let connected = isInput ? audio.inputDevices : audio.outputDevices
+        let disabled = isInput ? settings.disabledInputDevices : settings.disabledOutputDevices
+        let priority = isInput ? settings.inputPriority : settings.outputPriority
+
+        let eligible = connected.filter {
+            $0.uid != failedUID &&
+                !disabled.contains($0.uid) &&
+                !audio.requiresManualConnection($0) &&
+                !audio.isTemporarilyUnavailable($0.uid)
+        }
+        guard let fallback = RulesEngine.selectDeviceWithFallback(from: eligible, priority: priority) else { return }
+
+        audio.setDefault(fallback, isInput: isInput) { [weak self] success in
+            guard let self, success else { return }
+            let isOutput = !isInput
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+                guard let self else { return }
+                if let vol = settings.savedVolume(for: fallback.uid, isOutput: isOutput) {
+                    audio.setVolume(vol, for: fallback, isOutput: isOutput)
+                }
+                if !isInput, let alertVol = settings.savedAlertVolume(for: fallback.uid) {
+                    audio.setAlertVolume(alertVol)
+                }
             }
         }
     }

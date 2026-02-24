@@ -103,6 +103,275 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertTrue(settings.disabledInputDevices.contains("A"))
     }
 
+    func test_hideThenEnableRestoresNearestPriorityPosition() {
+        settings.outputPriority = ["A", "B", "C"]
+        settings.hideDevice(uid: "B", isOutput: true)
+        XCTAssertEqual(settings.outputPriority, ["A", "C"])
+
+        settings.enableDevice(uid: "B", isOutput: true)
+        XCTAssertEqual(settings.outputPriority, ["A", "B", "C"])
+    }
+
+    func test_groupByModelDefaultEnabledForUSBUID() {
+        let uid = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        settings.registerDevice(uid: uid, name: "Shure MV7+", isOutput: true, transportType: .usb)
+
+        XCTAssertNotNil(settings.modelGroupKey(for: uid))
+        XCTAssertTrue(settings.isGroupByModelEnabled(for: uid))
+    }
+
+    func test_groupedDevicesAreKeptAdjacentInPriority() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:MV7+#12-aad43524b65c6b5e856dfe9c14610cf7:2,3"
+        settings.registerDevice(uid: a, name: "Shure MV7+ A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure MV7+ B", isOutput: true, transportType: .usb)
+
+        settings.outputPriority = [a, "X", b, "Y"]
+        XCTAssertEqual(settings.outputPriority, [a, b, "X", "Y"])
+    }
+
+    func test_hideDeviceWithGroupingHidesWholeGroupAcrossRoles() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:MV7+#12-aad43524b65c6b5e856dfe9c14610cf7:2,3"
+
+        settings.registerDevice(uid: a, name: "Shure MV7+ A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure MV7+ B", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: a, name: "Shure MV7+ A", isOutput: false, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure MV7+ B", isOutput: false, transportType: .usb)
+
+        settings.hideDevice(uid: a, isOutput: true)
+
+        XCTAssertTrue(settings.disabledOutputDevices.contains(a))
+        XCTAssertTrue(settings.disabledOutputDevices.contains(b))
+        XCTAssertTrue(settings.disabledInputDevices.contains(a))
+        XCTAssertTrue(settings.disabledInputDevices.contains(b))
+        XCTAssertFalse(settings.outputPriority.contains(a))
+        XCTAssertFalse(settings.outputPriority.contains(b))
+        XCTAssertFalse(settings.inputPriority.contains(a))
+        XCTAssertFalse(settings.inputPriority.contains(b))
+    }
+
+    func test_forgetDeviceWithGroupingDeletesOnlyDisconnectedMembers() {
+        let connected = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        let disconnected = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:MV7+#12-aad43524b65c6b5e856dfe9c14610cf7:2,3"
+        settings.registerDevice(uid: connected, name: "Shure MV7+ A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: disconnected, name: "Shure MV7+ B", isOutput: true, transportType: .usb)
+
+        settings.forgetDevice(uid: connected, connectedUIDs: [connected])
+
+        XCTAssertNotNil(settings.knownDevices[connected])
+        XCTAssertNil(settings.knownDevices[disconnected])
+    }
+
+    func test_setIconSyncsAcrossGroupedDevices() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:MV7+#12-aad43524b65c6b5e856dfe9c14610cf7:2,3"
+        settings.registerDevice(uid: a, name: "Shure MV7+ A", isOutput: false, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure MV7+ B", isOutput: false, transportType: .usb)
+
+        settings.setIcon("mic", for: a, isOutput: false)
+
+        XCTAssertEqual(settings.deviceIcons[a]?["input"], "mic")
+        XCTAssertEqual(settings.deviceIcons[b]?["input"], "mic")
+    }
+
+    func test_clearIconSyncsAcrossGroupedDevices() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:MV7+#12-aad43524b65c6b5e856dfe9c14610cf7:2,3"
+        settings.registerDevice(uid: a, name: "Shure MV7+ A", isOutput: false, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure MV7+ B", isOutput: false, transportType: .usb)
+        settings.setIcon("mic", for: a, isOutput: false)
+
+        settings.clearIcon(for: b, isOutput: false)
+
+        XCTAssertNil(settings.deviceIcons[a]?["input"])
+        XCTAssertNil(settings.deviceIcons[b]?["input"])
+    }
+
+    func test_registerDeviceCopiesGroupedIconFromExistingPeer() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:MV7+#12-aad43524b65c6b5e856dfe9c14610cf7:2,3"
+        settings.registerDevice(uid: a, name: "Shure MV7+ A", isOutput: false, transportType: .usb)
+        settings.setIcon("mic", for: a, isOutput: false)
+
+        settings.registerDevice(uid: b, name: "Shure MV7+ B", isOutput: false, transportType: .usb)
+
+        XCTAssertEqual(settings.deviceIcons[b]?["input"], "mic")
+    }
+
+    func test_displayNameUsesFallbackNameForUnknownUID() {
+        let uid = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        XCTAssertEqual(
+            settings.displayName(for: uid, isOutput: false, fallbackName: "Shure MV7+"),
+            "Shure MV7+"
+        )
+    }
+
+    func test_hiddenDeviceCanSetIcon() {
+        let uid = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        settings.registerDevice(uid: uid, name: "Shure MV7+", isOutput: false, transportType: .usb)
+        settings.hideDevice(uid: uid, isOutput: false)
+
+        settings.setIcon("mic", for: uid, isOutput: false)
+
+        XCTAssertEqual(settings.deviceIcons[uid]?["input"], "mic")
+    }
+
+    func test_movePriorityMovesWholeGroupBlockForThreeMembers() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:A:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:B:2,3"
+        let c = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:C:2,3"
+        settings.registerDevice(uid: a, name: "Shure A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure B", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: c, name: "Shure C", isOutput: true, transportType: .usb)
+        settings.outputPriority = [a, b, c, "X", "Y"]
+
+        settings.movePriority(uid: b, before: "Y", isOutput: true)
+
+        XCTAssertEqual(settings.outputPriority, ["X", a, b, c, "Y"])
+    }
+
+    func test_movePriorityInsertsBeforeTargetGroupHead() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:A:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:B:2,3"
+        let c = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:C:2,3"
+        let x1 = "AppleUSBAudioEngine:Other Vendor:Other Device:X1:2,3"
+        let x2 = "AppleUSBAudioEngine:Other Vendor:Other Device:X2:2,3"
+        settings.registerDevice(uid: a, name: "Shure A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure B", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: c, name: "Shure C", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: x1, name: "Other 1", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: x2, name: "Other 2", isOutput: true, transportType: .usb)
+        settings.outputPriority = [a, b, c, "Z", x1, x2]
+
+        settings.movePriority(uid: c, before: x2, isOutput: true)
+
+        XCTAssertEqual(settings.outputPriority, ["Z", a, b, c, x1, x2])
+    }
+
+    func test_movePriorityWithSourceTargetInSameGroupIsNoop() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:A:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:B:2,3"
+        settings.registerDevice(uid: a, name: "Shure A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure B", isOutput: true, transportType: .usb)
+        settings.outputPriority = [a, b, "X"]
+
+        settings.movePriority(uid: a, before: b, isOutput: true)
+
+        XCTAssertEqual(settings.outputPriority, [a, b, "X"])
+    }
+
+    func test_movePriorityWithMissingSourceIsNoop() {
+        settings.outputPriority = ["A", "B", "C"]
+
+        settings.movePriority(uid: "missing", before: "B", isOutput: true)
+
+        XCTAssertEqual(settings.outputPriority, ["A", "B", "C"])
+    }
+
+    func test_movePriorityWithMissingTargetIsNoop() {
+        settings.outputPriority = ["A", "B", "C"]
+
+        settings.movePriority(uid: "A", before: "missing", isOutput: true)
+
+        XCTAssertEqual(settings.outputPriority, ["A", "B", "C"])
+    }
+
+    func test_reorderPriorityForDragMovesTwoDeviceGroupDown() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:A:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:B:2,3"
+        settings.registerDevice(uid: a, name: "Shure A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure B", isOutput: true, transportType: .usb)
+        settings.outputPriority = [a, b, "X", "Y"]
+
+        settings.reorderPriorityForDrag(uid: a, over: "Y", isOutput: true)
+
+        XCTAssertEqual(settings.outputPriority, ["X", "Y", a, b])
+    }
+
+    func test_reorderPriorityForDragMovesTwoDeviceGroupUp() {
+        let a = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:A:2,3"
+        let b = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:B:2,3"
+        settings.registerDevice(uid: a, name: "Shure A", isOutput: true, transportType: .usb)
+        settings.registerDevice(uid: b, name: "Shure B", isOutput: true, transportType: .usb)
+        settings.outputPriority = ["X", "Y", a, b]
+
+        settings.reorderPriorityForDrag(uid: b, over: "X", isOutput: true)
+
+        XCTAssertEqual(settings.outputPriority, [a, b, "X", "Y"])
+    }
+
+    func test_exportIncludesGroupByModelEnabledByGroup() throws {
+        let uid = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        settings.registerDevice(uid: uid, name: "Shure MV7+", isOutput: true, transportType: .usb)
+        settings.setGroupByModelEnabled(false, for: uid)
+
+        let data = try settings.exportSettingsData()
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let exported = try decoder.decode(AppSettings.ExportedSettings.self, from: data)
+
+        let key = try XCTUnwrap(settings.modelGroupKey(for: uid))
+        XCTAssertEqual(exported.groupByModelEnabledByGroup?[key], false)
+    }
+
+    func test_importGroupByModelEnabledByGroupOverridesDisabledModelGroupKeys() throws {
+        let uid = "AppleUSBAudioEngine:Shure Inc:Shure MV7+:132000:2,3"
+        let key = "usbname:shure inc:shure mv7+"
+        let json = """
+        {
+          "schemaVersion": 5,
+          "exportedAt": "2026-02-24T00:00:00Z",
+          "outputPriority": ["\(uid)"],
+          "inputPriority": [],
+          "disabledOutputDevices": [],
+          "disabledInputDevices": [],
+          "volumeMemory": {},
+          "customDeviceNames": {},
+          "deviceIcons": {},
+          "knownDevices": {"\(uid)": "Shure MV7+"},
+          "knownDeviceTransportTypes": {"\(uid)": "usb"},
+          "disabledModelGroupKeys": [],
+          "groupByModelEnabledByGroup": {"\(key)": false},
+          "isAutoMode": true,
+          "hideMenuBarIcon": false
+        }
+        """
+
+        try settings.importSettings(from: Data(json.utf8))
+
+        XCTAssertFalse(settings.isGroupByModelEnabled(for: uid))
+        XCTAssertTrue(settings.disabledModelGroupKeys.contains(key))
+    }
+
+    func test_importGroupByModelEnabledByGroupMergesWithDisabledModelGroupKeys() throws {
+        let json = """
+        {
+          "schemaVersion": 5,
+          "exportedAt": "2026-02-24T00:00:00Z",
+          "outputPriority": [],
+          "inputPriority": [],
+          "disabledOutputDevices": [],
+          "disabledInputDevices": [],
+          "volumeMemory": {},
+          "customDeviceNames": {},
+          "deviceIcons": {},
+          "knownDevices": {},
+          "disabledModelGroupKeys": ["usbname:vendor:a", "usbname:vendor:b"],
+          "groupByModelEnabledByGroup": {
+            "usbname:vendor:a": true,
+            "usbname:vendor:c": false
+          },
+          "isAutoMode": true,
+          "hideMenuBarIcon": false
+        }
+        """
+
+        try settings.importSettings(from: Data(json.utf8))
+
+        XCTAssertEqual(settings.disabledModelGroupKeys, ["usbname:vendor:b", "usbname:vendor:c"])
+    }
+
     // MARK: – Volume memory
 
     func test_saveAndRetrieveOutputVolume() {
@@ -296,6 +565,19 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(imported.busyLightRules, settings.busyLightRules)
     }
 
+    func test_exportUsesHiddenDeviceKeys() throws {
+        settings.disabledOutputDevices = ["X"]
+        settings.disabledInputDevices = ["Y"]
+
+        let data = try settings.exportSettingsData()
+        let json = try XCTUnwrap(String(data: data, encoding: .utf8))
+
+        XCTAssertTrue(json.contains("\"hiddenOutputDevices\""))
+        XCTAssertTrue(json.contains("\"hiddenInputDevices\""))
+        XCTAssertFalse(json.contains("\"disabledOutputDevices\""))
+        XCTAssertFalse(json.contains("\"disabledInputDevices\""))
+    }
+
     func test_importRejectsNonSettingsJSON() throws {
         let data = Data("{\"hello\":\"world\"}".utf8)
         XCTAssertThrowsError(try settings.importSettings(from: data)) { error in
@@ -351,7 +633,7 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertEqual(settings.outputPriority, ["A"])
         XCTAssertEqual(settings.inputPriority, ["M"])
         XCTAssertEqual(settings.appLanguage, "system")
-        XCTAssertTrue(settings.showInputLevelMeter, "Missing showInputLevelMeter should default to true")
+        XCTAssertFalse(settings.showInputLevelMeter, "Missing showInputLevelMeter should default to false")
         XCTAssertTrue(settings.knownDeviceTransportTypes.isEmpty)
         XCTAssertTrue(settings.knownDeviceIconBaseNames.isEmpty)
         XCTAssertTrue(settings.knownDeviceIsAppleMade.isEmpty)
@@ -363,6 +645,70 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertFalse(settings.busyLightAPIEnabled)
         XCTAssertEqual(settings.busyLightAPIPort, 47833)
         XCTAssertEqual(settings.busyLightRules.count, 3)
+    }
+
+    func test_importLegacyDisabledDeviceKeysStillSupported() throws {
+        let json = """
+        {
+          "schemaVersion": 4,
+          "exportedAt": "2026-02-24T00:00:00Z",
+          "outputPriority": [],
+          "inputPriority": [],
+          "disabledOutputDevices": ["A"],
+          "disabledInputDevices": ["B"],
+          "volumeMemory": {},
+          "customDeviceNames": {},
+          "deviceIcons": {},
+          "knownDevices": {},
+          "isAutoMode": true,
+          "hideMenuBarIcon": false
+        }
+        """
+
+        try settings.importSettings(from: Data(json.utf8))
+
+        XCTAssertEqual(settings.disabledOutputDevices, ["A"])
+        XCTAssertEqual(settings.disabledInputDevices, ["B"])
+    }
+
+    func test_importPrefersHiddenDeviceKeysWhenBothArePresent() throws {
+        let json = """
+        {
+          "schemaVersion": 5,
+          "exportedAt": "2026-02-24T00:00:00Z",
+          "outputPriority": [],
+          "inputPriority": [],
+          "hiddenOutputDevices": ["H1"],
+          "hiddenInputDevices": ["H2"],
+          "disabledOutputDevices": ["D1"],
+          "disabledInputDevices": ["D2"],
+          "volumeMemory": {},
+          "customDeviceNames": {},
+          "deviceIcons": {},
+          "knownDevices": {},
+          "isAutoMode": true,
+          "hideMenuBarIcon": false
+        }
+        """
+
+        try settings.importSettings(from: Data(json.utf8))
+
+        XCTAssertEqual(settings.disabledOutputDevices, ["H1"])
+        XCTAssertEqual(settings.disabledInputDevices, ["H2"])
+    }
+
+    func test_exportImportRoundTripPreservesDisabledModelGroupKeysWithoutKnownDevices() throws {
+        settings.disabledModelGroupKeys = ["usbname:shure inc:shure mv7+"]
+
+        let data = try settings.exportSettingsData()
+
+        let otherSuite = "SentrioTests.\(UUID().uuidString)"
+        defer { UserDefaults.standard.removePersistentDomain(forName: otherSuite) }
+        let imported = try AppSettings(defaults: XCTUnwrap(UserDefaults(suiteName: otherSuite)))
+
+        try imported.importSettings(from: data)
+
+        XCTAssertEqual(imported.disabledModelGroupKeys, ["usbname:shure inc:shure mv7+"])
     }
 
     // MARK: – deleteDevice

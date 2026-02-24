@@ -9,11 +9,13 @@ Quick fixes for common issues.
 - Confirm **Auto** is enabled.
 - Check device priority order.
 - Ensure device is not disabled.
+- For Continuity/iPhone routes, use **Connect now** explicitly. These routes do not auto-connect in the background.
 
 ## Device appears but does not win
 
 - Move it higher in priority.
 - Re-check if another higher device is currently connected.
+- If a manual Continuity connect attempt fails, Sentrio falls back to the next eligible priority automatically.
 
 ## BusyLight did not change
 

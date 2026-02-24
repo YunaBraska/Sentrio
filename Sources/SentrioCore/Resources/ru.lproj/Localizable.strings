@@ -7,6 +7,7 @@
 "label.auto" = "Авто";
 "label.volume" = "Громкость";
 "label.inputGain" = "Усиление входа";
+"label.manualConnect" = "Ручное подключение";
 
 /* Общие действия */
 "action.preferences" = "Настройки…";
@@ -15,11 +16,16 @@
 "action.quit" = "Выйти";
 "action.playSound" = "Воспроизвести звук";
 "action.disableDevice" = "Отключить устройство";
+"action.hideDevice" = "Скрыть устройство";
+"action.forgetDevice" = "Забыть устройство";
+"action.groupByModel" = "Группировать по модели";
+"action.deviceActions" = "Действия устройства";
 "action.enable" = "Включить";
 "action.reset" = "Сбросить";
 "action.resetToDefault" = "Сбросить по умолчанию";
 "action.rename" = "Переименовать";
 "action.cancel" = "Отмена";
+"action.connectNow" = "Подключить сейчас";
 "action.save" = "Сохранить";
 "action.chooseIcon" = "Выбрать значок";
 "action.setIcon" = "Установить значок…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Перетаскивайте строки, чтобы упорядочить предпочтительные устройства ввода. Sentrio активирует самое приоритетное подключённое устройство.";
 "prefs.priority.section.title" = "Порядок приоритета";
 "prefs.priority.section.hint" = "Перетащите ≡, чтобы изменить порядок";
-"prefs.disabled.section.title" = "Отключено (не используется как запасной вариант)";
+"prefs.disabled.section.title" = "Скрытые (не используются как резерв)";
 
 /* Настройки: строки */
 "prefs.dragToReorder" = "Перетащите, чтобы изменить порядок";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Показывать индикатор уровня входа (Настройки)";
 "prefs.general.showInputLevelMeter.description" = "Если включено, Sentrio отслеживает устройство ввода по умолчанию только пока открыты Настройки. macOS будет показывать индикатор использования микрофона в это время.";
 "prefs.general.settings" = "Настройки";
-"prefs.general.settings.description" = "Экспорт включает списки приоритета, отключённые устройства, пользовательские имена/значки и память громкости.";
+"prefs.general.settings.description" = "Экспорт включает списки приоритета, скрытые устройства, пользовательские имена/значки и память громкости.";
 "prefs.general.volumeMemory" = "Память громкости";
 "prefs.general.volumeMemory.description" = "Уровни громкости сохраняются для каждого устройства и автоматически восстанавливаются, когда это устройство становится активным.";
 "prefs.language.title" = "Язык";

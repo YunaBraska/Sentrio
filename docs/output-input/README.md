@@ -9,11 +9,13 @@ This guide explains how audio switching works.
 - Sentrio checks each priority list from top to bottom.
 - The first connected, enabled device wins.
 - If a device disconnects, Sentrio falls back to the next one.
+- Menu priority numbers are shown as contiguous ranks for visible rows (`#1`, `#2`, `#3`, ...), even when grouped/hidden entries exist in stored priority arrays.
 
 ## Auto vs manual
 
 - **Auto ON**: Sentrio controls default output/input.
 - **Auto OFF**: you select devices manually from the menu panel.
+- **Continuity routes (for example iPhone as mic/speaker)**: explicit **Connect now** user action is required before they can become active. If that connect attempt fails, Sentrio immediately tries the next eligible device by priority.
 
 ## Common actions in Preferences
 

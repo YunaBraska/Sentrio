@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Volume";
 "label.inputGain" = "Gain d’entrée";
+"label.manualConnect" = "Connexion manuelle";
 
 /* Actions courantes */
 "action.preferences" = "Préférences…";
@@ -15,11 +16,16 @@
 "action.quit" = "Quitter";
 "action.playSound" = "Lire le son";
 "action.disableDevice" = "Désactiver l’appareil";
+"action.hideDevice" = "Masquer l’appareil";
+"action.forgetDevice" = "Oublier l’appareil";
+"action.groupByModel" = "Regrouper par modèle";
+"action.deviceActions" = "Actions de l’appareil";
 "action.enable" = "Activer";
 "action.reset" = "Réinitialiser";
 "action.resetToDefault" = "Réinitialiser par défaut";
 "action.rename" = "Renommer";
 "action.cancel" = "Annuler";
+"action.connectNow" = "Connecter maintenant";
 "action.save" = "Enregistrer";
 "action.chooseIcon" = "Choisir une icône";
 "action.setIcon" = "Définir l’icône…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Faites glisser les lignes pour classer les appareils d’entrée préférés. Sentrio active l’appareil connecté le mieux classé.";
 "prefs.priority.section.title" = "Ordre de priorité";
 "prefs.priority.section.hint" = "Saisissez ≡ pour réordonner";
-"prefs.disabled.section.title" = "Désactivés (pas utilisés en secours)";
+"prefs.disabled.section.title" = "Masqués (non utilisés comme repli)";
 
 /* Préférences : lignes */
 "prefs.dragToReorder" = "Glisser pour réordonner";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Afficher le niveau d’entrée en direct (Préférences)";
 "prefs.general.showInputLevelMeter.description" = "Si activé, Sentrio surveille l’appareil d’entrée par défaut uniquement lorsque Préférences est ouvert. macOS affichera l’indicateur micro en cours d’utilisation pendant ce temps.";
 "prefs.general.settings" = "Réglages";
-"prefs.general.settings.description" = "L’export inclut les listes de priorité, les appareils désactivés, les noms/icônes personnalisés et la mémoire des volumes.";
+"prefs.general.settings.description" = "L’export inclut les listes de priorité, les appareils masqués, les noms/icônes personnalisés et la mémoire des volumes.";
 "prefs.general.volumeMemory" = "Mémoire des volumes";
 "prefs.general.volumeMemory.description" = "Les niveaux de volume sont enregistrés par appareil et restaurés automatiquement quand cet appareil devient actif.";
 "prefs.language.title" = "Langue";

@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Volume";
 "label.inputGain" = "Input Gain";
+"label.manualConnect" = "Manual connection";
 
 /* Common actions */
 "action.preferences" = "Preferences…";
@@ -15,11 +16,16 @@
 "action.quit" = "Quit";
 "action.playSound" = "Play sound";
 "action.disableDevice" = "Disable Device";
+"action.hideDevice" = "Hide Device";
+"action.forgetDevice" = "Forget Device";
+"action.groupByModel" = "Group by model";
+"action.deviceActions" = "Device actions";
 "action.enable" = "Enable";
 "action.reset" = "Reset";
 "action.resetToDefault" = "Reset to default";
 "action.rename" = "Rename";
 "action.cancel" = "Cancel";
+"action.connectNow" = "Connect now";
 "action.save" = "Save";
 "action.chooseIcon" = "Choose Icon";
 "action.setIcon" = "Set Icon…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Drag rows to order preferred input devices. Sentrio activates the top-ranked connected device.";
 "prefs.priority.section.title" = "Priority order";
 "prefs.priority.section.hint" = "Grab ≡ to reorder";
-"prefs.disabled.section.title" = "Disabled (not used as fallback)";
+"prefs.disabled.section.title" = "Hidden (not used as fallback)";
 
 /* Preferences: rows */
 "prefs.dragToReorder" = "Drag to reorder";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Show live input level meter (Preferences)";
 "prefs.general.showInputLevelMeter.description" = "If enabled, Sentrio monitors the default input device only while Preferences is open. macOS will show the microphone‑in‑use indicator during that time.";
 "prefs.general.settings" = "Settings";
-"prefs.general.settings.description" = "Export includes priority lists, disabled devices, custom names/icons, and volume memory.";
+"prefs.general.settings.description" = "Export includes priority lists, hidden devices, custom names/icons, and volume memory.";
 "prefs.general.volumeMemory" = "Volume Memory";
 "prefs.general.volumeMemory.description" = "Volume levels are saved per device and restored automatically when that device becomes active.";
 "prefs.language.title" = "Language";

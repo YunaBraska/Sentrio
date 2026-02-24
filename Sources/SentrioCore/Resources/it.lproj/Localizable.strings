@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Volume";
 "label.inputGain" = "Guadagno ingresso";
+"label.manualConnect" = "Connessione manuale";
 
 /* Azioni comuni */
 "action.preferences" = "Preferenze…";
@@ -15,11 +16,16 @@
 "action.quit" = "Esci";
 "action.playSound" = "Riproduci suono";
 "action.disableDevice" = "Disattiva dispositivo";
+"action.hideDevice" = "Nascondi dispositivo";
+"action.forgetDevice" = "Dimentica dispositivo";
+"action.groupByModel" = "Raggruppa per modello";
+"action.deviceActions" = "Azioni dispositivo";
 "action.enable" = "Abilita";
 "action.reset" = "Ripristina";
 "action.resetToDefault" = "Ripristina predefiniti";
 "action.rename" = "Rinomina";
 "action.cancel" = "Annulla";
+"action.connectNow" = "Connetti ora";
 "action.save" = "Salva";
 "action.chooseIcon" = "Scegli icona";
 "action.setIcon" = "Imposta icona…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Trascina le righe per ordinare i dispositivi di ingresso preferiti. Sentrio attiva il dispositivo con priorità più alta tra quelli connessi.";
 "prefs.priority.section.title" = "Ordine di priorità";
 "prefs.priority.section.hint" = "Trascina ≡ per riordinare";
-"prefs.disabled.section.title" = "Disattivati (non usati come fallback)";
+"prefs.disabled.section.title" = "Nascosti (non usati come fallback)";
 
 /* Preferenze: righe */
 "prefs.dragToReorder" = "Trascina per riordinare";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Mostra indicatore livello ingresso (Preferenze)";
 "prefs.general.showInputLevelMeter.description" = "Se abilitato, Sentrio monitora il dispositivo di ingresso predefinito solo mentre Preferenze è aperto. macOS mostrerà l’indicatore micro in uso durante questo periodo.";
 "prefs.general.settings" = "Impostazioni";
-"prefs.general.settings.description" = "L’esportazione include liste di priorità, dispositivi disattivati, nomi/icono personalizzati e memoria volume.";
+"prefs.general.settings.description" = "L’esportazione include liste di priorità, dispositivi nascosti, nomi/icono personalizzati e memoria volume.";
 "prefs.general.volumeMemory" = "Memoria volume";
 "prefs.general.volumeMemory.description" = "I livelli di volume vengono salvati per dispositivo e ripristinati automaticamente quando quel dispositivo diventa attivo.";
 "prefs.language.title" = "Lingua";

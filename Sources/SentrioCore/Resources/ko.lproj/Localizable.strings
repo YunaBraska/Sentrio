@@ -7,6 +7,7 @@
 "label.auto" = "자동";
 "label.volume" = "볼륨";
 "label.inputGain" = "입력 게인";
+"label.manualConnect" = "수동 연결";
 
 /* 공통 동작 */
 "action.preferences" = "설정…";
@@ -15,11 +16,16 @@
 "action.quit" = "종료";
 "action.playSound" = "소리 재생";
 "action.disableDevice" = "기기 비활성화";
+"action.hideDevice" = "기기 숨기기";
+"action.forgetDevice" = "기기 정보 삭제";
+"action.groupByModel" = "모델별 그룹화";
+"action.deviceActions" = "기기 작업";
 "action.enable" = "활성화";
 "action.reset" = "재설정";
 "action.resetToDefault" = "기본값으로 재설정";
 "action.rename" = "이름 변경";
 "action.cancel" = "취소";
+"action.connectNow" = "지금 연결";
 "action.save" = "저장";
 "action.chooseIcon" = "아이콘 선택";
 "action.setIcon" = "아이콘 설정…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "행을 드래그하여 선호하는 입력 기기 순서를 정하세요. Sentrio는 가장 우선순위가 높은 연결된 기기를 활성화합니다.";
 "prefs.priority.section.title" = "우선순위 순서";
 "prefs.priority.section.hint" = "≡를 잡아 끌어 순서 변경";
-"prefs.disabled.section.title" = "비활성화됨(대체로 사용 안 함)";
+"prefs.disabled.section.title" = "숨김(폴백으로 사용 안 함)";
 
 /* 설정: 행 */
 "prefs.dragToReorder" = "드래그하여 순서 변경";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "실시간 입력 레벨 미터 표시(설정)";
 "prefs.general.showInputLevelMeter.description" = "활성화하면 Sentrio는 설정이 열려 있는 동안에만 기본 입력 기기를 모니터링합니다. 그동안 macOS는 마이크 사용 표시를 보여줍니다.";
 "prefs.general.settings" = "설정";
-"prefs.general.settings.description" = "내보내기에는 우선순위 목록, 비활성화된 기기, 사용자 지정 이름/아이콘 및 볼륨 메모리가 포함됩니다.";
+"prefs.general.settings.description" = "내보내기에는 우선순위 목록, 숨겨진 기기, 사용자 지정 이름/아이콘 및 볼륨 메모리가 포함됩니다.";
 "prefs.general.volumeMemory" = "볼륨 메모리";
 "prefs.general.volumeMemory.description" = "볼륨 레벨은 기기별로 저장되며 해당 기기가 활성화되면 자동으로 복원됩니다.";
 "prefs.language.title" = "언어";

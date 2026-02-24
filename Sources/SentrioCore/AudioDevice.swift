@@ -211,10 +211,10 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
 
     /// If `icon` is a standard speaker symbol, returns a volume-level variant (mirrors System Settings).
     /// All other icons are returned unchanged.
-    public static func volumeAdaptedIcon(_ icon: String, volume: Float) -> String {
+    public static func volumeAdaptedIcon(_ icon: String, volume: Float, isMuted: Bool = false) -> String {
         guard speakerFamily.contains(icon) else { return icon }
+        if isMuted || volume <= 0.001 { return "speaker.slash" }
         switch volume {
-        case 0: return "speaker.slash"
         case ..<0.34: return "speaker.wave.1"
         case ..<0.67: return "speaker.wave.2"
         default: return "speaker.wave.3"

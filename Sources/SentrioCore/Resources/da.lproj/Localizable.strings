@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Lydstyrke";
 "label.inputGain" = "Indgangsforstærkning";
+"label.manualConnect" = "Manuel tilslutning";
 
 /* Almindelige handlinger */
 "action.preferences" = "Indstillinger…";
@@ -15,11 +16,16 @@
 "action.quit" = "Afslut";
 "action.playSound" = "Afspil lyd";
 "action.disableDevice" = "Deaktivér enhed";
+"action.hideDevice" = "Skjul enhed";
+"action.forgetDevice" = "Glem enhed";
+"action.groupByModel" = "Gruppér efter model";
+"action.deviceActions" = "Enhedshandlinger";
 "action.enable" = "Aktivér";
 "action.reset" = "Nulstil";
 "action.resetToDefault" = "Nulstil til standard";
 "action.rename" = "Omdøb";
 "action.cancel" = "Annuller";
+"action.connectNow" = "Tilslut nu";
 "action.save" = "Gem";
 "action.chooseIcon" = "Vælg ikon";
 "action.setIcon" = "Angiv ikon…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Træk rækker for at sortere foretrukne indgangsenheder. Sentrio aktiverer den højest rangerede forbundne enhed.";
 "prefs.priority.section.title" = "Prioritetsrækkefølge";
 "prefs.priority.section.hint" = "Træk ≡ for at omarrangere";
-"prefs.disabled.section.title" = "Deaktiveret (bruges ikke som fallback)";
+"prefs.disabled.section.title" = "Skjulte (bruges ikke som fallback)";
 
 /* Indstillinger: rækker */
 "prefs.dragToReorder" = "Træk for at omarrangere";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Vis live input-niveaumåler (Indstillinger)";
 "prefs.general.showInputLevelMeter.description" = "Hvis aktiveret overvåger Sentrio standardindgangsenheden kun, mens Indstillinger er åben. macOS viser mikrofonindikatoren i den periode.";
 "prefs.general.settings" = "Indstillinger";
-"prefs.general.settings.description" = "Eksporten inkluderer prioritetslister, deaktiverede enheder, brugerdefinerede navne/ikoner og lydstyrkehukommelse.";
+"prefs.general.settings.description" = "Eksporten inkluderer prioritetslister, skjulte enheder, brugerdefinerede navne/ikoner og lydstyrkehukommelse.";
 "prefs.general.volumeMemory" = "Lydstyrkehukommelse";
 "prefs.general.volumeMemory.description" = "Lydstyrken gemmes pr. enhed og gendannes automatisk, når den enhed bliver aktiv.";
 "prefs.language.title" = "Sprog";

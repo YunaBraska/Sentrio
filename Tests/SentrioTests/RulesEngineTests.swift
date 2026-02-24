@@ -71,6 +71,36 @@ final class RulesEngineTests: XCTestCase {
         XCTAssertNil(RulesEngine.selectDevice(from: [], priority: ["A", "B"]))
     }
 
+    // MARK: – selectDeviceWithFallback
+
+    func test_selectDeviceWithFallback_returnsPriorityMatchWhenAvailable() {
+        let result = RulesEngine.selectDeviceWithFallback(
+            from: [d("B"), d("C")],
+            priority: ["A", "B", "C"]
+        )
+        XCTAssertEqual(result?.uid, "B")
+    }
+
+    func test_selectDeviceWithFallback_returnsFirstConnectedWhenNoPriorityMatch() {
+        let result = RulesEngine.selectDeviceWithFallback(
+            from: [d("X"), d("Y")],
+            priority: ["A", "B"]
+        )
+        XCTAssertEqual(result?.uid, "X")
+    }
+
+    func test_selectDeviceWithFallback_returnsFirstConnectedWhenPriorityEmpty() {
+        let result = RulesEngine.selectDeviceWithFallback(
+            from: [d("X"), d("Y")],
+            priority: []
+        )
+        XCTAssertEqual(result?.uid, "X")
+    }
+
+    func test_selectDeviceWithFallback_returnsNilWhenNoConnectedDevices() {
+        XCTAssertNil(RulesEngine.selectDeviceWithFallback(from: [], priority: ["A", "B"]))
+    }
+
     // MARK: – Helpers
 
     private func d(_ uid: String) -> AudioDevice {

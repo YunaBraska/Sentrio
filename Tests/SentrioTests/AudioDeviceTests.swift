@@ -261,6 +261,17 @@ final class AudioDeviceTests: XCTestCase {
         XCTAssertEqual(AudioDevice.volumeAdaptedIcon("speaker.wave.2", volume: 0), "speaker.slash")
     }
 
+    func test_volumeAdaptedIconTreatsNearZeroAsMuted() {
+        XCTAssertEqual(AudioDevice.volumeAdaptedIcon("speaker.wave.2", volume: 0.0004), "speaker.slash")
+    }
+
+    func test_volumeAdaptedIconRespectsMuteFlag() {
+        XCTAssertEqual(
+            AudioDevice.volumeAdaptedIcon("speaker.wave.2", volume: 0.7, isMuted: true),
+            "speaker.slash"
+        )
+    }
+
     func test_volumeAdaptedIconLow() {
         XCTAssertEqual(AudioDevice.volumeAdaptedIcon("speaker.wave.3", volume: 0.1), "speaker.wave.1")
     }

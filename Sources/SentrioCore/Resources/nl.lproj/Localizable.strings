@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Volume";
 "label.inputGain" = "Ingangsversterking";
+"label.manualConnect" = "Handmatige verbinding";
 
 /* Algemene acties */
 "action.preferences" = "Voorkeuren…";
@@ -15,11 +16,16 @@
 "action.quit" = "Stop";
 "action.playSound" = "Geluid afspelen";
 "action.disableDevice" = "Apparaat uitschakelen";
+"action.hideDevice" = "Apparaat verbergen";
+"action.forgetDevice" = "Apparaat vergeten";
+"action.groupByModel" = "Groeperen op model";
+"action.deviceActions" = "Apparaatacties";
 "action.enable" = "Inschakelen";
 "action.reset" = "Herstellen";
 "action.resetToDefault" = "Terug naar standaard";
 "action.rename" = "Hernoemen";
 "action.cancel" = "Annuleren";
+"action.connectNow" = "Nu verbinden";
 "action.save" = "Opslaan";
 "action.chooseIcon" = "Pictogram kiezen";
 "action.setIcon" = "Pictogram instellen…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Sleep rijen om voorkeursinvoerapparaten te ordenen. Sentrio activeert het hoogst gerangschikte verbonden apparaat.";
 "prefs.priority.section.title" = "Prioriteitsvolgorde";
 "prefs.priority.section.hint" = "Pak ≡ om te herschikken";
-"prefs.disabled.section.title" = "Uitgeschakeld (niet gebruikt als fallback)";
+"prefs.disabled.section.title" = "Verborgen (niet gebruikt als fallback)";
 
 /* Voorkeuren: rijen */
 "prefs.dragToReorder" = "Sleep om te herschikken";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Live invoerniveaumeter tonen (Voorkeuren)";
 "prefs.general.showInputLevelMeter.description" = "Indien ingeschakeld, monitort Sentrio het standaard invoerapparaat alleen terwijl Voorkeuren geopend is. macOS toont in die tijd de microfoon-indicator.";
 "prefs.general.settings" = "Instellingen";
-"prefs.general.settings.description" = "Export bevat prioriteitenlijsten, uitgeschakelde apparaten, aangepaste namen/pictogrammen en volumengeheugen.";
+"prefs.general.settings.description" = "Export bevat prioriteitenlijsten, verborgen apparaten, aangepaste namen/pictogrammen en volumengeheugen.";
 "prefs.general.volumeMemory" = "Volumengeheugen";
 "prefs.general.volumeMemory.description" = "Volumeniveaus worden per apparaat opgeslagen en automatisch hersteld wanneer dat apparaat actief wordt.";
 "prefs.language.title" = "Taal";

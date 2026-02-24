@@ -79,6 +79,17 @@ This ADR records non-negotiable guardrails for all future changes.
 - Preferences must accept plain integer entry for port (no decimal/grouping formatting behavior).
 - Stored/served port values remain normalized to valid range.
 
+11. Continuity route switching must be explicit and failure-safe.
+
+- Continuity/iPhone-style routes are manual-connect only.
+- Failed manual connects must not block UI or switching loops; selection must fall back immediately to the next eligible priority.
+- Priority status should remain user-comprehensible in UI (no misleading skipped rank badges for visible rows).
+
+12. BusyLight lifecycle behavior must be deterministic.
+
+- On first device detection after app start, run a short hello sequence before normal rule/manual evaluation.
+- On app termination, send explicit BusyLight `off`.
+
 ## Consequences
 
 - Slightly more implementation overhead per feature, but fewer regressions.

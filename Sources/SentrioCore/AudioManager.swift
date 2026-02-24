@@ -21,6 +21,8 @@ final class AudioManager: ObservableObject {
 
     /// Master output volume [0…1] of the current default output device
     @Published var outputVolume: Float = 0.5
+    /// Mute state of the current default output device (best effort; false when unavailable)
+    @Published var isOutputMuted = false
     /// Mic gain [0…1] of the current default input device
     @Published var inputVolume: Float = 0.5
     /// System alert/beep volume [0…1]
@@ -35,10 +37,18 @@ final class AudioManager: ObservableObject {
     private var audioEngine: AVAudioEngine?
     private var isInputLevelMonitoringEnabled = false
     private var inputLevelMonitoringDemandTokens: Set<String> = []
+    private let coreAudioWorkQueue = DispatchQueue(
+        label: "Sentrio.AudioManager.CoreAudioWork",
+        qos: .userInitiated,
+        attributes: .concurrent
+    )
 
     private var bluetoothBatterySnapshot = BluetoothBatterySnapshot()
     private var bluetoothBatterySnapshotLastRefreshedAt: Date?
     private var bluetoothBatterySnapshotRefreshInFlight = false
+    private var unavailableUntilByUID: [String: Date] = [:]
+    private let unavailableUntilByUIDLock = NSLock()
+    private let unavailableCooldownSeconds: TimeInterval = 30
 
     // MARK: – Init
 
@@ -55,7 +65,15 @@ final class AudioManager: ObservableObject {
     func setInputLevelMonitoringEnabled(_ enabled: Bool) {
         guard enabled != isInputLevelMonitoringEnabled else { return }
         isInputLevelMonitoringEnabled = enabled
-        if enabled { startInputLevelMonitor() } else { stopInputLevelMonitor() }
+        if enabled {
+            if let uid = defaultInput?.uid, isTemporarilyUnavailable(uid) {
+                inputLevel = 0
+                return
+            }
+            startInputLevelMonitor()
+        } else {
+            stopInputLevelMonitor()
+        }
     }
 
     func setInputLevelMonitoringDemand(_ demanded: Bool, token: String) {
@@ -83,35 +101,86 @@ final class AudioManager: ObservableObject {
     }
 
     func refreshVolumes() {
-        if let out = defaultOutput { outputVolume = volume(for: out, isOutput: true) ?? outputVolume }
-        if let inp = defaultInput { inputVolume = volume(for: inp, isOutput: false) ?? inputVolume }
-        alertVolume = Self.readAlertVolume()
+        let out = defaultOutput
+        let inp = defaultInput
+        let currentOutVolume = outputVolume
+        let currentOutMuted = isOutputMuted
+        let currentInVolume = inputVolume
+
+        coreAudioWorkQueue.async { [weak self] in
+            guard let self else { return }
+            let outVol = out.flatMap { self.volume(for: $0, isOutput: true) }
+            let outMuted = out.flatMap { self.mute(for: $0, isOutput: true) }
+            let inVol = inp.flatMap { self.volume(for: $0, isOutput: false) }
+            let alertVol = Self.readAlertVolume()
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                if let out, defaultOutput?.id == out.id {
+                    outputVolume = outVol ?? currentOutVolume
+                    isOutputMuted = outMuted ?? currentOutMuted
+                }
+                if let inp, defaultInput?.id == inp.id {
+                    inputVolume = inVol ?? currentInVolume
+                }
+                alertVolume = alertVol
+            }
+        }
     }
 
     // MARK: – Set default device
 
-    func setDefault(_ device: AudioDevice, isInput: Bool) {
-        let selector = isInput
-            ? kAudioHardwarePropertyDefaultInputDevice
-            : kAudioHardwarePropertyDefaultOutputDevice
-        var addr = AudioObjectPropertyAddress(
-            mSelector: selector,
-            mScope: kAudioObjectPropertyScopeGlobal,
-            mElement: kAudioObjectPropertyElementMain
-        )
-        var devID = device.id
-        AudioObjectSetPropertyData(
-            AudioObjectID(kAudioObjectSystemObject),
-            &addr, 0, nil,
-            UInt32(MemoryLayout<AudioDeviceID>.size), &devID
-        )
-        DispatchQueue.main.async { [weak self] in
-            if isInput { self?.defaultInput = device }
-            else { self?.defaultOutput = device }
-            self?.refreshVolumes()
-            self?.rebuildVolumeListenersIfNeeded()
+    func setDefault(
+        _ device: AudioDevice,
+        isInput: Bool,
+        completion: ((Bool) -> Void)? = nil
+    ) {
+        coreAudioWorkQueue.async { [weak self] in
+            guard let self else { return }
+
+            let selector = isInput
+                ? kAudioHardwarePropertyDefaultInputDevice
+                : kAudioHardwarePropertyDefaultOutputDevice
+            var addr = AudioObjectPropertyAddress(
+                mSelector: selector,
+                mScope: kAudioObjectPropertyScopeGlobal,
+                mElement: kAudioObjectPropertyElementMain
+            )
+            var devID = device.id
+            let status = AudioObjectSetPropertyData(
+                AudioObjectID(kAudioObjectSystemObject),
+                &addr, 0, nil,
+                UInt32(MemoryLayout<AudioDeviceID>.size), &devID
+            )
+
+            // Do not optimistically mutate defaultInput/defaultOutput on the main thread.
+            // Some devices (notably Continuity iPhone) can fail or time out; forcing UI state
+            // early makes the app look "stuck" with a non-active default device.
+            let resolvedID = resolveDefaultID(input: isInput)
+            let didSucceed = Self.didDefaultSwitchSucceed(
+                status: status,
+                resolvedDefaultID: resolvedID,
+                targetID: device.id
+            )
+            if !didSucceed {
+                markDeviceTemporarilyUnavailable(device.uid)
+                NSLog(
+                    "Sentrio: failed to set default %@ device to %@ (status=%d, resolvedID=%u)",
+                    isInput ? "input" : "output",
+                    device.uid,
+                    Int32(status),
+                    resolvedID
+                )
+            } else {
+                clearTemporarilyUnavailable(device.uid)
+            }
+
+            DispatchQueue.main.async {
+                completion?(didSucceed)
+            }
+            refreshDevices()
         }
-        // Level monitor restart is handled by the defaultInputDevice listener below
+        // Level monitor restart is handled by the defaultInputDevice listener.
     }
 
     // MARK: – Volume
@@ -133,6 +202,23 @@ final class AudioManager: ObservableObject {
         return nil
     }
 
+    func mute(for device: AudioDevice, isOutput: Bool) -> Bool? {
+        let scope: AudioObjectPropertyScope = isOutput
+            ? kAudioObjectPropertyScopeOutput : kAudioObjectPropertyScopeInput
+        for element: UInt32 in [kAudioObjectPropertyElementMain, 1, 2] {
+            var addr = AudioObjectPropertyAddress(
+                mSelector: kAudioDevicePropertyMute,
+                mScope: scope, mElement: element
+            )
+            guard AudioObjectHasProperty(device.id, &addr) else { continue }
+            var muted: UInt32 = 0
+            var size = UInt32(MemoryLayout<UInt32>.size)
+            guard AudioObjectGetPropertyData(device.id, &addr, 0, nil, &size, &muted) == noErr else { continue }
+            return muted != 0
+        }
+        return nil
+    }
+
     func setVolume(_ volume: Float, for device: AudioDevice, isOutput: Bool) {
         let scope: AudioObjectPropertyScope = isOutput
             ? kAudioObjectPropertyScopeOutput : kAudioObjectPropertyScopeInput
@@ -143,8 +229,12 @@ final class AudioManager: ObservableObject {
         if AudioObjectHasProperty(device.id, &addr) {
             var vol = volume
             AudioObjectSetPropertyData(device.id, &addr, 0, nil, UInt32(MemoryLayout<Float32>.size), &vol)
-            if isOutput { DispatchQueue.main.async { self.outputVolume = volume } }
-            else { DispatchQueue.main.async { self.inputVolume = volume } }
+            if isOutput {
+                DispatchQueue.main.async {
+                    self.outputVolume = volume
+                    self.isOutputMuted = volume <= 0.001
+                }
+            } else { DispatchQueue.main.async { self.inputVolume = volume } }
             return
         }
         for ch: UInt32 in [1, 2] {
@@ -154,8 +244,12 @@ final class AudioManager: ObservableObject {
                 AudioObjectSetPropertyData(device.id, &addr, 0, nil, UInt32(MemoryLayout<Float32>.size), &vol)
             }
         }
-        if isOutput { DispatchQueue.main.async { self.outputVolume = volume } }
-        else { DispatchQueue.main.async { self.inputVolume = volume } }
+        if isOutput {
+            DispatchQueue.main.async {
+                self.outputVolume = volume
+                self.isOutputMuted = volume <= 0.001
+            }
+        } else { DispatchQueue.main.async { self.inputVolume = volume } }
     }
 
     // MARK: – Alert volume
@@ -183,6 +277,22 @@ final class AudioManager: ObservableObject {
         var running: UInt32 = 0
         var size = UInt32(MemoryLayout<UInt32>.size)
         return AudioObjectGetPropertyData(device.id, &addr, 0, nil, &size, &running) == noErr && running != 0
+    }
+
+    func isTemporarilyUnavailable(_ uid: String, now: Date = Date()) -> Bool {
+        unavailableUntilByUIDLock.lock()
+        defer { unavailableUntilByUIDLock.unlock() }
+        unavailableUntilByUID = unavailableUntilByUID.filter { $0.value > now }
+        return Self.isDeviceUnavailable(until: unavailableUntilByUID[uid], now: now)
+    }
+
+    func requiresManualConnection(_ device: AudioDevice) -> Bool {
+        Self.requiresManualConnection(
+            uid: device.uid,
+            name: device.name,
+            transportType: device.transportType,
+            modelUID: device.modelUID
+        )
     }
 
     // MARK: – Periodic refresh (battery)
@@ -437,7 +547,7 @@ final class AudioManager: ObservableObject {
                 self.bluetoothBatterySnapshot = snapshot
                 self.bluetoothBatterySnapshotLastRefreshedAt = Date()
                 self.bluetoothBatterySnapshotRefreshInFlight = false
-                self.refreshDevices()
+                self.refreshDevicesAsync()
             }
         }
     }
@@ -927,29 +1037,87 @@ final class AudioManager: ObservableObject {
     private func addListeners() {
         let sys = AudioObjectID(kAudioObjectSystemObject)
         addListener(on: sys, selector: kAudioHardwarePropertyDevices) { [weak self] in
-            self?.refreshDevices()
+            self?.refreshDevicesAsync()
             self?.refreshBluetoothBatterySnapshotIfNeeded(force: true)
             NotificationCenter.default.post(name: .audioDevicesChanged, object: self)
         }
         addListener(on: sys, selector: kAudioHardwarePropertyDefaultOutputDevice) { [weak self] in
             guard let self else { return }
-            defaultOutput = fetchDefaultDevice(input: false)
-            refreshVolumes()
-            rebuildVolumeListenersIfNeeded()
+            refreshDevicesAsync()
             refreshBluetoothBatterySnapshotIfNeeded(force: true)
         }
         addListener(on: sys, selector: kAudioHardwarePropertyDefaultInputDevice) { [weak self] in
             guard let self else { return }
             inputLevel = 0 // reset immediately
-            defaultInput = fetchDefaultDevice(input: true)
-            refreshVolumes()
-            rebuildVolumeListenersIfNeeded()
+            refreshDevicesAsync()
             refreshBluetoothBatterySnapshotIfNeeded(force: true)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 guard let self, isInputLevelMonitoringEnabled else { return }
+                if let uid = defaultInput?.uid, isTemporarilyUnavailable(uid) {
+                    inputLevel = 0
+                    return
+                }
                 startInputLevelMonitor() // reattach tap to new device
             }
         }
+    }
+
+    private func refreshDevicesAsync() {
+        coreAudioWorkQueue.async { [weak self] in
+            self?.refreshDevices()
+        }
+    }
+
+    static func didDefaultSwitchSucceed(
+        status: OSStatus,
+        resolvedDefaultID: AudioDeviceID,
+        targetID: AudioDeviceID
+    ) -> Bool {
+        status == noErr && resolvedDefaultID == targetID
+    }
+
+    static func requiresManualConnection(
+        uid: String,
+        name: String,
+        transportType: AudioDevice.TransportType,
+        modelUID: String?
+    ) -> Bool {
+        let model = modelUID?.lowercased() ?? ""
+        if model.contains("iphone mic") || model.contains("continuity") {
+            return true
+        }
+
+        guard transportType == .unknown else { return false }
+        let lowerName = name.lowercased()
+        if model.contains("iphone") || lowerName.contains("iphone") {
+            return true
+        }
+        return Self.looksLikeCoreAudioUUID(uid)
+    }
+
+    static func isDeviceUnavailable(until: Date?, now: Date) -> Bool {
+        guard let until else { return false }
+        return until > now
+    }
+
+    static func looksLikeCoreAudioUUID(_ uid: String) -> Bool {
+        let regex = try? NSRegularExpression(
+            pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        )
+        let range = NSRange(uid.startIndex ..< uid.endIndex, in: uid)
+        return regex?.firstMatch(in: uid, options: [], range: range) != nil
+    }
+
+    private func markDeviceTemporarilyUnavailable(_ uid: String, now: Date = Date()) {
+        unavailableUntilByUIDLock.lock()
+        unavailableUntilByUID[uid] = now.addingTimeInterval(unavailableCooldownSeconds)
+        unavailableUntilByUIDLock.unlock()
+    }
+
+    private func clearTemporarilyUnavailable(_ uid: String) {
+        unavailableUntilByUIDLock.lock()
+        unavailableUntilByUID.removeValue(forKey: uid)
+        unavailableUntilByUIDLock.unlock()
     }
 
     // MARK: – Volume listeners (default devices)
@@ -988,31 +1156,57 @@ final class AudioManager: ObservableObject {
             ? kAudioObjectPropertyScopeOutput
             : kAudioObjectPropertyScopeInput
         let elements: [UInt32] = [kAudioObjectPropertyElementMain, 1, 2]
+        let selectors: [AudioObjectPropertySelector] = [kAudioDevicePropertyVolumeScalar, kAudioDevicePropertyMute]
 
-        for element in elements {
-            var addr = AudioObjectPropertyAddress(
-                mSelector: kAudioDevicePropertyVolumeScalar,
-                mScope: scope,
-                mElement: element
-            )
-            guard AudioObjectHasProperty(device.id, &addr) else { continue }
-            let block: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
-                DispatchQueue.main.async { self?.refreshVolumeFromSystem(isOutput: isOutput) }
+        for selector in selectors {
+            for element in elements {
+                var addr = AudioObjectPropertyAddress(
+                    mSelector: selector,
+                    mScope: scope,
+                    mElement: element
+                )
+                guard AudioObjectHasProperty(device.id, &addr) else { continue }
+                let block: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
+                    DispatchQueue.main.async { self?.refreshVolumeFromSystem(isOutput: isOutput) }
+                }
+                AudioObjectAddPropertyListenerBlock(deviceObjectID, &addr, .main, block)
+                volumeListeners.append(ListenerToken(objectID: deviceObjectID, address: addr, block: block))
             }
-            AudioObjectAddPropertyListenerBlock(deviceObjectID, &addr, .main, block)
-            volumeListeners.append(ListenerToken(objectID: deviceObjectID, address: addr, block: block))
         }
     }
 
     private func refreshVolumeFromSystem(isOutput: Bool) {
         if isOutput {
             guard let out = defaultOutput else { return }
-            let newValue = volume(for: out, isOutput: true) ?? outputVolume
-            if abs(newValue - outputVolume) > 0.005 { outputVolume = newValue }
+            let current = outputVolume
+            let currentMuted = isOutputMuted
+            coreAudioWorkQueue.async { [weak self] in
+                guard let self else { return }
+                let newValue = volume(for: out, isOutput: true) ?? current
+                let newMuted = mute(for: out, isOutput: true) ?? currentMuted
+                DispatchQueue.main.async { [weak self] in
+                    guard let self, defaultOutput?.id == out.id else { return }
+                    if abs(newValue - outputVolume) > 0.005 {
+                        outputVolume = newValue
+                    }
+                    if newMuted != isOutputMuted {
+                        isOutputMuted = newMuted
+                    }
+                }
+            }
         } else {
             guard let inp = defaultInput else { return }
-            let newValue = volume(for: inp, isOutput: false) ?? inputVolume
-            if abs(newValue - inputVolume) > 0.005 { inputVolume = newValue }
+            let current = inputVolume
+            coreAudioWorkQueue.async { [weak self] in
+                guard let self else { return }
+                let newValue = volume(for: inp, isOutput: false) ?? current
+                DispatchQueue.main.async { [weak self] in
+                    guard let self, defaultInput?.id == inp.id else { return }
+                    if abs(newValue - inputVolume) > 0.005 {
+                        inputVolume = newValue
+                    }
+                }
+            }
         }
     }
 

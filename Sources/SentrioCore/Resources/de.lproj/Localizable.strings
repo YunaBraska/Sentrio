@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Lautstärke";
 "label.inputGain" = "Eingangsverstärkung";
+"label.manualConnect" = "Manuelle Verbindung";
 
 /* Allgemeine Aktionen */
 "action.preferences" = "Einstellungen…";
@@ -15,11 +16,16 @@
 "action.quit" = "Beenden";
 "action.playSound" = "Sound abspielen";
 "action.disableDevice" = "Gerät deaktivieren";
+"action.hideDevice" = "Gerät ausblenden";
+"action.forgetDevice" = "Gerät vergessen";
+"action.groupByModel" = "Nach Modell gruppieren";
+"action.deviceActions" = "Geräteaktionen";
 "action.enable" = "Aktivieren";
 "action.reset" = "Zurücksetzen";
 "action.resetToDefault" = "Auf Standard zurücksetzen";
 "action.rename" = "Umbenennen";
 "action.cancel" = "Abbrechen";
+"action.connectNow" = "Jetzt verbinden";
 "action.save" = "Speichern";
 "action.chooseIcon" = "Symbol auswählen";
 "action.setIcon" = "Symbol festlegen…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Ziehe Zeilen, um bevorzugte Eingabegeräte zu sortieren. Sentrio aktiviert das höchstpriorisierte verbundene Gerät.";
 "prefs.priority.section.title" = "Prioritätsreihenfolge";
 "prefs.priority.section.hint" = "≡ greifen zum Sortieren";
-"prefs.disabled.section.title" = "Deaktiviert (nicht als Fallback genutzt)";
+"prefs.disabled.section.title" = "Ausgeblendet (nicht als Fallback verwendet)";
 
 /* Präferenzen: Zeilen */
 "prefs.dragToReorder" = "Ziehen zum Sortieren";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Live‑Eingangspegel anzeigen (Einstellungen)";
 "prefs.general.showInputLevelMeter.description" = "Wenn aktiviert, überwacht Sentrio das Standard‑Eingabegerät nur, während Einstellungen geöffnet ist. macOS zeigt in dieser Zeit den Mikrofon‑Indikator an.";
 "prefs.general.settings" = "Einstellungen";
-"prefs.general.settings.description" = "Der Export enthält Prioritätslisten, deaktivierte Geräte, benutzerdefinierte Namen/Symbole und den Lautstärke‑Speicher.";
+"prefs.general.settings.description" = "Der Export enthält Prioritätslisten, ausgeblendete Geräte, benutzerdefinierte Namen/Symbole und den Lautstärke‑Speicher.";
 "prefs.general.volumeMemory" = "Lautstärke‑Speicher";
 "prefs.general.volumeMemory.description" = "Lautstärken werden pro Gerät gespeichert und automatisch wiederhergestellt, wenn dieses Gerät aktiv wird.";
 "prefs.language.title" = "Sprache";

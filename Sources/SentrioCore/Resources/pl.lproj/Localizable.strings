@@ -7,6 +7,7 @@
 "label.auto" = "Auto";
 "label.volume" = "Głośność";
 "label.inputGain" = "Wzmocnienie wejścia";
+"label.manualConnect" = "Połączenie ręczne";
 
 /* Wspólne akcje */
 "action.preferences" = "Preferencje…";
@@ -15,11 +16,16 @@
 "action.quit" = "Zakończ";
 "action.playSound" = "Odtwórz dźwięk";
 "action.disableDevice" = "Wyłącz urządzenie";
+"action.hideDevice" = "Ukryj urządzenie";
+"action.forgetDevice" = "Zapomnij urządzenie";
+"action.groupByModel" = "Grupuj według modelu";
+"action.deviceActions" = "Akcje urządzenia";
 "action.enable" = "Włącz";
 "action.reset" = "Resetuj";
 "action.resetToDefault" = "Przywróć domyślne";
 "action.rename" = "Zmień nazwę";
 "action.cancel" = "Anuluj";
+"action.connectNow" = "Połącz teraz";
 "action.save" = "Zapisz";
 "action.chooseIcon" = "Wybierz ikonę";
 "action.setIcon" = "Ustaw ikonę…";
@@ -77,7 +83,7 @@
 "prefs.priority.input.description" = "Przeciągnij wiersze, aby ułożyć preferowane urządzenia wejściowe. Sentrio aktywuje najwyżej ocenione podłączone urządzenie.";
 "prefs.priority.section.title" = "Kolejność priorytetów";
 "prefs.priority.section.hint" = "Przeciągnij ≡, aby zmienić kolejność";
-"prefs.disabled.section.title" = "Wyłączone (nieużywane jako zapas)";
+"prefs.disabled.section.title" = "Ukryte (nieużywane jako zapas)";
 
 /* Preferencje: wiersze */
 "prefs.dragToReorder" = "Przeciągnij, aby zmienić kolejność";
@@ -107,7 +113,7 @@
 "prefs.general.showInputLevelMeter" = "Pokaż miernik poziomu wejścia na żywo (Preferencje)";
 "prefs.general.showInputLevelMeter.description" = "Jeśli włączone, Sentrio monitoruje domyślne urządzenie wejściowe tylko wtedy, gdy Preferencje są otwarte. macOS pokaże w tym czasie wskaźnik użycia mikrofonu.";
 "prefs.general.settings" = "Ustawienia";
-"prefs.general.settings.description" = "Eksport obejmuje listy priorytetów, wyłączone urządzenia, niestandardowe nazwy/ikony oraz pamięć głośności.";
+"prefs.general.settings.description" = "Eksport obejmuje listy priorytetów, ukryte urządzenia, niestandardowe nazwy/ikony oraz pamięć głośności.";
 "prefs.general.volumeMemory" = "Pamięć głośności";
 "prefs.general.volumeMemory.description" = "Poziomy głośności są zapisywane dla każdego urządzenia i przywracane automatycznie, gdy to urządzenie staje się aktywne.";
 "prefs.language.title" = "Język";

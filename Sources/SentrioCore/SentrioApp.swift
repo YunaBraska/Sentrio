@@ -45,6 +45,10 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    public func applicationWillTerminate(_: Notification) {
+        BusyLightIntegrationBridge.shared.shutdownIfAvailable()
+    }
+
     public func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
         NotificationCenter.default.post(name: .reopenApp, object: nil)
         return true

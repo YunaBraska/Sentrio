@@ -1,6 +1,18 @@
 import AppKit
 import SwiftUI
 
+enum MenuPriorityRanker {
+    static func rankMap(for visibleUIDs: [String]) -> [String: Int] {
+        var ranks: [String: Int] = [:]
+        var nextRank = 1
+        for uid in visibleUIDs where ranks[uid] == nil {
+            ranks[uid] = nextRank
+            nextRank += 1
+        }
+        return ranks
+    }
+}
+
 // MARK: – Root
 
 struct MenuBarView: View {
@@ -112,11 +124,13 @@ struct MenuBarView: View {
                     .font(.caption).foregroundStyle(.tertiary)
                     .padding(.horizontal, 16).padding(.bottom, 8)
             } else {
+                let rankByUID = MenuPriorityRanker.rankMap(for: devices.map(\.uid))
                 ForEach(devices) { device in
                     MenuDeviceRow(
                         device: device,
                         isDefault: device.uid == defaultUID,
-                        isInput: isInput
+                        isInput: isInput,
+                        priorityRank: rankByUID[device.uid]
                     )
                 }
             }
@@ -207,22 +221,53 @@ private struct MenuDeviceRow: View {
     let device: AudioDevice
     let isDefault: Bool
     let isInput: Bool
+    let priorityRank: Int?
 
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var appState: AppState
 
+    private var connectedUIDs: Set<String> {
+        Set(audio.outputDevices.map(\.uid) + audio.inputDevices.map(\.uid))
+    }
+
+    private var canForget: Bool {
+        settings.canForgetDevice(uid: device.uid, connectedUIDs: connectedUIDs)
+    }
+
+    private var isGroupByModelAvailable: Bool {
+        settings.modelGroupKey(for: device.uid) != nil
+    }
+
+    private var isGroupByModelEnabled: Bool {
+        settings.isGroupByModelEnabled(for: device.uid)
+    }
+
+    private var groupByModelActionTitle: String {
+        let base = L10n.tr("action.groupByModel")
+        let count = settings.groupByModelDeviceCount(for: device.uid)
+        return count > 1 ? "\(base) (\(count))" : base
+    }
+
+    private var requiresManualConnect: Bool {
+        audio.requiresManualConnection(device)
+    }
+
     var body: some View {
         // ── Name row ────────────────────────────────────────────
         Button {
-            guard !settings.isAutoMode else { return }
+            guard !settings.isAutoMode || requiresManualConnect else { return }
             appState.rules.switchTo(device, isInput: isInput)
         } label: {
             HStack(spacing: 10) {
                 // Device icon — volume-reactive for active output speaker icons
                 let baseIcon = settings.iconName(for: device, isOutput: !isInput)
                 let icon = (!isInput && isDefault)
-                    ? AudioDevice.volumeAdaptedIcon(baseIcon, volume: audio.outputVolume)
+                    ? AudioDevice.volumeAdaptedIcon(
+                        baseIcon,
+                        volume: audio.outputVolume,
+                        isMuted: audio.isOutputMuted
+                    )
                     : baseIcon
                 Image(systemName: icon)
                     .font(.system(size: 15))
@@ -230,11 +275,21 @@ private struct MenuDeviceRow: View {
                     .frame(width: 22)
 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(settings.displayName(for: device.uid, isOutput: !isInput))
-                        .lineLimit(1).truncationMode(.tail)
+                    Text(settings.displayName(
+                        for: device.uid,
+                        isOutput: !isInput,
+                        fallbackName: device.name
+                    ))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                     HStack(spacing: 4) {
                         Text(device.transportType.label)
                             .font(.caption2).foregroundStyle(.tertiary)
+                        if requiresManualConnect {
+                            Label(L10n.tr("label.manualConnect"), systemImage: "hand.tap")
+                                .font(.caption2)
+                                .foregroundStyle(.orange)
+                        }
                         if !device.batteryStates.isEmpty {
                             BatteryIconsInlineView(states: device.batteryStates)
                         }
@@ -254,15 +309,36 @@ private struct MenuDeviceRow: View {
         }
         .buttonStyle(.plain)
         .background(isDefault ? Color.accentColor.opacity(0.08) : Color.clear)
-        .help(settings.isAutoMode ? L10n.tr("menu.deviceRow.autoModeHelp") : "")
+        .help(settings.isAutoMode && !requiresManualConnect ? L10n.tr("menu.deviceRow.autoModeHelp") : "")
         .contextMenu {
-            iconPickerMenu
-            Divider()
-            if isAirPodsFamily {
-                Button(L10n.tr("action.bluetoothSettings")) { openBluetoothSettings() }
+            if requiresManualConnect {
+                Button(L10n.tr("action.connectNow")) { appState.rules.switchTo(device, isInput: isInput) }
                 Divider()
             }
-            Button(L10n.tr("action.disableDevice")) { settings.disableDevice(uid: device.uid, isOutput: !isInput) }
+            Button(L10n.tr("action.rename")) { renameDevice() }
+            iconPickerMenu
+            Divider()
+            Button(L10n.tr("action.hideDevice")) {
+                settings.hideDevice(uid: device.uid, isOutput: !isInput)
+            }
+            Button(L10n.tr("action.forgetDevice")) {
+                settings.forgetDevice(uid: device.uid, connectedUIDs: connectedUIDs)
+            }
+            .disabled(!canForget)
+            Button {
+                settings.setGroupByModelEnabled(!isGroupByModelEnabled, for: device.uid)
+            } label: {
+                if isGroupByModelEnabled {
+                    Label(groupByModelActionTitle, systemImage: "checkmark")
+                } else {
+                    Text(groupByModelActionTitle)
+                }
+            }
+            .disabled(!isGroupByModelAvailable)
+            if isAirPodsFamily {
+                Divider()
+                Button(L10n.tr("action.bluetoothSettings")) { openBluetoothSettings() }
+            }
         }
     }
 
@@ -280,10 +356,32 @@ private struct MenuDeviceRow: View {
         NSWorkspace.shared.open(url)
     }
 
-    private var priorityRank: Int? {
-        let list = isInput ? settings.inputPriority : settings.outputPriority
-        guard let idx = list.firstIndex(of: device.uid) else { return nil }
-        return idx + 1
+    private func renameDevice() {
+        let alert = NSAlert()
+        alert.messageText = L10n.tr("action.rename")
+        alert.informativeText = isInput ? L10n.tr("prefs.rename.subtitle.input") : L10n.tr("prefs.rename.subtitle.output")
+
+        let field = NSTextField(string: settings.displayName(
+            for: device.uid,
+            isOutput: !isInput,
+            fallbackName: device.name
+        ))
+        field.placeholderString = L10n.tr("prefs.rename.deviceNamePlaceholder")
+        field.frame = NSRect(x: 0, y: 0, width: 260, height: 24)
+        alert.accessoryView = field
+
+        alert.addButton(withTitle: L10n.tr("action.save"))
+        alert.addButton(withTitle: L10n.tr("action.reset"))
+        alert.addButton(withTitle: L10n.tr("action.cancel"))
+
+        switch alert.runModal() {
+        case .alertFirstButtonReturn:
+            settings.setCustomName(field.stringValue, for: device.uid, isOutput: !isInput)
+        case .alertSecondButtonReturn:
+            settings.clearCustomName(for: device.uid, isOutput: !isInput)
+        default:
+            break
+        }
     }
 
     /// Context menu: icon picker

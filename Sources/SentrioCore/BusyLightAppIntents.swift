@@ -30,6 +30,10 @@ public final class BusyLightIntegrationBridge {
         self.engine = engine
     }
 
+    public func shutdownIfAvailable() {
+        engine?.shutdown()
+    }
+
     public func setAuto(trigger: String) throws {
         guard let engine else { throw BusyLightIntegrationError.unavailable }
         engine.enableAutoControl(source: trigger)

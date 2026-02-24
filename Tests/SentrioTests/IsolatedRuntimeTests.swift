@@ -80,4 +80,53 @@ final class IsolatedRuntimeTests: XCTestCase {
         XCTAssertFalse(engine.apiServerRunning)
         XCTAssertNil(engine.apiServerError)
     }
+
+    func test_rulesEngine_autoMode_restoresHighestPriorityInputAfterDefaultDrift() async throws {
+        let suiteName = "Sentrio.IsolatedRuntimeTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("Unable to allocate isolated defaults suite.")
+            return
+        }
+        defaults.removePersistentDomain(forName: suiteName)
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let settings = AppSettings(defaults: defaults)
+        settings.isAutoMode = true
+        settings.inputPriority = ["shure-mv7", "airpods-mic"]
+
+        let shureMic = AudioDevice(
+            uid: "shure-mv7",
+            name: "Shure MV7+",
+            hasInput: true,
+            hasOutput: false,
+            transportType: .usb
+        )
+        let airPodsMic = AudioDevice(
+            uid: "airpods-mic",
+            name: "AirPods Pro",
+            hasInput: true,
+            hasOutput: true,
+            transportType: .bluetooth
+        )
+
+        let audio = AudioManager(mode: .isolated)
+        audio.inputDevices = [shureMic, airPodsMic]
+        audio.defaultInput = shureMic
+
+        let rules = RulesEngine(audio: audio, settings: settings)
+        _ = rules
+
+        // Simulate macOS forcing both roles onto AirPods when they connect.
+        audio.defaultInput = airPodsMic
+
+        try await Task.sleep(nanoseconds: 120_000_000)
+
+        XCTAssertEqual(
+            audio.defaultInput?.uid,
+            "shure-mv7",
+            "Auto mode should restore the highest-priority input device."
+        )
+    }
 }

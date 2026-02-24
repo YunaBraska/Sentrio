@@ -28,6 +28,28 @@ final class RulesEngine {
             .sink { [weak self] _ in self?.onDevicesChanged() }
             .store(in: &cancellables)
 
+        audio.$defaultOutput
+            .map { $0?.uid }
+            .removeDuplicates()
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                if settings.isAutoMode { applyOutputRules() }
+            }
+            .store(in: &cancellables)
+
+        audio.$defaultInput
+            .map { $0?.uid }
+            .removeDuplicates()
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                if settings.isAutoMode { applyInputRules() }
+            }
+            .store(in: &cancellables)
+
         settings.$outputPriority.dropFirst().receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }

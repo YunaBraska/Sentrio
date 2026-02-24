@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Aucun événement déclencheur pour le moment.";
 
 "action.clearLog" = "Effacer le journal";
+"prefs.busylight.rule.metrics.total" = "Actif total";
+"prefs.busylight.rule.metrics.avgDay" = "Moy./jour";
+"prefs.busylight.rule.metrics.avgMonth" = "Moy./mois";
+"prefs.busylight.rule.metrics.avgYear" = "Moy./an";

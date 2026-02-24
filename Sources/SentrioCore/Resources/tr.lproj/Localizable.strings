@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Henüz tetikleme olayı yok.";
 
 "action.clearLog" = "Günlüğü temizle";
+"prefs.busylight.rule.metrics.total" = "Toplam aktif";
+"prefs.busylight.rule.metrics.avgDay" = "Ort./gün";
+"prefs.busylight.rule.metrics.avgMonth" = "Ort./ay";
+"prefs.busylight.rule.metrics.avgYear" = "Ort./yıl";

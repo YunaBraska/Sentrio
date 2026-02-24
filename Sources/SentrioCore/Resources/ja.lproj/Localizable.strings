@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "トリガーイベントはまだありません。";
 
 "action.clearLog" = "ログを消去";
+"prefs.busylight.rule.metrics.total" = "累計アクティブ";
+"prefs.busylight.rule.metrics.avgDay" = "平均/日";
+"prefs.busylight.rule.metrics.avgMonth" = "平均/月";
+"prefs.busylight.rule.metrics.avgYear" = "平均/年";

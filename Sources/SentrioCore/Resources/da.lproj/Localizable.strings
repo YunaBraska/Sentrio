@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Ingen udløsende hændelser endnu.";
 
 "action.clearLog" = "Ryd log";
+"prefs.busylight.rule.metrics.total" = "Aktiv i alt";
+"prefs.busylight.rule.metrics.avgDay" = "Gns./dag";
+"prefs.busylight.rule.metrics.avgMonth" = "Gns./måned";
+"prefs.busylight.rule.metrics.avgYear" = "Gns./år";

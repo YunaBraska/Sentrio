@@ -27,6 +27,7 @@ Use **Import Settings...** to restore from a previous export.
 - Custom names and icons
 - Volume memory
 - BusyLight settings and rules
+- BusyLight per-rule activity metrics (totals + rolling windows)
 
 ## Good practice
 

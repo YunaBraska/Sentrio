@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Nessun evento di attivazione finora.";
 
 "action.clearLog" = "Cancella registro";
+"prefs.busylight.rule.metrics.total" = "Attivo totale";
+"prefs.busylight.rule.metrics.avgDay" = "Med./giorno";
+"prefs.busylight.rule.metrics.avgMonth" = "Med./mese";
+"prefs.busylight.rule.metrics.avgYear" = "Med./anno";

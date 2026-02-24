@@ -537,9 +537,10 @@ final class AppSettingsTests: XCTestCase {
         )
         settings.busyLightAPIEnabled = true
         settings.busyLightAPIPort = 51234
-        settings.busyLightRules = try [
+        let ruleID = try XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-000000000001"))
+        settings.busyLightRules = [
             BusyLightRule(
-                id: XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-000000000001")),
+                id: ruleID,
                 name: "Mic busy",
                 isEnabled: true,
                 expression: BusyLightExpression(
@@ -551,6 +552,15 @@ final class AppSettingsTests: XCTestCase {
                     color: BusyLightColor(red: 255, green: 140, blue: 0),
                     periodMilliseconds: 900
                 )
+            ),
+        ]
+        settings.busyLightRuleMetrics = [
+            AppSettings.busyLightRuleMetricsKey(for: ruleID): BusyLightRuleMetrics(
+                totalActiveMilliseconds: 12345,
+                recentIntervals: [BusyLightRuleActiveInterval(
+                    startEpochMilliseconds: 1_700_000_000_000,
+                    endEpochMilliseconds: 1_700_000_010_000
+                )]
             ),
         ]
 
@@ -587,6 +597,7 @@ final class AppSettingsTests: XCTestCase {
         XCTAssertTrue(imported.busyLightAPIEnabled)
         XCTAssertEqual(imported.busyLightAPIPort, 51234)
         XCTAssertEqual(imported.busyLightRules, settings.busyLightRules)
+        XCTAssertEqual(imported.busyLightRuleMetrics, settings.busyLightRuleMetrics)
     }
 
     func test_exportUsesHiddenDeviceKeys() throws {
@@ -733,6 +744,88 @@ final class AppSettingsTests: XCTestCase {
         try imported.importSettings(from: data)
 
         XCTAssertEqual(imported.disabledModelGroupKeys, ["usbname:shure inc:shure mv7+"])
+    }
+
+    func test_busyLightRuleMetricsRemovedWhenRuleDeleted() throws {
+        let keepID = try XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-0000000000AA"))
+        let dropID = try XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-0000000000BB"))
+        settings.busyLightRules = [
+            BusyLightRule(
+                id: keepID,
+                name: "Keep",
+                expression: BusyLightExpression(
+                    conditions: [BusyLightCondition(signal: .microphone, expectedValue: true)],
+                    operators: []
+                ),
+                action: .defaultBusy
+            ),
+            BusyLightRule(
+                id: dropID,
+                name: "Drop",
+                expression: BusyLightExpression(
+                    conditions: [BusyLightCondition(signal: .camera, expectedValue: true)],
+                    operators: []
+                ),
+                action: .defaultBusy
+            ),
+        ]
+
+        settings.busyLightRuleMetrics = [
+            AppSettings.busyLightRuleMetricsKey(for: keepID): BusyLightRuleMetrics(totalActiveMilliseconds: 100),
+            AppSettings.busyLightRuleMetricsKey(for: dropID): BusyLightRuleMetrics(totalActiveMilliseconds: 200),
+        ]
+
+        settings.busyLightRules = [settings.busyLightRules[0]]
+
+        XCTAssertNotNil(settings.busyLightRuleMetrics[AppSettings.busyLightRuleMetricsKey(for: keepID)])
+        XCTAssertNil(settings.busyLightRuleMetrics[AppSettings.busyLightRuleMetricsKey(for: dropID)])
+    }
+
+    func test_recordBusyLightRuleActiveInterval_ignoresUnknownRule() throws {
+        let knownID = try XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-0000000000CC"))
+        settings.busyLightRules = [
+            BusyLightRule(
+                id: knownID,
+                name: "Known",
+                expression: BusyLightExpression(
+                    conditions: [BusyLightCondition(signal: .microphone, expectedValue: true)],
+                    operators: []
+                ),
+                action: .defaultBusy
+            ),
+        ]
+
+        let unknownID = try XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-0000000000DD"))
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+        let end = Date(timeIntervalSince1970: 1_700_000_001)
+
+        settings.recordBusyLightRuleActiveInterval(ruleID: unknownID, start: start, end: end, now: end)
+
+        XCTAssertTrue(settings.busyLightRuleMetrics.isEmpty)
+    }
+
+    func test_recordBusyLightRuleActiveInterval_recordsDurationForKnownRule() throws {
+        let ruleID = try XCTUnwrap(UUID(uuidString: "00000000-0000-0000-0000-0000000000EE"))
+        settings.busyLightRules = [
+            BusyLightRule(
+                id: ruleID,
+                name: "Known",
+                expression: BusyLightExpression(
+                    conditions: [BusyLightCondition(signal: .microphone, expectedValue: true)],
+                    operators: []
+                ),
+                action: .defaultBusy
+            ),
+        ]
+
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+        let end = Date(timeIntervalSince1970: 1_700_000_004)
+
+        settings.recordBusyLightRuleActiveInterval(ruleID: ruleID, start: start, end: end, now: end)
+
+        let key = AppSettings.busyLightRuleMetricsKey(for: ruleID)
+        XCTAssertEqual(settings.busyLightRuleMetrics[key]?.totalActiveMilliseconds, 4000)
+        XCTAssertEqual(settings.busyLightRuleMetrics[key]?.recentIntervals.count, 1)
     }
 
     // MARK: – deleteDevice

@@ -40,6 +40,9 @@ bash scripts/format.sh
 - `Sources/SentrioCore/BusyLightSignalsMonitor.swift`  
   Mic/camera/screen signals feeding BusyLight rules.
 
+- `Sources/SentrioCore/BusyLightRuleMetrics.swift`  
+  Rolling per-rule activity metrics + duration formatting used by BusyLight rule footers.
+
 - `Sources/SentrioCore/PreferencesView.swift` and `Sources/SentrioCore/BusyLightPreferencesView.swift`  
   Settings UI.
 
@@ -74,9 +77,15 @@ bash scripts/format.sh
 - Keepalive writes are operational noise and must not be logged as trigger events.
 - BusyLight tab visibility follows hardware presence: hide when no device, show on reconnect.
 - BusyLight API port input is integer-only UX in Preferences; normalize to valid range in settings.
-- Signal label uses **Alert sounds** (not guaranteed per-app media truth).
+- Signal label uses **Media activity** (best-effort, not guaranteed per-app media truth).
 - BusyLight startup sequence: on first device detection, run a short hello sequence before applying rules/manual action.
 - App shutdown behavior: always send BusyLight `off` on application termination.
+- BusyLight rule metrics are persisted per rule, exported/imported with settings, and shown as:
+  - total active duration
+  - rolling avg/day (last 24h)
+  - rolling avg/month (last 30d / 30)
+  - rolling avg/year (last 365d / 365)
+- Deleting a BusyLight rule must also delete that rule's persisted metrics.
 
 ## Audio Product Decisions (Current)
 

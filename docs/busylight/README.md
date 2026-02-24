@@ -23,7 +23,7 @@ Current signals include:
 - Microphone
 - Camera
 - Screen recording
-- Alert sounds
+- Media activity
 
 Signals are best-effort and depend on available macOS APIs.
 
@@ -33,6 +33,12 @@ Each rule has:
 - Name
 - Conditions (AND/OR)
 - Action (off, solid, blink, pulse, color, speed)
+- Footer metrics:
+  - Active total
+  - Avg/day (rolling last 24h)
+  - Avg/month (rolling last 30d, normalized per day)
+  - Avg/year (rolling last 365d, normalized per day)
+  - Display units are compact: `ms`, `s`, `min`, `h`, `d`, `mo`, `y`
 
 First matching enabled rule wins.
 

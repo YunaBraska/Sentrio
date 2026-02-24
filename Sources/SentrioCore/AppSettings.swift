@@ -175,7 +175,14 @@ final class AppSettings: ObservableObject {
     }
 
     @Published var busyLightRules: [BusyLightRule] {
-        didSet { save("busyLightRules", busyLightRules) }
+        didSet {
+            save("busyLightRules", busyLightRules)
+            pruneBusyLightRuleMetricsForExistingRules()
+        }
+    }
+
+    @Published var busyLightRuleMetrics: [String: BusyLightRuleMetrics] {
+        didSet { save("busyLightRuleMetrics", busyLightRuleMetrics) }
     }
 
     // MARK: – Storage
@@ -228,11 +235,46 @@ final class AppSettings: ObservableObject {
         let storedBusyLightPort = defaults.object(forKey: "busyLightAPIPort") as? Int
         busyLightAPIPort = Self.normalizedBusyLightAPIPort(storedBusyLightPort ?? 47833)
         busyLightRules = defaults.jsonDecode([BusyLightRule].self, forKey: "busyLightRules") ?? BusyLightRule.defaultRules()
+        busyLightRuleMetrics = defaults.jsonDecode([String: BusyLightRuleMetrics].self, forKey: "busyLightRuleMetrics") ?? [:]
+        pruneBusyLightRuleMetricsForExistingRules()
         outputPriority = normalizePriorityList(outputPriority)
         inputPriority = normalizePriorityList(inputPriority)
 
         // Property observers do not fire during init.
         L10n.overrideLocalization = appLanguage == "system" ? nil : appLanguage
+    }
+
+    // MARK: – BusyLight rule metrics
+
+    static func busyLightRuleMetricsKey(for ruleID: UUID) -> String {
+        ruleID.uuidString.lowercased()
+    }
+
+    func busyLightRuleMetricsForRule(_ ruleID: UUID) -> BusyLightRuleMetrics {
+        busyLightRuleMetrics[Self.busyLightRuleMetricsKey(for: ruleID)] ?? BusyLightRuleMetrics()
+    }
+
+    func recordBusyLightRuleActiveInterval(
+        ruleID: UUID,
+        start: Date,
+        end: Date,
+        now: Date = Date()
+    ) {
+        guard busyLightRules.contains(where: { $0.id == ruleID }) else { return }
+        guard end > start else { return }
+
+        let key = Self.busyLightRuleMetricsKey(for: ruleID)
+        var metrics = busyLightRuleMetrics[key] ?? BusyLightRuleMetrics()
+        metrics.recordInterval(start: start, end: end, now: now)
+        busyLightRuleMetrics[key] = metrics
+    }
+
+    private func pruneBusyLightRuleMetricsForExistingRules() {
+        let validKeys = Set(busyLightRules.map { Self.busyLightRuleMetricsKey(for: $0.id) })
+        let filtered = busyLightRuleMetrics.filter { validKeys.contains($0.key) }
+        if filtered.count != busyLightRuleMetrics.count {
+            busyLightRuleMetrics = filtered
+        }
     }
 
     // MARK: – Volume memory
@@ -692,6 +734,7 @@ final class AppSettings: ObservableObject {
         var busyLightAPIEnabled: Bool?
         var busyLightAPIPort: Int?
         var busyLightRules: [BusyLightRule]?
+        var busyLightRuleMetrics: [String: BusyLightRuleMetrics]?
     }
 
     enum ImportExportError: LocalizedError {
@@ -710,7 +753,7 @@ final class AppSettings: ObservableObject {
 
     func exportSettingsData() throws -> Data {
         let export = ExportedSettings(
-            schemaVersion: 5,
+            schemaVersion: 6,
             exportedAt: Date(),
             outputPriority: outputPriority,
             inputPriority: inputPriority,
@@ -743,7 +786,8 @@ final class AppSettings: ObservableObject {
             busyLightManualAction: busyLightManualAction,
             busyLightAPIEnabled: busyLightAPIEnabled,
             busyLightAPIPort: busyLightAPIPort,
-            busyLightRules: busyLightRules
+            busyLightRules: busyLightRules,
+            busyLightRuleMetrics: busyLightRuleMetrics
         )
 
         let encoder = JSONEncoder()
@@ -773,7 +817,7 @@ final class AppSettings: ObservableObject {
             throw ImportExportError.invalidFile
         }
 
-        guard (1 ... 5).contains(export.schemaVersion) else {
+        guard (1 ... 6).contains(export.schemaVersion) else {
             throw ImportExportError.unsupportedSchema(export.schemaVersion)
         }
 
@@ -829,6 +873,8 @@ final class AppSettings: ObservableObject {
         busyLightAPIEnabled = export.busyLightAPIEnabled ?? false
         busyLightAPIPort = Self.normalizedBusyLightAPIPort(export.busyLightAPIPort ?? 47833)
         busyLightRules = export.busyLightRules ?? BusyLightRule.defaultRules()
+        busyLightRuleMetrics = export.busyLightRuleMetrics ?? [:]
+        pruneBusyLightRuleMetricsForExistingRules()
         outputPriority = normalizePriorityList(outputPriority)
         inputPriority = normalizePriorityList(inputPriority)
     }

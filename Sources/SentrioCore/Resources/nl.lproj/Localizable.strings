@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Nog geen triggergebeurtenissen.";
 
 "action.clearLog" = "Log wissen";
+"prefs.busylight.rule.metrics.total" = "Totaal actief";
+"prefs.busylight.rule.metrics.avgDay" = "Gem./dag";
+"prefs.busylight.rule.metrics.avgMonth" = "Gem./maand";
+"prefs.busylight.rule.metrics.avgYear" = "Gem./jaar";

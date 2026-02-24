@@ -17,6 +17,7 @@ struct BusyLightEvent: Codable, Identifiable, Equatable {
 private struct BusyLightDecision {
     var action: BusyLightAction?
     var trigger: String
+    var matchedRuleID: UUID?
 }
 
 struct BusyLightHelloFrame: Equatable {
@@ -106,6 +107,8 @@ final class BusyLightEngine: ObservableObject {
     private var connectHelloWorkItems: [DispatchWorkItem] = []
     private var isConnectHelloRunning = false
     private var pendingApplyAfterConnectHello: (force: Bool, source: String)?
+    private var activeRuleID: UUID?
+    private var activeRuleStartedAt: Date?
 
     private static let previewDuration: TimeInterval = 2.5
     private static let solidKeepaliveInterval: TimeInterval = 20
@@ -202,6 +205,7 @@ final class BusyLightEngine: ObservableObject {
     }
 
     func shutdown() {
+        finalizeRuleActivity(at: Date())
         cancelConnectHelloSequence()
         previewEndWorkItem?.cancel()
         previewEndWorkItem = nil
@@ -246,22 +250,23 @@ final class BusyLightEngine: ObservableObject {
 
     private func desiredDecision() -> BusyLightDecision {
         if let previewOverride {
-            return BusyLightDecision(action: previewOverride, trigger: "preview")
+            return BusyLightDecision(action: previewOverride, trigger: "preview", matchedRuleID: nil)
         }
         guard settings.busyLightEnabled else {
-            return BusyLightDecision(action: nil, trigger: "disabled")
+            return BusyLightDecision(action: nil, trigger: "disabled", matchedRuleID: nil)
         }
 
         switch settings.busyLightControlMode {
         case .manual:
-            return BusyLightDecision(action: settings.busyLightManualAction, trigger: "manual")
+            return BusyLightDecision(action: settings.busyLightManualAction, trigger: "manual", matchedRuleID: nil)
         case .auto:
             for rule in settings.busyLightRules where rule.matches(using: signals) {
-                return BusyLightDecision(action: rule.action, trigger: "rule '\(rule.name)'")
+                return BusyLightDecision(action: rule.action, trigger: "rule '\(rule.name)'", matchedRuleID: rule.id)
             }
             return BusyLightDecision(
                 action: BusyLightAction(mode: .off, color: .offColor, periodMilliseconds: Self.defaultActionPeriodMilliseconds),
-                trigger: "no rule match"
+                trigger: "no rule match",
+                matchedRuleID: nil
             )
         }
     }
@@ -276,7 +281,16 @@ final class BusyLightEngine: ObservableObject {
             return
         }
         let decision = desiredDecision()
+        updateRuleActivity(nextRuleID: decision.matchedRuleID, at: Date())
         apply(action: decision.action, force: force, source: source, trigger: decision.trigger)
+    }
+
+    func ruleMetricsSummary(for ruleID: UUID, now: Date = Date()) -> BusyLightRuleMetricsSummary {
+        var metrics = settings.busyLightRuleMetricsForRule(ruleID)
+        if activeRuleID == ruleID, let start = activeRuleStartedAt, now > start {
+            metrics.recordInterval(start: start, end: now, now: now)
+        }
+        return metrics.summary(now: now)
     }
 
     private func apply(action: BusyLightAction?, force: Bool, source: String, trigger: String) {
@@ -602,5 +616,23 @@ final class BusyLightEngine: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             self?.suppressSettingsApply = false
         }
+    }
+
+    private func updateRuleActivity(nextRuleID: UUID?, at now: Date) {
+        guard nextRuleID != activeRuleID else { return }
+
+        if let currentRuleID = activeRuleID, let start = activeRuleStartedAt {
+            settings.recordBusyLightRuleActiveInterval(ruleID: currentRuleID, start: start, end: now, now: now)
+        }
+
+        activeRuleID = nextRuleID
+        activeRuleStartedAt = nextRuleID == nil ? nil : now
+    }
+
+    private func finalizeRuleActivity(at now: Date) {
+        guard let currentRuleID = activeRuleID, let start = activeRuleStartedAt else { return }
+        settings.recordBusyLightRuleActiveInterval(ruleID: currentRuleID, start: start, end: now, now: now)
+        activeRuleID = nil
+        activeRuleStartedAt = nil
     }
 }

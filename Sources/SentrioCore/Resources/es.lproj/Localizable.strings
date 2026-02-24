@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Aún no hay eventos de activación.";
 
 "action.clearLog" = "Borrar registro";
+"prefs.busylight.rule.metrics.total" = "Activo total";
+"prefs.busylight.rule.metrics.avgDay" = "Prom./día";
+"prefs.busylight.rule.metrics.avgMonth" = "Prom./mes";
+"prefs.busylight.rule.metrics.avgYear" = "Prom./año";

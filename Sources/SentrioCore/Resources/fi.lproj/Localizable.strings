@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Ei vielä laukaisutapahtumia.";
 
 "action.clearLog" = "Tyhjennä loki";
+"prefs.busylight.rule.metrics.total" = "Aktiivinen yhteensä";
+"prefs.busylight.rule.metrics.avgDay" = "Ka./päivä";
+"prefs.busylight.rule.metrics.avgMonth" = "Ka./kuukausi";
+"prefs.busylight.rule.metrics.avgYear" = "Ka./vuosi";

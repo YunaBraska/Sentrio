@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "No trigger events yet.";
 
 "action.clearLog" = "Clear log";
+"prefs.busylight.rule.metrics.total" = "Active total";
+"prefs.busylight.rule.metrics.avgDay" = "Avg/day";
+"prefs.busylight.rule.metrics.avgMonth" = "Avg/month";
+"prefs.busylight.rule.metrics.avgYear" = "Avg/year";

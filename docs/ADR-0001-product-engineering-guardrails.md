@@ -70,7 +70,7 @@ This ADR records non-negotiable guardrails for all future changes.
 
 9. BusyLight signal naming and limits must be explicit.
 
-- The `music` signal is presented to users as **Alert sounds**.
+- The `music` signal is presented to users as **Media activity**.
 - Detection is best-effort based on available system signals; it is not guaranteed per-app media playback truth.
 - Any stronger detection mode that requires extra permissions must be explicit and opt-in.
 
@@ -89,6 +89,13 @@ This ADR records non-negotiable guardrails for all future changes.
 
 - On first device detection after app start, run a short hello sequence before normal rule/manual evaluation.
 - On app termination, send explicit BusyLight `off`.
+
+13. BusyLight rule activity metrics must be deterministic and portable.
+
+- Track per-rule active duration based on actual active rule intervals.
+- Expose in Preferences as total active + rolling averages (day/month/year).
+- Persist metrics in settings and include them in import/export.
+- When a rule is deleted, delete its associated metrics.
 
 ## Consequences
 

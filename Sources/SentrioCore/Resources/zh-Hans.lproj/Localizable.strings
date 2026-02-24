@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "暂无触发事件。";
 
 "action.clearLog" = "清除日志";
+"prefs.busylight.rule.metrics.total" = "累计活跃";
+"prefs.busylight.rule.metrics.avgDay" = "平均/天";
+"prefs.busylight.rule.metrics.avgMonth" = "平均/月";
+"prefs.busylight.rule.metrics.avgYear" = "平均/年";

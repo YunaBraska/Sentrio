@@ -306,6 +306,7 @@ private struct BusyLightRuleEditor: View {
     let moveUp: () -> Void
     let moveDown: () -> Void
     let delete: () -> Void
+    @EnvironmentObject var busyLight: BusyLightEngine
 
     var body: some View {
         GroupBox {
@@ -315,6 +316,8 @@ private struct BusyLightRuleEditor: View {
                 conditions
                 Divider()
                 action
+                Divider()
+                metricsFooter
             }
             .padding(.vertical, 2)
         }
@@ -447,6 +450,44 @@ private struct BusyLightRuleEditor: View {
                     }
                 }
             }
+        }
+    }
+
+    private var metricsFooter: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                let summary = busyLight.ruleMetricsSummary(for: rule.id, now: context.date)
+                HStack(spacing: 12) {
+                    metricValue(
+                        label: L10n.tr("prefs.busylight.rule.metrics.total"),
+                        value: BusyLightDurationFormatter.string(milliseconds: Double(summary.totalActiveMilliseconds))
+                    )
+                    metricValue(
+                        label: L10n.tr("prefs.busylight.rule.metrics.avgDay"),
+                        value: BusyLightDurationFormatter.string(milliseconds: summary.averagePerDayMilliseconds)
+                    )
+                    metricValue(
+                        label: L10n.tr("prefs.busylight.rule.metrics.avgMonth"),
+                        value: BusyLightDurationFormatter.string(milliseconds: summary.averagePerMonthMilliseconds)
+                    )
+                    metricValue(
+                        label: L10n.tr("prefs.busylight.rule.metrics.avgYear"),
+                        value: BusyLightDurationFormatter.string(milliseconds: summary.averagePerYearMilliseconds)
+                    )
+                    Spacer(minLength: 0)
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+            }
+        }
+    }
+
+    private func metricValue(label: String, value: String) -> some View {
+        HStack(spacing: 4) {
+            Text(label)
+            Text(value)
+                .foregroundStyle(.tertiary)
         }
     }
 

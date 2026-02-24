@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Пока нет событий срабатывания.";
 
 "action.clearLog" = "Очистить журнал";
+"prefs.busylight.rule.metrics.total" = "Активно всего";
+"prefs.busylight.rule.metrics.avgDay" = "Ср./день";
+"prefs.busylight.rule.metrics.avgMonth" = "Ср./мес.";
+"prefs.busylight.rule.metrics.avgYear" = "Ср./год";

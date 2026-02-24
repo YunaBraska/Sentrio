@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "아직 트리거 이벤트가 없습니다.";
 
 "action.clearLog" = "로그 지우기";
+"prefs.busylight.rule.metrics.total" = "총 활성 시간";
+"prefs.busylight.rule.metrics.avgDay" = "평균/일";
+"prefs.busylight.rule.metrics.avgMonth" = "평균/월";
+"prefs.busylight.rule.metrics.avgYear" = "평균/년";

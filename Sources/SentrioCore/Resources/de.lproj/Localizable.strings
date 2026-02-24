@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Noch keine Auslöseereignisse.";
 
 "action.clearLog" = "Protokoll löschen";
+"prefs.busylight.rule.metrics.total" = "Aktiv gesamt";
+"prefs.busylight.rule.metrics.avgDay" = "Ø/Tag";
+"prefs.busylight.rule.metrics.avgMonth" = "Ø/Monat";
+"prefs.busylight.rule.metrics.avgYear" = "Ø/Jahr";

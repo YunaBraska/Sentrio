@@ -20,6 +20,7 @@ A lightweight macOS menu bar app that keeps your audio routing and BusyLight beh
 - Adds BusyLight automation (rules/manual), HTTP control, and macOS integrations
 - Runs a short BusyLight hello sequence on device detection, then applies rules/manual action
 - Turns BusyLight off on app quit
+- Shows per-rule BusyLight activity metrics (active total + rolling avg/day, avg/month, avg/year)
 - Includes import/export for settings backup
 
 ## Install

@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Inga triggerhändelser ännu.";
 
 "action.clearLog" = "Rensa logg";
+"prefs.busylight.rule.metrics.total" = "Aktiv totalt";
+"prefs.busylight.rule.metrics.avgDay" = "Snitt/dag";
+"prefs.busylight.rule.metrics.avgMonth" = "Snitt/månad";
+"prefs.busylight.rule.metrics.avgYear" = "Snitt/år";

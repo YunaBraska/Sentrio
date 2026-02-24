@@ -242,3 +242,7 @@
 "prefs.busylight.logs.empty" = "Brak zdarzeń wyzwalających.";
 
 "action.clearLog" = "Wyczyść log";
+"prefs.busylight.rule.metrics.total" = "Łącznie aktywne";
+"prefs.busylight.rule.metrics.avgDay" = "Śr./dzień";
+"prefs.busylight.rule.metrics.avgMonth" = "Śr./mies.";
+"prefs.busylight.rule.metrics.avgYear" = "Śr./rok";

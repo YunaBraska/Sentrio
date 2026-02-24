@@ -22,6 +22,7 @@
 "action.deviceActions" = "기기 작업";
 "action.enable" = "활성화";
 "action.reset" = "재설정";
+"action.resetFooterStats" = "카운터와 점수 재설정";
 "action.resetToDefault" = "기본값으로 재설정";
 "action.rename" = "이름 변경";
 "action.cancel" = "취소";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "규칙 활성화";
 
-"prefs.busylight.signal.music" = "알림 소리";
+"prefs.busylight.signal.music" = "미디어 활동";
 
 "prefs.busylight.manualAction" = "수동 동작";
 

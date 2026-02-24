@@ -129,6 +129,12 @@ final class AppSettings: ObservableObject {
         didSet { defaults.set(signalIntegrityScore, forKey: "signalIntegrityScore") }
     }
 
+    func resetFooterStats() {
+        autoSwitchCount = 0
+        millisecondsSaved = 0
+        signalIntegrityScore = 0
+    }
+
     // MARK: – Sounds
 
     @Published var testSound: AppSound {

@@ -22,6 +22,7 @@
 "action.deviceActions" = "Actions de l’appareil";
 "action.enable" = "Activer";
 "action.reset" = "Réinitialiser";
+"action.resetFooterStats" = "Réinitialiser compteurs et score";
 "action.resetToDefault" = "Réinitialiser par défaut";
 "action.rename" = "Renommer";
 "action.cancel" = "Annuler";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "Activer les règles";
 
-"prefs.busylight.signal.music" = "Sons d’alerte";
+"prefs.busylight.signal.music" = "Activité multimédia";
 
 "prefs.busylight.manualAction" = "Action manuelle";
 

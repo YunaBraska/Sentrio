@@ -442,6 +442,30 @@ final class AppSettingsTests: XCTestCase {
         c.cancel()
     }
 
+    func test_resetFooterStatsClearsCounters() {
+        settings.autoSwitchCount = 12
+        settings.millisecondsSaved = 34000
+        settings.signalIntegrityScore = -5
+
+        settings.resetFooterStats()
+
+        XCTAssertEqual(settings.autoSwitchCount, 0)
+        XCTAssertEqual(settings.millisecondsSaved, 0)
+        XCTAssertEqual(settings.signalIntegrityScore, 0)
+    }
+
+    func test_resetFooterStatsPersistsAcrossReinit() throws {
+        settings.autoSwitchCount = 12
+        settings.millisecondsSaved = 34000
+        settings.signalIntegrityScore = -5
+        settings.resetFooterStats()
+
+        let s2 = try AppSettings(defaults: XCTUnwrap(UserDefaults(suiteName: suiteName)))
+        XCTAssertEqual(s2.autoSwitchCount, 0)
+        XCTAssertEqual(s2.millisecondsSaved, 0)
+        XCTAssertEqual(s2.signalIntegrityScore, 0)
+    }
+
     // MARK: – Persistence round-trip
 
     func test_settingsPersistAcrossReinit() throws {

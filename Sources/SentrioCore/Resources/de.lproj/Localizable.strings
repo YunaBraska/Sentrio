@@ -22,6 +22,7 @@
 "action.deviceActions" = "Geräteaktionen";
 "action.enable" = "Aktivieren";
 "action.reset" = "Zurücksetzen";
+"action.resetFooterStats" = "Zähler und Score zurücksetzen";
 "action.resetToDefault" = "Auf Standard zurücksetzen";
 "action.rename" = "Umbenennen";
 "action.cancel" = "Abbrechen";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "Regeln aktivieren";
 
-"prefs.busylight.signal.music" = "Hinweistöne";
+"prefs.busylight.signal.music" = "Medienaktivität";
 
 "prefs.busylight.manualAction" = "Manuelle Aktion";
 

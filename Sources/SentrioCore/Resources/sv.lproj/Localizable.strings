@@ -22,6 +22,7 @@
 "action.deviceActions" = "Enhetsåtgärder";
 "action.enable" = "Aktivera";
 "action.reset" = "Återställ";
+"action.resetFooterStats" = "Återställ räknare och poäng";
 "action.resetToDefault" = "Återställ till standard";
 "action.rename" = "Byt namn";
 "action.cancel" = "Avbryt";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "Aktivera regler";
 
-"prefs.busylight.signal.music" = "Varningsljud";
+"prefs.busylight.signal.music" = "Medieaktivitet";
 
 "prefs.busylight.manualAction" = "Manuell åtgärd";
 

@@ -22,6 +22,7 @@
 "action.deviceActions" = "デバイス操作";
 "action.enable" = "有効にする";
 "action.reset" = "リセット";
+"action.resetFooterStats" = "カウンターとスコアをリセット";
 "action.resetToDefault" = "デフォルトに戻す";
 "action.rename" = "名前を変更";
 "action.cancel" = "キャンセル";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "ルールを有効化";
 
-"prefs.busylight.signal.music" = "通知音";
+"prefs.busylight.signal.music" = "メディアアクティビティ";
 
 "prefs.busylight.manualAction" = "手動アクション";
 

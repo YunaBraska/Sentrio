@@ -964,6 +964,9 @@ private struct GeneralTab: View {
                     .font(.caption).foregroundStyle(.secondary)
                 Button(L10n.tr("action.clearVolumeMemory")) { settings.volumeMemory = [:] }
                     .foregroundStyle(.red)
+                Button(L10n.tr("action.resetFooterStats")) { settings.resetFooterStats() }
+                    .foregroundStyle(.red)
+                    .disabled(!canResetFooterStats)
             }
 
             // ── About ────────────────────────────────────────────────
@@ -1052,5 +1055,11 @@ private struct GeneralTab: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [message] in
             if importExportStatus == message { importExportStatus = nil }
         }
+    }
+
+    private var canResetFooterStats: Bool {
+        settings.autoSwitchCount != 0 ||
+            settings.millisecondsSaved != 0 ||
+            settings.signalIntegrityScore != 0
     }
 }

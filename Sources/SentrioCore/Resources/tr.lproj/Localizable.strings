@@ -22,6 +22,7 @@
 "action.deviceActions" = "Aygıt eylemleri";
 "action.enable" = "Etkinleştir";
 "action.reset" = "Sıfırla";
+"action.resetFooterStats" = "Sayaçları ve puanı sıfırla";
 "action.resetToDefault" = "Varsayılanlara döndür";
 "action.rename" = "Yeniden adlandır";
 "action.cancel" = "İptal";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "Kuralları etkinleştir";
 
-"prefs.busylight.signal.music" = "Uyarı sesleri";
+"prefs.busylight.signal.music" = "Medya etkinliği";
 
 "prefs.busylight.manualAction" = "Manuel eylem";
 

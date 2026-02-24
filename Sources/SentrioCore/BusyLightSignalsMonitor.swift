@@ -261,11 +261,6 @@ private final class BusyLightPlaybackMonitor: ObservableObject {
 
     private static let activationSamplesRequired = 2
     private static let deactivationSamplesRequired = 3
-    private static let ignoredOutputBundleIDs: Set<String> = [
-        "com.apple.WebKit.GPU",
-        "com.apple.WebKit.WebContent",
-    ]
-
     init(audio _: AudioManager) {
         refresh()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -318,29 +313,35 @@ private final class BusyLightPlaybackMonitor: ObservableObject {
         let ownPID = Int32(ProcessInfo.processInfo.processIdentifier)
 
         for processObjectID in processObjectIDs() {
-            guard let outputRunning = uint32Property(
+            let outputRunning = uint32Property(
                 objectID: processObjectID,
                 selector: kAudioProcessPropertyIsRunningOutput
-            ), outputRunning != 0 else { continue }
+            )
 
-            guard let ioRunning = uint32Property(
+            let ioRunning = uint32Property(
                 objectID: processObjectID,
                 selector: kAudioProcessPropertyIsRunning
-            ), ioRunning != 0 else { continue }
+            )
 
-            guard let pid = int32Property(
+            let pid = int32Property(
                 objectID: processObjectID,
                 selector: kAudioProcessPropertyPID
-            ), pid != ownPID else { continue }
+            )
 
             let bundleID = stringProperty(
                 objectID: processObjectID,
                 selector: kAudioProcessPropertyBundleID
             )
-            if let bundleID, Self.ignoredOutputBundleIDs.contains(bundleID) {
-                continue
+
+            if BusyLightPlaybackProcessFilter.isActiveOutputProcess(
+                outputRunning: outputRunning,
+                ioRunning: ioRunning,
+                processID: pid,
+                ownProcessID: ownPID,
+                bundleID: bundleID
+            ) {
+                return true
             }
-            return true
         }
         return false
     }

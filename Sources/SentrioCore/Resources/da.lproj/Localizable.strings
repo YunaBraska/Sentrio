@@ -22,6 +22,7 @@
 "action.deviceActions" = "Enhedshandlinger";
 "action.enable" = "Aktivér";
 "action.reset" = "Nulstil";
+"action.resetFooterStats" = "Nulstil tællere og score";
 "action.resetToDefault" = "Nulstil til standard";
 "action.rename" = "Omdøb";
 "action.cancel" = "Annuller";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "Aktivér regler";
 
-"prefs.busylight.signal.music" = "Advarselslyde";
+"prefs.busylight.signal.music" = "Medieaktivitet";
 
 "prefs.busylight.manualAction" = "Manuel handling";
 

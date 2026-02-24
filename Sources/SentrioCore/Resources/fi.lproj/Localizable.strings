@@ -22,6 +22,7 @@
 "action.deviceActions" = "Laitevalinnat";
 "action.enable" = "Ota käyttöön";
 "action.reset" = "Nollaa";
+"action.resetFooterStats" = "Nollaa laskurit ja pisteet";
 "action.resetToDefault" = "Palauta oletuksiin";
 "action.rename" = "Nimeä uudelleen";
 "action.cancel" = "Peruuta";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "Ota säännöt käyttöön";
 
-"prefs.busylight.signal.music" = "Hälytysäänet";
+"prefs.busylight.signal.music" = "Media-aktiivisuus";
 
 "prefs.busylight.manualAction" = "Manuaalinen toiminto";
 

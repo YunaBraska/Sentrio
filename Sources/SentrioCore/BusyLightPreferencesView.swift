@@ -164,6 +164,12 @@ struct BusyLightTab: View {
     private var manualActionEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
+                if settings.busyLightManualAction.mode != .off {
+                    ColorPicker("", selection: manualColorBinding, supportsOpacity: false)
+                        .labelsHidden()
+                        .frame(width: 44)
+                }
+
                 Picker(L10n.tr("prefs.busylight.manualAction"), selection: manualModeBinding) {
                     Text(L10n.tr("prefs.busylight.mode.off")).tag(BusyLightMode.off)
                     Text(L10n.tr("prefs.busylight.mode.solid")).tag(BusyLightMode.solid)
@@ -173,18 +179,7 @@ struct BusyLightTab: View {
                 .labelsHidden()
                 .frame(width: 160)
 
-                if settings.busyLightManualAction.mode != .off {
-                    ColorPicker("", selection: manualColorBinding)
-                        .labelsHidden()
-                        .frame(width: 44)
-                }
-
                 Spacer()
-
-                Button(L10n.tr("action.preview")) {
-                    busyLight.preview(settings.busyLightManualAction)
-                }
-                .disabled(busyLight.connectedDevices.isEmpty)
             }
 
             if settings.busyLightManualAction.mode == .blink || settings.busyLightManualAction.mode == .pulse {
@@ -305,8 +300,6 @@ struct BusyLightTab: View {
 // MARK: - Rule editor
 
 private struct BusyLightRuleEditor: View {
-    @EnvironmentObject var busyLight: BusyLightEngine
-
     @Binding var rule: BusyLightRule
     let index: Int
     let total: Int
@@ -325,6 +318,7 @@ private struct BusyLightRuleEditor: View {
             }
             .padding(.vertical, 2)
         }
+        .onAppear(perform: canonicalizeRuleExpression)
     }
 
     private var header: some View {
@@ -364,50 +358,40 @@ private struct BusyLightRuleEditor: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
 
-            ForEach(Array(rule.expression.conditions.enumerated()), id: \.element.id) { condIndex, _ in
-                HStack(spacing: 8) {
-                    if condIndex > 0 {
-                        Picker("", selection: bindingOperator(at: condIndex - 1)) {
-                            Text(L10n.tr("logic.and")).tag(BusyLightLogicalOperator.and)
-                            Text(L10n.tr("logic.or")).tag(BusyLightLogicalOperator.or)
-                        }
+            ForEach(BusyLightRuleConditionEditor.signalOrder, id: \.self) { signal in
+                HStack(spacing: 10) {
+                    Toggle("", isOn: signalEnabledBinding(signal))
                         .labelsHidden()
-                        .frame(width: 80)
-                    } else {
-                        Text(L10n.tr("logic.when"))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 80, alignment: .leading)
-                    }
 
-                    Picker("", selection: bindingSignal(at: condIndex)) {
-                        Text(L10n.tr("prefs.busylight.signal.microphone")).tag(BusyLightSignal.microphone)
-                        Text(L10n.tr("prefs.busylight.signal.camera")).tag(BusyLightSignal.camera)
-                        Text(L10n.tr("prefs.busylight.signal.screenRecording")).tag(BusyLightSignal.screenRecording)
-                        Text(L10n.tr("prefs.busylight.signal.music")).tag(BusyLightSignal.music)
-                    }
-                    .labelsHidden()
-                    .frame(width: 160)
+                    Text(signalLabel(signal))
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Picker("", selection: bindingExpected(at: condIndex)) {
+                    Picker("", selection: signalExpectedBinding(signal)) {
                         Text(L10n.tr("status.on")).tag(true)
                         Text(L10n.tr("status.off")).tag(false)
                     }
                     .labelsHidden()
-                    .frame(width: 90)
-
-                    Spacer()
-
-                    Button(role: .destructive) { removeCondition(at: condIndex) } label: {
-                        Image(systemName: "minus.circle")
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(rule.expression.conditions.count <= 1)
-                    .help(L10n.tr("action.removeCondition"))
+                    .pickerStyle(.segmented)
+                    .frame(width: 130)
+                    .disabled(!BusyLightRuleConditionEditor.isSignalEnabled(signal, in: rule.expression))
                 }
             }
 
-            Button(L10n.tr("action.addCondition")) { addCondition() }
+            HStack(spacing: 10) {
+                Text(L10n.tr("logic.when"))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Picker("", selection: logicalOperatorBinding) {
+                    Text(L10n.tr("logic.and")).tag(BusyLightLogicalOperator.and)
+                    Text(L10n.tr("logic.or")).tag(BusyLightLogicalOperator.or)
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+                .frame(width: 130)
+                .disabled(BusyLightRuleConditionEditor.selectedSignalCount(in: rule.expression) < 2)
+
+                Spacer()
+            }
         }
     }
 
@@ -419,6 +403,16 @@ private struct BusyLightRuleEditor: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 HStack(spacing: 10) {
+                    if rule.action.mode != .off {
+                        ColorPicker(
+                            L10n.tr("prefs.busylight.color"),
+                            selection: bindingColor(),
+                            supportsOpacity: false
+                        )
+                        .labelsHidden()
+                        .frame(width: 48)
+                    }
+
                     Picker("", selection: $rule.action.mode) {
                         Text(L10n.tr("prefs.busylight.mode.off")).tag(BusyLightMode.off)
                         Text(L10n.tr("prefs.busylight.mode.solid")).tag(BusyLightMode.solid)
@@ -428,21 +422,7 @@ private struct BusyLightRuleEditor: View {
                     .labelsHidden()
                     .frame(width: 140)
 
-                    if rule.action.mode != .off {
-                        ColorPicker(
-                            L10n.tr("prefs.busylight.color"),
-                            selection: bindingColor()
-                        )
-                        .labelsHidden()
-                        .frame(width: 48)
-                    }
-
                     Spacer()
-
-                    Button(L10n.tr("action.preview")) {
-                        busyLight.preview(rule.action)
-                    }
-                    .disabled(busyLight.connectedDevices.isEmpty)
                 }
 
                 if rule.action.mode == .blink || rule.action.mode == .pulse {
@@ -470,71 +450,62 @@ private struct BusyLightRuleEditor: View {
         }
     }
 
-    private func addCondition() {
-        rule.expression.conditions.append(BusyLightCondition(signal: .camera, expectedValue: true))
-        rule.expression.operators.append(.and)
+    private var logicalOperatorBinding: Binding<BusyLightLogicalOperator> {
+        Binding(
+            get: {
+                BusyLightRuleConditionEditor.logicalOperator(in: rule.expression)
+            },
+            set: { newValue in
+                BusyLightRuleConditionEditor.setLogicalOperator(newValue, in: &rule.expression)
+            }
+        )
     }
 
-    private func removeCondition(at index: Int) {
-        guard rule.expression.conditions.indices.contains(index) else { return }
-        guard rule.expression.conditions.count > 1 else { return }
-        rule.expression.conditions.remove(at: index)
+    private func signalEnabledBinding(_ signal: BusyLightSignal) -> Binding<Bool> {
+        Binding(
+            get: {
+                BusyLightRuleConditionEditor.isSignalEnabled(signal, in: rule.expression)
+            },
+            set: { enabled in
+                BusyLightRuleConditionEditor.setSignal(
+                    signal,
+                    enabled: enabled,
+                    in: &rule.expression
+                )
+            }
+        )
+    }
 
-        if index == 0 {
-            if !rule.expression.operators.isEmpty { rule.expression.operators.removeFirst() }
-        } else if rule.expression.operators.indices.contains(index - 1) {
-            rule.expression.operators.remove(at: index - 1)
+    private func signalExpectedBinding(_ signal: BusyLightSignal) -> Binding<Bool> {
+        Binding(
+            get: {
+                BusyLightRuleConditionEditor.expectedValue(for: signal, in: rule.expression)
+            },
+            set: { newValue in
+                BusyLightRuleConditionEditor.setExpectedValue(
+                    newValue,
+                    for: signal,
+                    in: &rule.expression
+                )
+            }
+        )
+    }
+
+    private func signalLabel(_ signal: BusyLightSignal) -> String {
+        switch signal {
+        case .microphone:
+            L10n.tr("prefs.busylight.signal.microphone")
+        case .camera:
+            L10n.tr("prefs.busylight.signal.camera")
+        case .screenRecording:
+            L10n.tr("prefs.busylight.signal.screenRecording")
+        case .music:
+            L10n.tr("prefs.busylight.signal.music")
         }
     }
 
-    private func bindingOperator(at index: Int) -> Binding<BusyLightLogicalOperator> {
-        Binding(
-            get: {
-                if rule.expression.operators.indices.contains(index) {
-                    return rule.expression.operators[index]
-                }
-                return .and
-            },
-            set: { newValue in
-                let required = max(rule.expression.conditions.count - 1, 0)
-                if rule.expression.operators.count < required {
-                    while rule.expression.operators.count < required {
-                        rule.expression.operators.append(.and)
-                    }
-                }
-                if rule.expression.operators.indices.contains(index) {
-                    rule.expression.operators[index] = newValue
-                }
-            }
-        )
-    }
-
-    private func bindingSignal(at index: Int) -> Binding<BusyLightSignal> {
-        Binding(
-            get: {
-                rule.expression.conditions.indices.contains(index)
-                    ? rule.expression.conditions[index].signal
-                    : .microphone
-            },
-            set: { newValue in
-                guard rule.expression.conditions.indices.contains(index) else { return }
-                rule.expression.conditions[index].signal = newValue
-            }
-        )
-    }
-
-    private func bindingExpected(at index: Int) -> Binding<Bool> {
-        Binding(
-            get: {
-                rule.expression.conditions.indices.contains(index)
-                    ? rule.expression.conditions[index].expectedValue
-                    : true
-            },
-            set: { newValue in
-                guard rule.expression.conditions.indices.contains(index) else { return }
-                rule.expression.conditions[index].expectedValue = newValue
-            }
-        )
+    private func canonicalizeRuleExpression() {
+        rule.expression = BusyLightRuleConditionEditor.canonicalized(rule.expression)
     }
 
     private func bindingColor() -> Binding<Color> {

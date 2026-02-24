@@ -22,6 +22,7 @@
 "action.deviceActions" = "Действия устройства";
 "action.enable" = "Включить";
 "action.reset" = "Сбросить";
+"action.resetFooterStats" = "Сбросить счётчики и оценку";
 "action.resetToDefault" = "Сбросить по умолчанию";
 "action.rename" = "Переименовать";
 "action.cancel" = "Отмена";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "Включить правила";
 
-"prefs.busylight.signal.music" = "Звуки уведомлений";
+"prefs.busylight.signal.music" = "Медиаактивность";
 
 "prefs.busylight.manualAction" = "Ручное действие";
 

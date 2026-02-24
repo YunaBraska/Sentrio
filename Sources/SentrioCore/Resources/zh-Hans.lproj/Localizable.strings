@@ -22,6 +22,7 @@
 "action.deviceActions" = "设备操作";
 "action.enable" = "启用";
 "action.reset" = "重置";
+"action.resetFooterStats" = "重置计数器和评分";
 "action.resetToDefault" = "恢复默认";
 "action.rename" = "重命名";
 "action.cancel" = "取消";
@@ -214,7 +215,7 @@
 
 "prefs.busylight.rules.enable" = "启用规则";
 
-"prefs.busylight.signal.music" = "提醒音";
+"prefs.busylight.signal.music" = "媒体活动";
 
 "prefs.busylight.manualAction" = "手动操作";
 

@@ -1,5 +1,5 @@
-import XCTest
 @testable import SentrioCore
+import XCTest
 
 final class BusyLightPlaybackProcessFilterTests: XCTestCase {
     func test_isActiveOutputProcess_returnsFalseWhenOutputNotRunning() {

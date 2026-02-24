@@ -1,5 +1,5 @@
-import XCTest
 @testable import SentrioCore
+import XCTest
 
 final class BusyLightRuleConditionEditorTests: XCTestCase {
     func test_canonicalized_removesDuplicateSignals_andUsesStableSignalOrder() {

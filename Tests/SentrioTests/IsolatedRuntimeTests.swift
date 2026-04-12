@@ -129,4 +129,84 @@ final class IsolatedRuntimeTests: XCTestCase {
             "Auto mode should restore the highest-priority input device."
         )
     }
+
+    func test_rulesEngine_autoMode_switchesToHigherPriorityDevicesWhenTheyReconnect() async throws {
+        let suiteName = "Sentrio.IsolatedRuntimeTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("Unable to allocate isolated defaults suite.")
+            return
+        }
+        defaults.removePersistentDomain(forName: suiteName)
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let settings = AppSettings(defaults: defaults)
+        settings.isAutoMode = true
+        settings.outputPriority = ["usb-headset", "built-in-output"]
+        settings.inputPriority = ["usb-mic", "built-in-input"]
+
+        let builtInOutput = AudioDevice(
+            id: AudioDeviceID(601),
+            uid: "built-in-output",
+            name: "MacBook Speakers",
+            hasInput: false,
+            hasOutput: true,
+            transportType: .builtIn
+        )
+        let builtInInput = AudioDevice(
+            id: AudioDeviceID(602),
+            uid: "built-in-input",
+            name: "MacBook Microphone",
+            hasInput: true,
+            hasOutput: false,
+            transportType: .builtIn
+        )
+        let usbHeadset = AudioDevice(
+            id: AudioDeviceID(603),
+            uid: "usb-headset",
+            name: "USB Headset",
+            hasInput: false,
+            hasOutput: true,
+            transportType: .usb
+        )
+        let usbMic = AudioDevice(
+            id: AudioDeviceID(604),
+            uid: "usb-mic",
+            name: "USB Mic",
+            hasInput: true,
+            hasOutput: false,
+            transportType: .usb
+        )
+
+        let audio = AudioManager(mode: .isolated)
+        audio.outputDevices = [builtInOutput]
+        audio.inputDevices = [builtInInput]
+        audio.defaultOutput = builtInOutput
+        audio.defaultInput = builtInInput
+
+        let rules = RulesEngine(audio: audio, settings: settings)
+        _ = rules
+
+        try await Task.sleep(nanoseconds: 120_000_000)
+
+        XCTAssertEqual(audio.defaultOutput?.uid, "built-in-output")
+        XCTAssertEqual(audio.defaultInput?.uid, "built-in-input")
+
+        audio.outputDevices = [builtInOutput, usbHeadset]
+        audio.inputDevices = [builtInInput, usbMic]
+
+        try await Task.sleep(nanoseconds: 120_000_000)
+
+        XCTAssertEqual(
+            audio.defaultOutput?.uid,
+            "usb-headset",
+            "Auto mode should switch to the highest-priority output device when it reconnects."
+        )
+        XCTAssertEqual(
+            audio.defaultInput?.uid,
+            "usb-mic",
+            "Auto mode should switch to the highest-priority input device when it reconnects."
+        )
+    }
 }

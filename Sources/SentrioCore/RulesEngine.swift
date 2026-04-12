@@ -22,10 +22,17 @@ final class RulesEngine {
     // MARK: – Subscriptions
 
     private func subscribe() {
-        NotificationCenter.default
-            .publisher(for: .audioDevicesChanged)
+        Publishers.CombineLatest(
+            audio.$outputDevices
+                .map { $0.map { "\($0.uid)|\($0.id)" } }
+                .removeDuplicates(),
+            audio.$inputDevices
+                .map { $0.map { "\($0.uid)|\($0.id)" } }
+                .removeDuplicates()
+        )
+            .dropFirst()
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.onDevicesChanged() }
+            .sink { [weak self] _, _ in self?.onDevicesChanged() }
             .store(in: &cancellables)
 
         audio.$defaultOutput

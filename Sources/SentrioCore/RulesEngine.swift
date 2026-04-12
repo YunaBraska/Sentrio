@@ -30,10 +30,10 @@ final class RulesEngine {
                 .map { $0.map { "\($0.uid)|\($0.id)" } }
                 .removeDuplicates()
         )
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _, _ in self?.onDevicesChanged() }
-            .store(in: &cancellables)
+        .dropFirst()
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] _, _ in self?.onDevicesChanged() }
+        .store(in: &cancellables)
 
         audio.$defaultOutput
             .map { $0?.uid }

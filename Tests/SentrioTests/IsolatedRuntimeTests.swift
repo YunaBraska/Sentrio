@@ -209,4 +209,98 @@ final class IsolatedRuntimeTests: XCTestCase {
             "Auto mode should switch to the highest-priority input device when it reconnects."
         )
     }
+
+    func test_rulesEngine_autoMode_restoresLatestLiveVolumesAfterDisconnectAndReconnect() async throws {
+        let suiteName = "Sentrio.IsolatedRuntimeTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("Unable to allocate isolated defaults suite.")
+            return
+        }
+        defaults.removePersistentDomain(forName: suiteName)
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+
+        let settings = AppSettings(defaults: defaults)
+        settings.isAutoMode = true
+        settings.outputPriority = ["usb-headset", "built-in-output"]
+        settings.inputPriority = ["usb-mic", "built-in-input"]
+        settings.saveVolume(0.21, for: "usb-headset", isOutput: true)
+        settings.saveAlertVolume(0.19, for: "usb-headset")
+        settings.saveVolume(0.33, for: "usb-mic", isOutput: false)
+
+        let usbHeadset = AudioDevice(
+            id: AudioDeviceID(701),
+            uid: "usb-headset",
+            name: "USB Headset",
+            hasInput: false,
+            hasOutput: true,
+            transportType: .usb
+        )
+        let usbMic = AudioDevice(
+            id: AudioDeviceID(702),
+            uid: "usb-mic",
+            name: "USB Mic",
+            hasInput: true,
+            hasOutput: false,
+            transportType: .usb
+        )
+        let builtInOutput = AudioDevice(
+            id: AudioDeviceID(703),
+            uid: "built-in-output",
+            name: "MacBook Speakers",
+            hasInput: false,
+            hasOutput: true,
+            transportType: .builtIn
+        )
+        let builtInInput = AudioDevice(
+            id: AudioDeviceID(704),
+            uid: "built-in-input",
+            name: "MacBook Microphone",
+            hasInput: true,
+            hasOutput: false,
+            transportType: .builtIn
+        )
+
+        let audio = AudioManager(mode: .isolated)
+        audio.outputDevices = [usbHeadset, builtInOutput]
+        audio.inputDevices = [usbMic, builtInInput]
+        audio.defaultOutput = usbHeadset
+        audio.defaultInput = usbMic
+
+        let rules = RulesEngine(audio: audio, settings: settings)
+        _ = rules
+
+        try await Task.sleep(nanoseconds: 120_000_000)
+
+        audio.setVolume(0.82, for: usbHeadset, isOutput: true)
+        audio.setAlertVolume(0.61)
+        audio.setVolume(0.47, for: usbMic, isOutput: false)
+
+        try await Task.sleep(nanoseconds: 120_000_000)
+
+        XCTAssertEqual(settings.savedVolume(for: "usb-headset", isOutput: true) ?? -1, 0.82, accuracy: 0.001)
+        XCTAssertEqual(settings.savedAlertVolume(for: "usb-headset") ?? -1, 0.61, accuracy: 0.001)
+        XCTAssertEqual(settings.savedVolume(for: "usb-mic", isOutput: false) ?? -1, 0.47, accuracy: 0.001)
+
+        // Simulate macOS auto-falling back when the USB devices disappear before the rules engine
+        // gets a chance to "switch away" and snapshot outgoing volumes explicitly.
+        audio.outputDevices = [builtInOutput]
+        audio.inputDevices = [builtInInput]
+        audio.defaultOutput = builtInOutput
+        audio.defaultInput = builtInInput
+
+        try await Task.sleep(nanoseconds: 120_000_000)
+
+        audio.outputDevices = [builtInOutput, usbHeadset]
+        audio.inputDevices = [builtInInput, usbMic]
+
+        try await Task.sleep(nanoseconds: 900_000_000)
+
+        XCTAssertEqual(audio.defaultOutput?.uid, "usb-headset")
+        XCTAssertEqual(audio.defaultInput?.uid, "usb-mic")
+        XCTAssertEqual(audio.volume(for: usbHeadset, isOutput: true) ?? -1, 0.82, accuracy: 0.001)
+        XCTAssertEqual(audio.alertVolume, 0.61, accuracy: 0.001)
+        XCTAssertEqual(audio.volume(for: usbMic, isOutput: false) ?? -1, 0.47, accuracy: 0.001)
+    }
 }

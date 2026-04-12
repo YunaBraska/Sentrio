@@ -57,6 +57,36 @@ final class RulesEngine {
             }
             .store(in: &cancellables)
 
+        audio.$outputVolume
+            .removeDuplicates()
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] volume in
+                guard let self, let uid = audio.defaultOutput?.uid else { return }
+                settings.saveVolume(volume, for: uid, isOutput: true)
+            }
+            .store(in: &cancellables)
+
+        audio.$inputVolume
+            .removeDuplicates()
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] volume in
+                guard let self, let uid = audio.defaultInput?.uid else { return }
+                settings.saveVolume(volume, for: uid, isOutput: false)
+            }
+            .store(in: &cancellables)
+
+        audio.$alertVolume
+            .removeDuplicates()
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] volume in
+                guard let self, let uid = audio.defaultOutput?.uid else { return }
+                settings.saveAlertVolume(volume, for: uid)
+            }
+            .store(in: &cancellables)
+
         settings.$outputPriority.dropFirst().receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }

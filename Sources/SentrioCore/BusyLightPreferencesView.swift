@@ -157,7 +157,9 @@ struct BusyLightTab: View {
             apiPortText = String(newValue)
         }
         .onChange(of: apiPortFocused) { focused in
-            if !focused { commitAPIPortText() }
+            if !focused {
+                commitAPIPortText()
+            }
         }
     }
 

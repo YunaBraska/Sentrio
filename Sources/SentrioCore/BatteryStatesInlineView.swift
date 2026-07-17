@@ -29,7 +29,9 @@ struct BatteryStatesInlineView: View {
 
         let l = order[lhs.kind] ?? 99
         let r = order[rhs.kind] ?? 99
-        if l != r { return l < r }
+        if l != r {
+            return l < r
+        }
         return (lhs.sourceName ?? "").localizedCaseInsensitiveCompare(rhs.sourceName ?? "") == .orderedAscending
     }
 }

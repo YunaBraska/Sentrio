@@ -336,7 +336,9 @@ final class BusyLightEngine: ObservableObject {
     }
 
     private func apply(action: BusyLightAction?, force: Bool, source: String, trigger: String) {
-        if !force, action == currentAction { return }
+        if !force, action == currentAction {
+            return
+        }
         currentAction = action
 
         stopAnimation()
@@ -581,7 +583,11 @@ final class BusyLightEngine: ObservableObject {
         animationTimer = Timer.scheduledTimer(withTimeInterval: halfPeriod, repeats: true) { [weak self] _ in
             guard let self else { return }
             on.toggle()
-            if on { _ = usb.setSolidColor(action.color) } else { _ = usb.turnOff() }
+            if on {
+                _ = usb.setSolidColor(action.color)
+            } else {
+                _ = usb.turnOff()
+            }
         }
         animationTimer?.tolerance = min(halfPeriod * 0.2, 0.05)
         return initial
@@ -595,7 +601,9 @@ final class BusyLightEngine: ObservableObject {
         animationTimer = Timer.scheduledTimer(withTimeInterval: tick, repeats: true) { [weak self] _ in
             guard let self else { return }
             pulsePhase += tick / period
-            if pulsePhase >= 1 { pulsePhase -= 1 }
+            if pulsePhase >= 1 {
+                pulsePhase -= 1
+            }
 
             let x = pulsePhase
             let intensity = 0.5 - 0.5 * cos(2 * Double.pi * x)

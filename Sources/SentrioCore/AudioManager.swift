@@ -91,8 +91,11 @@ final class AudioManager: ObservableObject {
     }
 
     func setInputLevelMonitoringDemand(_ demanded: Bool, token: String) {
-        if demanded { inputLevelMonitoringDemandTokens.insert(token) }
-        else { inputLevelMonitoringDemandTokens.remove(token) }
+        if demanded {
+            inputLevelMonitoringDemandTokens.insert(token)
+        } else {
+            inputLevelMonitoringDemandTokens.remove(token)
+        }
         setInputLevelMonitoringEnabled(!inputLevelMonitoringDemandTokens.isEmpty)
     }
 
@@ -288,7 +291,9 @@ final class AudioManager: ObservableObject {
                     self.outputVolume = volume
                     self.isOutputMuted = volume <= 0.001
                 }
-            } else { DispatchQueue.main.async { self.inputVolume = volume } }
+            } else {
+                DispatchQueue.main.async { self.inputVolume = volume }
+            }
             return
         }
         for ch: UInt32 in [1, 2] {
@@ -303,7 +308,9 @@ final class AudioManager: ObservableObject {
                 self.outputVolume = volume
                 self.isOutputMuted = volume <= 0.001
             }
-        } else { DispatchQueue.main.async { self.inputVolume = volume } }
+        } else {
+            DispatchQueue.main.async { self.inputVolume = volume }
+        }
     }
 
     // MARK: – Alert volume
@@ -460,7 +467,9 @@ final class AudioManager: ObservableObject {
         // Filter all aggregate devices — this removes macOS-internal auto-aggregates
         // (CADefaultDeviceAggregate-*, created and destroyed on every device change)
         // as well as user-created aggregate devices from Audio MIDI Setup.
-        if transport == .aggregate { return nil }
+        if transport == .aggregate {
+            return nil
+        }
 
         let hasIn = hasStreams(id, scope: kAudioObjectPropertyScopeInput)
         let hasOut = hasStreams(id, scope: kAudioObjectPropertyScopeOutput)
@@ -605,7 +614,9 @@ final class AudioManager: ObservableObject {
     }
 
     private func refreshBluetoothBatterySnapshotIfNeeded(force: Bool = false) {
-        if bluetoothBatterySnapshotRefreshInFlight { return }
+        if bluetoothBatterySnapshotRefreshInFlight {
+            return
+        }
         if !force, let last = bluetoothBatterySnapshotLastRefreshedAt, Date().timeIntervalSince(last) < 30 {
             return
         }
@@ -787,7 +798,9 @@ final class AudioManager: ObservableObject {
         guard let raw = info["device_vendorID"] else { return nil }
         if let s = raw as? String {
             let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.hasPrefix("0x") { return Int(trimmed.dropFirst(2), radix: 16) }
+            if trimmed.hasPrefix("0x") {
+                return Int(trimmed.dropFirst(2), radix: 16)
+            }
             return Int(trimmed)
         }
         if let n = raw as? NSNumber {
@@ -800,7 +813,9 @@ final class AudioManager: ObservableObject {
         guard let raw = info["device_productID"] else { return nil }
         if let s = raw as? String {
             let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.hasPrefix("0x") { return Int(trimmed.dropFirst(2), radix: 16) }
+            if trimmed.hasPrefix("0x") {
+                return Int(trimmed.dropFirst(2), radix: 16)
+            }
             return Int(trimmed)
         }
         if let n = raw as? NSNumber {
@@ -818,7 +833,9 @@ final class AudioManager: ObservableObject {
     private static func parseBatteryPercentFraction(_ value: Any) -> Float? {
         if let n = value as? NSNumber {
             let f = n.floatValue
-            if f <= 1 { return f.clamped(to: 0 ... 1) }
+            if f <= 1 {
+                return f.clamped(to: 0 ... 1)
+            }
             return (f / 100).clamped(to: 0 ... 1)
         }
         guard let s = value as? String else { return nil }
@@ -858,7 +875,9 @@ final class AudioManager: ObservableObject {
         for item in result {
             let key = item.name.lowercased()
             if let existing = best[key] {
-                if item.level < existing.level { best[key] = item }
+                if item.level < existing.level {
+                    best[key] = item
+                }
             } else {
                 best[key] = item
             }
@@ -879,7 +898,9 @@ final class AudioManager: ObservableObject {
 
         let matches = ps.filter { source in
             let sourceLower = source.name.lowercased()
-            if sourceLower == deviceLower { return true }
+            if sourceLower == deviceLower {
+                return true
+            }
             let sourceKey = Self.batteryMatchKey(source.name)
             guard !sourceKey.isEmpty else { return false }
             return deviceKey.contains(sourceKey) || sourceKey.contains(deviceKey)
@@ -898,9 +919,15 @@ final class AudioManager: ObservableObject {
 
     private static func inferBatteryKind(from name: String) -> AudioDevice.BatteryState.Kind {
         let n = name.lowercased()
-        if n.contains("left") { return .left }
-        if n.contains("right") { return .right }
-        if n.contains("case") { return .case }
+        if n.contains("left") {
+            return .left
+        }
+        if n.contains("right") {
+            return .right
+        }
+        if n.contains("case") {
+            return .case
+        }
         return .device
     }
 
@@ -934,7 +961,9 @@ final class AudioManager: ObservableObject {
         var bestByKind: [AudioDevice.BatteryState.Kind: AudioDevice.BatteryState] = [:]
         for state in states {
             if let existing = bestByKind[state.kind] {
-                if state.level < existing.level { bestByKind[state.kind] = state }
+                if state.level < existing.level {
+                    bestByKind[state.kind] = state
+                }
             } else {
                 bestByKind[state.kind] = state
             }
@@ -949,7 +978,9 @@ final class AudioManager: ObservableObject {
         return bestByKind.values.sorted { a, b in
             let l = order[a.kind] ?? 99
             let r = order[b.kind] ?? 99
-            if l != r { return l < r }
+            if l != r {
+                return l < r
+            }
             return (a.sourceName ?? "").localizedCaseInsensitiveCompare(b.sourceName ?? "") == .orderedAscending
         }
     }
@@ -1002,9 +1033,15 @@ final class AudioManager: ObservableObject {
             guard strings.contains(where: { $0.contains(macDash) || $0.contains(macColon) })
             else { continue }
 
-            if let pct = dict["BatteryPercent"] as? Int { return Float(pct).clamped(to: 0 ... 100) / 100 }
-            if let pct = dict["BatteryPercentRaw"] as? Int { return Float(pct).clamped(to: 0 ... 100) / 100 }
-            if let lvl = dict["BatteryLevel"] as? Int { return Float(lvl).clamped(to: 0 ... 100) / 100 }
+            if let pct = dict["BatteryPercent"] as? Int {
+                return Float(pct).clamped(to: 0 ... 100) / 100
+            }
+            if let pct = dict["BatteryPercentRaw"] as? Int {
+                return Float(pct).clamped(to: 0 ... 100) / 100
+            }
+            if let lvl = dict["BatteryLevel"] as? Int {
+                return Float(lvl).clamped(to: 0 ... 100) / 100
+            }
         }
         return nil
     }
@@ -1057,7 +1094,9 @@ final class AudioManager: ObservableObject {
         let devID = resolveDefaultID(input: input)
         guard devID != kAudioObjectUnknown else { return nil }
         let existing = (input ? inputDevices : outputDevices).first { $0.id == devID }
-        if let existing { return existing }
+        if let existing {
+            return existing
+        }
         // Device connected and became default before the device-list listener fired
         let powerSources = fetchPowerSourceBatteries()
         return makeDevice(
@@ -1209,8 +1248,12 @@ final class AudioManager: ObservableObject {
         guard outID != volumeListenerOutputID || inID != volumeListenerInputID else { return }
 
         removeVolumeListeners()
-        if let out = defaultOutput { installVolumeListeners(for: out, isOutput: true) }
-        if let inp = defaultInput { installVolumeListeners(for: inp, isOutput: false) }
+        if let out = defaultOutput {
+            installVolumeListeners(for: out, isOutput: true)
+        }
+        if let inp = defaultInput {
+            installVolumeListeners(for: inp, isOutput: false)
+        }
         volumeListenerOutputID = outID
         volumeListenerInputID = inID
     }

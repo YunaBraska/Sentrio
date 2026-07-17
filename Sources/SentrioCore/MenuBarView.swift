@@ -93,7 +93,9 @@ struct MenuBarView: View {
                     get: { audio.outputVolume },
                     set: { v in
                         audio.outputVolume = v
-                        if let d = audio.defaultOutput { audio.setVolume(v, for: d, isOutput: true) }
+                        if let d = audio.defaultOutput {
+                            audio.setVolume(v, for: d, isOutput: true)
+                        }
                     }
                 ),
                 playAction: { SoundLibrary.play(settings.testSound) },
@@ -106,7 +108,9 @@ struct MenuBarView: View {
                     get: { audio.inputVolume },
                     set: { v in
                         audio.inputVolume = v
-                        if let d = audio.defaultInput { audio.setVolume(v, for: d, isOutput: false) }
+                        if let d = audio.defaultInput {
+                            audio.setVolume(v, for: d, isOutput: false)
+                        }
                     }
                 )
             )
@@ -256,7 +260,9 @@ struct VolumeRow: View {
                 value: $volume,
                 in: 0 ... 1,
                 onEditingChanged: { editing in
-                    if !editing { onEditingEnded?() }
+                    if !editing {
+                        onEditingEnded?()
+                    }
                 }
             )
             Image(systemName: "\(icon).fill")

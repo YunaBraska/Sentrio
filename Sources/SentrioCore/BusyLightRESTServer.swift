@@ -97,7 +97,9 @@ final class BusyLightRESTServer {
             }
 
             var buffer = accumulated
-            if let data { buffer.append(data) }
+            if let data {
+                buffer.append(data)
+            }
 
             if buffer.range(of: Data("\r\n\r\n".utf8)) != nil || isComplete {
                 processRequestData(buffer, on: connection)

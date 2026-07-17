@@ -42,7 +42,9 @@ final class RulesEngine {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                if settings.isAutoMode { applyOutputRules() }
+                if settings.isAutoMode {
+                    applyOutputRules()
+                }
             }
             .store(in: &cancellables)
 
@@ -53,7 +55,9 @@ final class RulesEngine {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                if settings.isAutoMode { applyInputRules() }
+                if settings.isAutoMode {
+                    applyInputRules()
+                }
             }
             .store(in: &cancellables)
 
@@ -90,12 +94,18 @@ final class RulesEngine {
         settings.$outputPriority.dropFirst().receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                if settings.isAutoMode { applyOutputRules() }
+                if settings.isAutoMode {
+                    applyOutputRules()
+                }
             }
             .store(in: &cancellables)
 
         settings.$inputPriority.dropFirst().receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in if self?.settings.isAutoMode == true { self?.applyInputRules() } }
+            .sink {
+                [weak self] _ in if self?.settings.isAutoMode == true {
+                    self?.applyInputRules()
+                }
+            }
             .store(in: &cancellables)
 
         settings.$isAutoMode.dropFirst().filter { $0 }.receive(on: DispatchQueue.main)
@@ -206,13 +216,19 @@ final class RulesEngine {
                     var ok = true
                     if let expectedVol {
                         let actual = audio.volume(for: target, isOutput: isOutput) ?? expectedVol
-                        if abs(actual - expectedVol) > 0.03 { ok = false }
+                        if abs(actual - expectedVol) > 0.03 {
+                            ok = false
+                        }
                     }
                     if let expectedAlertVol {
                         let actualAlert = AudioManager.readAlertVolume()
-                        if abs(actualAlert - expectedAlertVol) > 0.03 { ok = false }
+                        if abs(actualAlert - expectedAlertVol) > 0.03 {
+                            ok = false
+                        }
                     }
-                    if ok { settings.signalIntegrityScore += 5 }
+                    if ok {
+                        settings.signalIntegrityScore += 5
+                    }
                 }
             }
         }
@@ -243,7 +259,9 @@ final class RulesEngine {
             if let vol = audio.volume(for: current, isOutput: isOutput) {
                 settings.saveVolume(vol, for: current.uid, isOutput: isOutput)
             }
-            if !isInput { settings.saveAlertVolume(AudioManager.readAlertVolume(), for: current.uid) }
+            if !isInput {
+                settings.saveAlertVolume(AudioManager.readAlertVolume(), for: current.uid)
+            }
         }
         audio.setDefault(device, isInput: isInput) { [weak self] success in
             guard let self else { return }

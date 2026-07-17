@@ -186,9 +186,15 @@ private struct PreferencesFooterView: View {
 
     private var milestoneMessage: String? {
         let ms = settings.millisecondsSaved
-        if ms >= 86_400_000 { return L10n.tr("prefs.footer.milestone.defeatedInefficiency") }
-        if ms >= 3_600_000 { return L10n.tr("prefs.footer.milestone.coffeeBreak") }
-        if ms >= 10000 { return L10n.tr("prefs.footer.milestone.tenSeconds") }
+        if ms >= 86_400_000 {
+            return L10n.tr("prefs.footer.milestone.defeatedInefficiency")
+        }
+        if ms >= 3_600_000 {
+            return L10n.tr("prefs.footer.milestone.coffeeBreak")
+        }
+        if ms >= 10000 {
+            return L10n.tr("prefs.footer.milestone.tenSeconds")
+        }
         return nil
     }
 }
@@ -302,14 +308,18 @@ private struct PriorityTab: View {
                             get: { audio.outputVolume },
                             set: { v in
                                 audio.outputVolume = v
-                                if let d = audio.defaultOutput { audio.setVolume(v, for: d, isOutput: true) }
+                                if let d = audio.defaultOutput {
+                                    audio.setVolume(v, for: d, isOutput: true)
+                                }
                             }
                         )
                         : Binding(
                             get: { audio.inputVolume },
                             set: { v in
                                 audio.inputVolume = v
-                                if let d = audio.defaultInput { audio.setVolume(v, for: d, isOutput: false) }
+                                if let d = audio.defaultInput {
+                                    audio.setVolume(v, for: d, isOutput: false)
+                                }
                             }
                         ),
                     playAction: isOutput ? { SoundLibrary.play(settings.testSound) } : nil,
@@ -354,7 +364,9 @@ private struct PriorityTab: View {
                 value: volume,
                 in: 0 ... 1,
                 onEditingChanged: { editing in
-                    if !editing { onEditingEnded?() }
+                    if !editing {
+                        onEditingEnded?()
+                    }
                 }
             )
             Image(systemName: "\(icon).fill")
@@ -783,7 +795,9 @@ private struct DisabledRow: View {
 
     /// Best-effort icon: live device → custom stored → generic fallback.
     private var iconName: String {
-        if let dev = device { return settings.iconName(for: dev, isOutput: isOutput) }
+        if let dev = device {
+            return settings.iconName(for: dev, isOutput: isOutput)
+        }
         return settings.deviceIcons[uid]?[isOutput ? "output" : "input"]
             ?? settings.defaultIconName(for: uid, isOutput: isOutput)
     }
@@ -1118,7 +1132,9 @@ private struct GeneralTab: View {
         importExportStatus = message
         importExportStatusIsError = isError
         DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [message] in
-            if importExportStatus == message { importExportStatus = nil }
+            if importExportStatus == message {
+                importExportStatus = nil
+            }
         }
     }
 

@@ -215,7 +215,9 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
     /// All other icons are returned unchanged.
     public static func volumeAdaptedIcon(_ icon: String, volume: Float, isMuted: Bool = false) -> String {
         guard speakerFamily.contains(icon) else { return icon }
-        if isMuted || volume <= 0.001 { return "speaker.slash" }
+        if isMuted || volume <= 0.001 {
+            return "speaker.slash"
+        }
         switch volume {
         case ..<0.34: return "speaker.wave.1"
         case ..<0.67: return "speaker.wave.2"
@@ -281,42 +283,94 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
     public var deviceTypeSystemImage: String {
         // 1. CoreAudio icon file → SF Symbol (most accurate — same source as System Settings)
         if let stem = iconBaseName {
-            if let symbol = Self.iconFileToSymbol[stem] { return symbol }
+            if let symbol = Self.iconFileToSymbol[stem] {
+                return symbol
+            }
             // Some icon stems include extra suffixes/prefixes (generation, region, etc.).
             // Best-effort substring matching keeps icons correct even as Apple ships new variants.
-            if stem.contains("airpodspro") { return "airpodspro" }
-            if stem.contains("airpodsmax") { return "airpodsmax" }
-            if stem.contains("airpods") { return "airpods" }
-            if stem.contains("earpods") { return "earbuds" }
-            if stem.contains("homepodmini") { return "homepodmini" }
-            if stem.contains("homepod") { return "homepod" }
-            if stem.contains("beats") { return "headphones" }
-            if stem.contains("iphone") { return "iphone" }
-            if stem.contains("ipad") { return "ipad" }
-            if stem.contains("applewatch") { return "applewatch" }
-            if stem.contains("macbook") { return "laptopcomputer" }
-            if stem.contains("macmini") { return "macmini" }
-            if stem.contains("imac") { return "desktopcomputer" }
-            if stem.contains("appletv") { return "appletv" }
-            if stem.contains("display") || stem.contains("monitor") { return "display" }
+            if stem.contains("airpodspro") {
+                return "airpodspro"
+            }
+            if stem.contains("airpodsmax") {
+                return "airpodsmax"
+            }
+            if stem.contains("airpods") {
+                return "airpods"
+            }
+            if stem.contains("earpods") {
+                return "earbuds"
+            }
+            if stem.contains("homepodmini") {
+                return "homepodmini"
+            }
+            if stem.contains("homepod") {
+                return "homepod"
+            }
+            if stem.contains("beats") {
+                return "headphones"
+            }
+            if stem.contains("iphone") {
+                return "iphone"
+            }
+            if stem.contains("ipad") {
+                return "ipad"
+            }
+            if stem.contains("applewatch") {
+                return "applewatch"
+            }
+            if stem.contains("macbook") {
+                return "laptopcomputer"
+            }
+            if stem.contains("macmini") {
+                return "macmini"
+            }
+            if stem.contains("imac") {
+                return "desktopcomputer"
+            }
+            if stem.contains("appletv") {
+                return "appletv"
+            }
+            if stem.contains("display") || stem.contains("monitor") {
+                return "display"
+            }
         }
 
         // 2. ModelUID heuristics (often stable even when user renames the device)
         if let modelUIDLower = modelUID?.lowercased() {
-            if modelUIDLower.contains("homepod mini") { return "homepodmini" }
-            if modelUIDLower.contains("homepod") { return "homepod" }
-            if modelUIDLower.contains("iphone") { return "iphone" }
-            if modelUIDLower.contains("ipad") { return "ipad" }
-            if modelUIDLower.contains("apple watch") { return "applewatch" }
-            if modelUIDLower.contains("earpods") { return "earbuds" }
-            if modelUIDLower.contains("microphone") || modelUIDLower.contains(" mic") { return "mic" }
-            if modelUIDLower == "speaker", hasOutput, !hasInput { return "speaker.wave.2" }
+            if modelUIDLower.contains("homepod mini") {
+                return "homepodmini"
+            }
+            if modelUIDLower.contains("homepod") {
+                return "homepod"
+            }
+            if modelUIDLower.contains("iphone") {
+                return "iphone"
+            }
+            if modelUIDLower.contains("ipad") {
+                return "ipad"
+            }
+            if modelUIDLower.contains("apple watch") {
+                return "applewatch"
+            }
+            if modelUIDLower.contains("earpods") {
+                return "earbuds"
+            }
+            if modelUIDLower.contains("microphone") || modelUIDLower.contains(" mic") {
+                return "mic"
+            }
+            if modelUIDLower == "speaker", hasOutput, !hasInput {
+                return "speaker.wave.2"
+            }
 
             if let ids = Self.appleVendorProduct(fromModelUID: modelUIDLower) {
                 let productID = ids.productID
                 // Best-effort Apple audio model mapping. Extend as new IDs are discovered.
-                if Self.appleAirPodsProProductIDs.contains(productID) { return "airpodspro" }
-                if Self.appleAirPodsMaxProductIDs.contains(productID) { return "airpodsmax" }
+                if Self.appleAirPodsProProductIDs.contains(productID) {
+                    return "airpodspro"
+                }
+                if Self.appleAirPodsMaxProductIDs.contains(productID) {
+                    return "airpodsmax"
+                }
                 if hasOutput,
                    batteryStates.contains(where: { $0.kind == .left || $0.kind == .right })
                 {
@@ -327,28 +381,68 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
 
         // 2. Name heuristics
         let n = name.lowercased()
-        if n.contains("airpods max") { return "airpodsmax" }
-        if n.contains("airpods pro") { return "airpodspro" }
-        if n.contains("airpods") { return "airpods" }
-        if n.contains("earpods") { return "earbuds" }
-        if hasOutput, n.contains("beats") { return "headphones" }
+        if n.contains("airpods max") {
+            return "airpodsmax"
+        }
+        if n.contains("airpods pro") {
+            return "airpodspro"
+        }
+        if n.contains("airpods") {
+            return "airpods"
+        }
+        if n.contains("earpods") {
+            return "earbuds"
+        }
+        if hasOutput, n.contains("beats") {
+            return "headphones"
+        }
         if hasOutput,
            n.contains("bose") || n.contains("sony") || n.contains("jabra") || n.contains("sennheiser")
-        { return "headphones" }
-        if n.contains("headphone") || n.contains("headset") { return "headphones" }
-        if n.contains("homepod mini") { return "homepodmini" }
-        if n.contains("homepod") { return "homepod" }
-        if n.contains("apple watch") { return "applewatch" }
-        if n.contains("iphone") { return "iphone" }
-        if n.contains("ipad") { return "ipad" }
-        if n.contains("mac") { return "laptopcomputer" }
-        if n.contains("built-in") && hasOutput && !hasInput { return "speaker.wave.2" }
-        if n.contains("built-in") && hasInput && !hasOutput { return "mic" }
-        if n.contains("built-in") { return "macmini" }
-        if n.contains("speaker") || n.contains("output") { return "hifispeaker" }
-        if n.contains("microphone") || n.contains("mic") { return "mic" }
-        if n.contains("display") || n.contains("monitor") { return "display" }
-        if n.contains("usb") { return "cable.connector" }
+        {
+            return "headphones"
+        }
+        if n.contains("headphone") || n.contains("headset") {
+            return "headphones"
+        }
+        if n.contains("homepod mini") {
+            return "homepodmini"
+        }
+        if n.contains("homepod") {
+            return "homepod"
+        }
+        if n.contains("apple watch") {
+            return "applewatch"
+        }
+        if n.contains("iphone") {
+            return "iphone"
+        }
+        if n.contains("ipad") {
+            return "ipad"
+        }
+        if n.contains("mac") {
+            return "laptopcomputer"
+        }
+        if n.contains("built-in") && hasOutput && !hasInput {
+            return "speaker.wave.2"
+        }
+        if n.contains("built-in") && hasInput && !hasOutput {
+            return "mic"
+        }
+        if n.contains("built-in") {
+            return "macmini"
+        }
+        if n.contains("speaker") || n.contains("output") {
+            return "hifispeaker"
+        }
+        if n.contains("microphone") || n.contains("mic") {
+            return "mic"
+        }
+        if n.contains("display") || n.contains("monitor") {
+            return "display"
+        }
+        if n.contains("usb") {
+            return "cable.connector"
+        }
 
         // 3. Apple Bluetooth fallback — catches Apple devices with user-renamed names
         //    (e.g. AirPods named "[Yuna] ClayWave") where icon file lookup and name matching both miss.
@@ -364,11 +458,21 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
                 }
                 return "headphones"
             }
-            if minor.contains("speaker") { return "hifispeaker" }
-            if minor.contains("phone") { return "iphone" }
-            if minor.contains("tablet") { return "ipad" }
-            if minor.contains("computer") || minor.contains("mac") { return "laptopcomputer" }
-            if minor.contains("watch") { return "applewatch" }
+            if minor.contains("speaker") {
+                return "hifispeaker"
+            }
+            if minor.contains("phone") {
+                return "iphone"
+            }
+            if minor.contains("tablet") {
+                return "ipad"
+            }
+            if minor.contains("computer") || minor.contains("mac") {
+                return "laptopcomputer"
+            }
+            if minor.contains("watch") {
+                return "applewatch"
+            }
         }
 
         if transportType == .bluetooth,
@@ -380,7 +484,9 @@ public struct AudioDevice: Identifiable, Hashable, Codable {
         }
 
         // 4. Fallback by I/O capability before transport type
-        if hasOutput, hasInput { return "headphones" }
+        if hasOutput, hasInput {
+            return "headphones"
+        }
 
         // 4. Transport-type fallback
         return transportType.connectionSystemImage

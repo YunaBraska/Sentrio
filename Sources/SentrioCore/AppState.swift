@@ -80,7 +80,9 @@ final class AppState: ObservableObject {
                 isMuted: audio.isOutputMuted
             )
         }
-        if let inp = audio.defaultInput { return settings.iconName(for: inp, isOutput: false) }
+        if let inp = audio.defaultInput {
+            return settings.iconName(for: inp, isOutput: false)
+        }
         return "waveform"
     }
 

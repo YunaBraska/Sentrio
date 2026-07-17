@@ -102,14 +102,20 @@ struct BusyLightExpression: Codable, Equatable {
     var operators: [BusyLightLogicalOperator]
 
     func normalized() -> BusyLightExpression {
-        if conditions.count <= 1 { return BusyLightExpression(conditions: conditions, operators: []) }
-        if operators.count == conditions.count - 1 { return self }
+        if conditions.count <= 1 {
+            return BusyLightExpression(conditions: conditions, operators: [])
+        }
+        if operators.count == conditions.count - 1 {
+            return self
+        }
 
         var ops = operators
         while ops.count < conditions.count - 1 {
             ops.append(.and)
         }
-        if ops.count > conditions.count - 1 { ops = Array(ops.prefix(conditions.count - 1)) }
+        if ops.count > conditions.count - 1 {
+            ops = Array(ops.prefix(conditions.count - 1))
+        }
         return BusyLightExpression(conditions: conditions, operators: ops)
     }
 

@@ -375,21 +375,32 @@ final class AppSettings: ObservableObject {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         var entry = customDeviceNames[uid] ?? [:]
         let key = isOutput ? "output" : "input"
-        if trimmed.isEmpty { entry.removeValue(forKey: key) } else { entry[key] = trimmed }
-        if entry.isEmpty { customDeviceNames.removeValue(forKey: uid) }
-        else { customDeviceNames[uid] = entry }
+        if trimmed.isEmpty {
+            entry.removeValue(forKey: key)
+        } else {
+            entry[key] = trimmed
+        }
+        if entry.isEmpty {
+            customDeviceNames.removeValue(forKey: uid)
+        } else {
+            customDeviceNames[uid] = entry
+        }
     }
 
     func clearCustomName(for uid: String, isOutput: Bool) {
         customDeviceNames[uid]?[isOutput ? "output" : "input"] = nil
-        if customDeviceNames[uid]?.isEmpty == true { customDeviceNames.removeValue(forKey: uid) }
+        if customDeviceNames[uid]?.isEmpty == true {
+            customDeviceNames.removeValue(forKey: uid)
+        }
     }
 
     // MARK: – Per-device icon
 
     /// Returns the custom icon for a device+role, or its auto-detected device-type icon.
     func iconName(for device: AudioDevice, isOutput: Bool) -> String {
-        if let custom = deviceIcons[device.uid]?[isOutput ? "output" : "input"] { return custom }
+        if let custom = deviceIcons[device.uid]?[isOutput ? "output" : "input"] {
+            return custom
+        }
         return device.deviceTypeSystemImage
     }
 
@@ -416,7 +427,9 @@ final class AppSettings: ObservableObject {
             bluetoothMinorType: minorType
         )
         let inferred = device.deviceTypeSystemImage
-        if inferred != "questionmark.circle" { return inferred }
+        if inferred != "questionmark.circle" {
+            return inferred
+        }
         return isOutput ? "speaker.wave.2" : "mic"
     }
 
@@ -433,7 +446,9 @@ final class AppSettings: ObservableObject {
         let key = isOutput ? "output" : "input"
         for target in groupedActionUIDs(for: uid) {
             deviceIcons[target]?[key] = nil
-            if deviceIcons[target]?.isEmpty == true { deviceIcons.removeValue(forKey: target) }
+            if deviceIcons[target]?.isEmpty == true {
+                deviceIcons.removeValue(forKey: target)
+            }
         }
     }
 
@@ -451,8 +466,11 @@ final class AppSettings: ObservableObject {
             }
         )
         guard reordered != list else { return }
-        if isOutput { outputPriority = reordered }
-        else { inputPriority = reordered }
+        if isOutput {
+            outputPriority = reordered
+        } else {
+            inputPriority = reordered
+        }
     }
 
     /// Reorders priority while dragging.
@@ -470,8 +488,11 @@ final class AppSettings: ObservableObject {
             }
         )
         guard reordered != list else { return }
-        if isOutput { outputPriority = reordered }
-        else { inputPriority = reordered }
+        if isOutput {
+            outputPriority = reordered
+        } else {
+            inputPriority = reordered
+        }
     }
 
     // MARK: – Priority management
@@ -488,19 +509,32 @@ final class AppSettings: ObservableObject {
         bluetoothMinorType: String? = nil
     ) {
         knownDevices[uid] = name
-        if let transportType { knownDeviceTransportTypes[uid] = transportType }
-        if let iconBaseName { knownDeviceIconBaseNames[uid] = iconBaseName }
-        if let modelUID { knownDeviceModelUIDs[uid] = modelUID }
-        if let isAppleMade { knownDeviceIsAppleMade[uid] = isAppleMade }
-        if let bluetoothMinorType { knownDeviceBluetoothMinorTypes[uid] = bluetoothMinorType }
+        if let transportType {
+            knownDeviceTransportTypes[uid] = transportType
+        }
+        if let iconBaseName {
+            knownDeviceIconBaseNames[uid] = iconBaseName
+        }
+        if let modelUID {
+            knownDeviceModelUIDs[uid] = modelUID
+        }
+        if let isAppleMade {
+            knownDeviceIsAppleMade[uid] = isAppleMade
+        }
+        if let bluetoothMinorType {
+            knownDeviceBluetoothMinorTypes[uid] = bluetoothMinorType
+        }
         synchronizeGroupIcons(for: uid)
 
         let disabled = isOutput ? disabledOutputDevices : disabledInputDevices
         guard !disabled.contains(uid) else { return }
         let list = isOutput ? outputPriority : inputPriority
         guard !list.contains(uid) else { return }
-        if isOutput { outputPriority.append(uid) }
-        else { inputPriority.append(uid) }
+        if isOutput {
+            outputPriority.append(uid)
+        } else {
+            inputPriority.append(uid)
+        }
     }
 
     func disableDevice(uid: String, isOutput: Bool) {
@@ -603,7 +637,9 @@ final class AppSettings: ObservableObject {
         if let transport = knownDeviceTransportTypes[uid], transport != .usb {
             return nil
         }
-        if let key = Self.usbVendorProductGroupKey(fromUID: uid) { return key }
+        if let key = Self.usbVendorProductGroupKey(fromUID: uid) {
+            return key
+        }
         guard let modelUID = knownDeviceModelUIDs[uid],
               let key = Self.usbVendorProductGroupKey(fromModelUID: modelUID)
         else { return nil }
@@ -616,7 +652,9 @@ final class AppSettings: ObservableObject {
             modelGroupKey(for: $0) == key && isGroupByModelEnabled(for: $0)
         })
         targets.insert(uid)
-        if targets.count <= 1 { return [uid] }
+        if targets.count <= 1 {
+            return [uid]
+        }
         return orderedUIDs(from: targets)
     }
 
@@ -687,8 +725,11 @@ final class AppSettings: ObservableObject {
 
     func setLaunchAtLogin(_ enabled: Bool) {
         do {
-            if enabled { try SMAppService.mainApp.register() }
-            else { try SMAppService.mainApp.unregister() }
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
         } catch { print("Launch-at-login error: \(error)") }
     }
 
@@ -888,8 +929,11 @@ final class AppSettings: ObservableObject {
         let normalized = normalizePriorityList(current)
         if normalized != current {
             isNormalizingPriority = true
-            if isOutput { outputPriority = normalized }
-            else { inputPriority = normalized }
+            if isOutput {
+                outputPriority = normalized
+            } else {
+                inputPriority = normalized
+            }
             isNormalizingPriority = false
             return
         }
@@ -1047,7 +1091,9 @@ final class AppSettings: ObservableObject {
     // MARK: – Persistence
 
     private func save(_ key: String, _ value: some Encodable) {
-        if let data = try? JSONEncoder().encode(value) { defaults.set(data, forKey: key) }
+        if let data = try? JSONEncoder().encode(value) {
+            defaults.set(data, forKey: key)
+        }
     }
 
     private func exportGroupByModelEnabledByGroup() -> [String: Bool] {
@@ -1071,7 +1117,9 @@ final class AppSettings: ObservableObject {
 
 private extension UserDefaults {
     func jsonStringArray(forKey key: String) -> [String]? {
-        if let arr = array(forKey: key) as? [String] { return arr }
+        if let arr = array(forKey: key) as? [String] {
+            return arr
+        }
         return jsonDecode([String].self, forKey: key)
     }
 

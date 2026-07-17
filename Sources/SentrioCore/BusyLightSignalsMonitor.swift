@@ -295,7 +295,9 @@ private final class BusyLightPlaybackMonitor: ObservableObject {
         if hasNowPlayingSignal() {
             consecutiveActiveSamples = Self.activationSamplesRequired
             consecutiveInactiveSamples = 0
-            if !isPlaybackInUse { isPlaybackInUse = true }
+            if !isPlaybackInUse {
+                isPlaybackInUse = true
+            }
             return
         }
 
@@ -318,12 +320,20 @@ private final class BusyLightPlaybackMonitor: ObservableObject {
 
     private func hasNowPlayingSignal() -> Bool {
         let nowPlaying = MPNowPlayingInfoCenter.default()
-        if nowPlaying.playbackState == .playing { return true }
+        if nowPlaying.playbackState == .playing {
+            return true
+        }
 
         guard let info = nowPlaying.nowPlayingInfo else { return false }
-        if let rate = info[MPNowPlayingInfoPropertyPlaybackRate] as? Double { return rate > 0.01 }
-        if let rate = info[MPNowPlayingInfoPropertyPlaybackRate] as? Float { return rate > 0.01 }
-        if let rate = info[MPNowPlayingInfoPropertyPlaybackRate] as? NSNumber { return rate.doubleValue > 0.01 }
+        if let rate = info[MPNowPlayingInfoPropertyPlaybackRate] as? Double {
+            return rate > 0.01
+        }
+        if let rate = info[MPNowPlayingInfoPropertyPlaybackRate] as? Float {
+            return rate > 0.01
+        }
+        if let rate = info[MPNowPlayingInfoPropertyPlaybackRate] as? NSNumber {
+            return rate.doubleValue > 0.01
+        }
         return false
     }
 

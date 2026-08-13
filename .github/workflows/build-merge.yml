@@ -1,0 +1,22 @@
+name: 🧩 CI · Merge
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sentrio-merge-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_build_common.yml@8f8c0c45ee7e939249d7442eba0192ca0c97f4e4
+    with:
+      ref: ${{ github.sha }}
+      dry_run: true
+      upload_artifact: true
+    secrets: inherit

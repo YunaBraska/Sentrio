@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
 if ! command -v swiftformat >/dev/null 2>&1; then
     echo "swiftformat is required. Install it with: brew install swiftformat" >&2

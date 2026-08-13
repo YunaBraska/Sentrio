@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   release:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_release.yml@4bbf9f8a3f6848f08be3e00ab05e39702cd95aaf
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_release.yml@8f8c0c45ee7e939249d7442eba0192ca0c97f4e4
     with:
       force: ${{ inputs.force }}
     secrets: inherit

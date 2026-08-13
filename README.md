@@ -27,9 +27,9 @@ A lightweight macOS menu bar app that keeps your audio routing and BusyLight beh
 
 ### Download (recommended)
 1. Open [Releases](https://github.com/YunaBraska/Sentrio/releases)
-2. Download the latest zip (`Sentrio-<version>.zip`)
+2. Download the latest DMG or zip (`Sentrio-<version>.dmg` or `.zip`)
 3. Drag `Sentrio.app` into **Applications**
-4. First launch: right-click `Sentrio.app` -> **Open**
+4. Before Developer ID credentials are configured, first launch requires right-click -> **Open**.
 
 ### Homebrew
 ```bash
@@ -42,8 +42,8 @@ brew install --cask sentrio
 ```bash
 swift build
 swift test
-./build.sh
-open build/Sentrio.app
+sh scripts/package.sh 0.0.1
+open dist/Sentrio.app
 ```
 
 ## Screenshots

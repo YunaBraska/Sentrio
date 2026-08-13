@@ -6,7 +6,10 @@ Icon?
 
 # SwiftPM / Xcode build outputs
 .build/
+.build-release-arm64/
+.build-release-x86_64/
 build/
+dist/
 .swiftpm/
 DerivedData/
 *.xcuserstate

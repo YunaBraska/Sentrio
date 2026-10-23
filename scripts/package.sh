@@ -115,7 +115,7 @@ codesign --verify --deep --verbose=2 "${app_dir}"
 
 if [ -n "${notary_profile}" ]; then
   ditto -c -k --sequesterRsrc --keepParent "${app_dir}" "${iconset}/${app_name}-notary.zip"
-  xcrun notarytool submit "${iconset}/${app_name}-notary.zip" --keychain-profile "${notary_profile}" --wait --timeout 30m
+  xcrun notarytool submit "${iconset}/${app_name}-notary.zip" --keychain-profile "${notary_profile}" --wait --timeout 90m
   xcrun stapler staple "${app_dir}"
   xcrun stapler validate "${app_dir}"
 fi
@@ -128,7 +128,7 @@ ln -s /Applications "${dmg_stage}/Applications"
 hdiutil create -volname "${app_name}" -srcfolder "${dmg_stage}" -ov -format UDZO "${dist_dir}/${app_name}-${version}.dmg"
 hdiutil verify "${dist_dir}/${app_name}-${version}.dmg"
 if [ -n "${notary_profile}" ]; then
-  xcrun notarytool submit "${dist_dir}/${app_name}-${version}.dmg" --keychain-profile "${notary_profile}" --wait --timeout 30m
+  xcrun notarytool submit "${dist_dir}/${app_name}-${version}.dmg" --keychain-profile "${notary_profile}" --wait --timeout 90m
   xcrun stapler staple "${dist_dir}/${app_name}-${version}.dmg"
   xcrun stapler validate "${dist_dir}/${app_name}-${version}.dmg"
 fi

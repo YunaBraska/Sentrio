@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   build:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_build_common.yml@8dd69a07a51f800bdcde8d8e63f72e6b68edcae8
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_build_common.yml@5e556f8baa1d8a5c2dc8b13029b720818db28124
     with:
       ref: ${{ github.sha }}
       dry_run: true

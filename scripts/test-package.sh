@@ -80,6 +80,8 @@ cd "${tmp}/work"
 sh "${root}/scripts/package.sh" 1.2.3
 
 grep -q '^codesign .*--entitlements .*Sentrio.entitlements ' "${PACKAGE_TEST_LOG}"
+grep -q '^notarytool submit .*\.zip .* --timeout 90m$' "${PACKAGE_TEST_LOG}"
+grep -q '^notarytool submit .*\.dmg .* --timeout 90m$' "${PACKAGE_TEST_LOG}"
 app_submission=$(grep -n '^notarytool submit .*\.zip ' "${PACKAGE_TEST_LOG}" | cut -d: -f1)
 app_staple=$(grep -n '^stapler staple .*\.app$' "${PACKAGE_TEST_LOG}" | cut -d: -f1)
 release_zip=$(grep -nF 'zip dist/Sentrio-1.2.3.zip' "${PACKAGE_TEST_LOG}" | cut -d: -f1)

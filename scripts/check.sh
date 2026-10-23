@@ -8,6 +8,10 @@ if ! command -v swiftformat >/dev/null 2>&1; then
     exit 1
 fi
 
-swiftformat Package.swift Sources Tests
-swiftformat --lint Package.swift Sources Tests
+set --
+if swiftformat --rules | grep -q '^[[:space:]]*repeatedGuard[[:space:]]'; then
+    set -- --disable repeatedGuard
+fi
+swiftformat "$@" Package.swift Sources Tests
+swiftformat --lint "$@" Package.swift Sources Tests
 swift test

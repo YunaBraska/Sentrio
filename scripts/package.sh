@@ -17,13 +17,15 @@ mkdir -p "${contents_dir}/MacOS" "${contents_dir}/Resources"
 
 swift build -c release --arch arm64 --product "${app_name}" --scratch-path .build-release-arm64
 swift build -c release --arch x86_64 --product "${app_name}" --scratch-path .build-release-x86_64
+arm64_bin=$(swift build -c release --arch arm64 --product "${app_name}" --scratch-path .build-release-arm64 --show-bin-path)
+x86_64_bin=$(swift build -c release --arch x86_64 --product "${app_name}" --scratch-path .build-release-x86_64 --show-bin-path)
 lipo -create \
   -output "${contents_dir}/MacOS/${app_name}" \
-  .build-release-arm64/arm64-apple-macosx/release/"${app_name}" \
-  .build-release-x86_64/x86_64-apple-macosx/release/"${app_name}"
+  "${arm64_bin}/${app_name}" \
+  "${x86_64_bin}/${app_name}"
 lipo -info "${contents_dir}/MacOS/${app_name}"
 
-binary_dir=.build-release-arm64/arm64-apple-macosx/release
+binary_dir=${arm64_bin}
 find "${binary_dir}" -maxdepth 1 -type d -name '*.bundle' -exec cp -R {} "${contents_dir}/Resources/" \;
 find "${binary_dir}" -maxdepth 1 -type d -name '*.appintents' -exec sh -c '
   destination=$1
@@ -89,7 +91,7 @@ EOF
 icon_source="${script_dir}/Assets.xcassets/AppIcon.appiconset"
 test -d "${icon_source}"
 iconset=$(mktemp -d)
-trap 'rm -rf "${iconset}"' EXIT HUP INT TERM
+trap 'rm -rf "${iconset}"' 0 HUP INT TERM
 mkdir -p "${iconset}/AppIcon.iconset"
 cp "${icon_source}/16-mac.png" "${iconset}/AppIcon.iconset/icon_16x16.png"
 cp "${icon_source}/32-mac.png" "${iconset}/AppIcon.iconset/icon_16x16@2x.png"
@@ -111,9 +113,16 @@ else
 fi
 codesign --verify --deep --verbose=2 "${app_dir}"
 
+if [ -n "${notary_profile}" ]; then
+  ditto -c -k --sequesterRsrc --keepParent "${app_dir}" "${iconset}/${app_name}-notary.zip"
+  xcrun notarytool submit "${iconset}/${app_name}-notary.zip" --keychain-profile "${notary_profile}" --wait --timeout 30m
+  xcrun stapler staple "${app_dir}"
+  xcrun stapler validate "${app_dir}"
+fi
+
 ditto -c -k --sequesterRsrc --keepParent "${app_dir}" "${dist_dir}/${app_name}-${version}.zip"
 dmg_stage=$(mktemp -d)
-trap 'rm -rf "${iconset}" "${dmg_stage}"' EXIT HUP INT TERM
+trap 'rm -rf "${iconset}" "${dmg_stage}"' 0 HUP INT TERM
 cp -R "${app_dir}" "${dmg_stage}/"
 ln -s /Applications "${dmg_stage}/Applications"
 hdiutil create -volname "${app_name}" -srcfolder "${dmg_stage}" -ov -format UDZO "${dist_dir}/${app_name}-${version}.dmg"
@@ -121,4 +130,5 @@ hdiutil verify "${dist_dir}/${app_name}-${version}.dmg"
 if [ -n "${notary_profile}" ]; then
   xcrun notarytool submit "${dist_dir}/${app_name}-${version}.dmg" --keychain-profile "${notary_profile}" --wait --timeout 30m
   xcrun stapler staple "${dist_dir}/${app_name}-${version}.dmg"
+  xcrun stapler validate "${dist_dir}/${app_name}-${version}.dmg"
 fi

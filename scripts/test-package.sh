@@ -39,7 +39,10 @@ case "${0##*/}" in
     done
     exit
     ;;
-  codesign) exit ;;
+  codesign)
+    printf 'codesign %s\n' "$*" >> "${PACKAGE_TEST_LOG}"
+    exit
+    ;;
   ditto)
     printf 'zip %s\n' "$6" >> "${PACKAGE_TEST_LOG}"
     touch "$6"
@@ -62,6 +65,7 @@ case "${0##*/}" in
 esac
 
 root=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
+test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.device.audio-input' "${root}/scripts/Sentrio.entitlements")" = true
 tmp=$(mktemp -d)
 trap 'rm -rf "${tmp}"' 0 HUP INT TERM
 mkdir -p "${tmp}/bin" "${tmp}/work"
@@ -75,6 +79,7 @@ export MACOS_NOTARY_PROFILE='test profile'
 cd "${tmp}/work"
 sh "${root}/scripts/package.sh" 1.2.3
 
+grep -q '^codesign .*--entitlements .*Sentrio.entitlements ' "${PACKAGE_TEST_LOG}"
 app_submission=$(grep -n '^notarytool submit .*\.zip ' "${PACKAGE_TEST_LOG}" | cut -d: -f1)
 app_staple=$(grep -n '^stapler staple .*\.app$' "${PACKAGE_TEST_LOG}" | cut -d: -f1)
 release_zip=$(grep -nF 'zip dist/Sentrio-1.2.3.zip' "${PACKAGE_TEST_LOG}" | cut -d: -f1)

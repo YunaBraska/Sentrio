@@ -107,9 +107,9 @@ iconutil -c icns "${iconset}/AppIcon.iconset" -o "${contents_dir}/Resources/AppI
 printf 'APPL????' > "${contents_dir}/PkgInfo"
 
 if [ "${signing_identity}" = '-' ]; then
-  codesign --force --deep --sign - --timestamp=none "${app_dir}"
+  codesign --force --deep --entitlements "${script_dir}/scripts/Sentrio.entitlements" --sign - --timestamp=none "${app_dir}"
 else
-  codesign --force --deep --options runtime --sign "${signing_identity}" --timestamp "${app_dir}"
+  codesign --force --deep --entitlements "${script_dir}/scripts/Sentrio.entitlements" --options runtime --sign "${signing_identity}" --timestamp "${app_dir}"
 fi
 codesign --verify --deep --verbose=2 "${app_dir}"
 

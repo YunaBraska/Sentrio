@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_build_common.yml@c2ae1aca39fb67b776e6164304c5e24c508992e1
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_build_common.yml@de3fb68d612620fa4761337b413d7f90f75c8765
     with:
       ref: ${{ github.event.pull_request.head.sha }}
     secrets: inherit

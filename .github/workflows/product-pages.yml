@@ -1,0 +1,20 @@
+name: "📖 CD · Product Pages"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - docs/Page/**
+      - .github/workflows/product-pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  pages:
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_product_pages.yml@26958b62eeafd990eb2889d756edd54d4c29b387
+

@@ -173,5 +173,6 @@ if [ -n "${update_public_key}" ]; then
   test -n "${sign_update}"
   cp "${dist_dir}/${app_name}-${version}.dmg" "${update_stage}/"
   "${generate_appcast}" --ed-key-file "${update_key}" --download-url-prefix "https://github.com/YunaBraska/Sentrio/releases/download/${version}/" --maximum-versions 1 --disable-signing-warning -o "${dist_dir}/appcast.xml" "${update_stage}"
+  "${sign_update}" --ed-key-file "${update_key}" "${dist_dir}/appcast.xml" --disable-signing-warning
   "${sign_update}" --ed-key-file "${update_key}" --verify "${dist_dir}/appcast.xml"
 fi

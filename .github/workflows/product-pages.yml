@@ -17,4 +17,3 @@ permissions:
 jobs:
   pages:
     uses: YunaBraska/YunaBraska/.github/workflows/wc_product_pages.yml@26958b62eeafd990eb2889d756edd54d4c29b387
-

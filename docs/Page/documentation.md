@@ -15,4 +15,3 @@ title: Documentation
 - [Output and input](https://github.com/YunaBraska/Sentrio/blob/main/docs/output-input/README.md)
 - [Settings and backup](https://github.com/YunaBraska/Sentrio/blob/main/docs/settings-backup/README.md)
 - [Troubleshooting](https://github.com/YunaBraska/Sentrio/blob/main/docs/troubleshooting/README.md)
-

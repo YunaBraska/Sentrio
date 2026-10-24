@@ -29,4 +29,4 @@ Sentrio supports macOS 13 and later.
 
 ## Updates
 
-Direct downloads are Developer-ID signed and notarized. Automatic updates will be available through the external distribution channel. Mac App Store builds will use the App Store update channel.
+Direct downloads are Developer-ID signed and notarized. They check the signed update feed automatically and ask before installing an update. Mac App Store builds use the App Store update channel.

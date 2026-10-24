@@ -29,7 +29,7 @@ A lightweight macOS menu bar app that keeps your audio routing and BusyLight beh
 1. Open [Releases](https://github.com/YunaBraska/Sentrio/releases)
 2. Download the latest DMG or zip (`Sentrio-<version>.dmg` or `.zip`)
 3. Drag `Sentrio.app` into **Applications**
-4. Before Developer ID credentials are configured, first launch requires right-click -> **Open**.
+4. Direct releases are Developer-ID signed and notarized. Sentrio checks its signed update feed automatically and asks before installing an update.
 
 ### Homebrew
 ```bash

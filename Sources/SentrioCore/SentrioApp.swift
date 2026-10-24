@@ -1,4 +1,5 @@
 import AppKit
+import Sparkle
 import SwiftUI
 
 public struct SentrioApp: App {
@@ -27,9 +28,21 @@ public struct SentrioApp: App {
     }
 }
 
+@MainActor
 public class AppDelegate: NSObject, NSApplicationDelegate {
+    private lazy var updater: SPUStandardUpdaterController? = {
+        guard let publicKey = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
+              !publicKey.isEmpty else { return nil }
+        let controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
+        controller.updater.automaticallyChecksForUpdates = true
+        controller.updater.automaticallyDownloadsUpdates = false
+        controller.startUpdater()
+        return controller
+    }()
+
     public func applicationDidFinishLaunching(_: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        _ = updater
         if #available(macOS 13.0, *) {
             BusyLightAppShortcuts.updateAppShortcutParameters()
         }

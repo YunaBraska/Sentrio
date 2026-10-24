@@ -11,6 +11,28 @@ contents_dir="${app_dir}/Contents"
 script_dir=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
 signing_identity=${MACOS_SIGNING_IDENTITY:--}
 notary_profile=${MACOS_NOTARY_PROFILE:-}
+update_private_key=${MACOS_UPDATE_PRIVATE_KEY:-}
+update_public_key=${MACOS_UPDATE_PUBLIC_KEY:-}
+
+if [ -n "${update_public_key}" ] || [ -n "${update_private_key}" ]; then
+  test -n "${update_public_key}"
+  test -n "${update_private_key}"
+  update_properties="
+    <key>SUFeedURL</key>
+    <string>https://github.com/YunaBraska/Sentrio/releases/latest/download/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>${update_public_key}</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
+    <key>SUAutomaticallyUpdate</key>
+    <false/>
+    <key>SUVerifyUpdateBeforeExtraction</key>
+    <true/>
+    <key>SURequireSignedFeed</key>
+    <true/>"
+else
+  update_properties=''
+fi
 
 rm -rf "${dist_dir}" .build-release-arm64 .build-release-x86_64
 mkdir -p "${contents_dir}/MacOS" "${contents_dir}/Resources"
@@ -23,7 +45,13 @@ lipo -create \
   -output "${contents_dir}/MacOS/${app_name}" \
   "${arm64_bin}/${app_name}" \
   "${x86_64_bin}/${app_name}"
+install_name_tool -add_rpath '@executable_path/../Frameworks' "${contents_dir}/MacOS/${app_name}"
 lipo -info "${contents_dir}/MacOS/${app_name}"
+
+sparkle_framework=$(find .build-release-arm64 -type d -name 'Sparkle.framework' -print -quit)
+test -n "${sparkle_framework}"
+mkdir -p "${contents_dir}/Frameworks"
+ditto "${sparkle_framework}" "${contents_dir}/Frameworks/Sparkle.framework"
 
 binary_dir=${arm64_bin}
 find "${binary_dir}" -maxdepth 1 -type d -name '*.bundle' -exec cp -R {} "${contents_dir}/Resources/" \;
@@ -84,6 +112,7 @@ cat > "${contents_dir}/Info.plist" <<EOF
     <true/>
     <key>NSSupportsAppIntents</key>
     <true/>
+${update_properties}
 </dict>
 </plist>
 EOF
@@ -131,4 +160,18 @@ if [ -n "${notary_profile}" ]; then
   xcrun notarytool submit "${dist_dir}/${app_name}-${version}.dmg" --keychain-profile "${notary_profile}" --wait --timeout 90m
   xcrun stapler staple "${dist_dir}/${app_name}-${version}.dmg"
   xcrun stapler validate "${dist_dir}/${app_name}-${version}.dmg"
+fi
+
+if [ -n "${update_public_key}" ]; then
+  update_stage=$(mktemp -d)
+  update_key="${update_stage}/private-key"
+  trap 'rm -rf "${iconset}" "${dmg_stage}" "${update_stage}"' 0 HUP INT TERM
+  (umask 077; printf '%s' "${update_private_key}" > "${update_key}")
+  generate_appcast=$(find .build-release-arm64 -type f -name generate_appcast -print -quit)
+  sign_update=$(find .build-release-arm64 -type f -name sign_update -print -quit)
+  test -n "${generate_appcast}"
+  test -n "${sign_update}"
+  cp "${dist_dir}/${app_name}-${version}.dmg" "${update_stage}/"
+  "${generate_appcast}" --ed-key-file "${update_key}" --download-url-prefix "https://github.com/YunaBraska/Sentrio/releases/download/${version}/" --maximum-versions 1 --disable-signing-warning -o "${dist_dir}/appcast.xml" "${update_stage}"
+  "${sign_update}" --ed-key-file "${update_key}" --verify "${dist_dir}/appcast.xml"
 fi

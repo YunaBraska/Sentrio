@@ -14,6 +14,30 @@ case "${0##*/}" in
       shift
     done
     mkdir -p "${scratch}/out/Products/Release"
+    mkdir -p "${scratch}/artifacts/sparkle/Sparkle/bin" "${scratch}/artifacts/sparkle/Sparkle/Sparkle.framework"
+    cat > "${scratch}/artifacts/sparkle/Sparkle/bin/generate_appcast" <<'EOF'
+#!/bin/sh
+set -eu
+output=''
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -o)
+      shift
+      output=$1
+      ;;
+  esac
+  shift
+done
+test -n "${output}"
+printf 'appcast %s\n' "${output}" >> "${PACKAGE_TEST_LOG}"
+touch "${output}"
+EOF
+    cat > "${scratch}/artifacts/sparkle/Sparkle/bin/sign_update" <<'EOF'
+#!/bin/sh
+set -eu
+printf 'verify appcast\n' >> "${PACKAGE_TEST_LOG}"
+EOF
+    chmod +x "${scratch}/artifacts/sparkle/Sparkle/bin/generate_appcast" "${scratch}/artifacts/sparkle/Sparkle/bin/sign_update"
     touch "${scratch}/out/Products/Release/Sentrio"
     if [ "${show_bin_path}" = true ]; then
       printf '%s\n' "${scratch}/out/Products/Release"
@@ -26,6 +50,10 @@ case "${0##*/}" in
       test -f "$5"
       touch "$3"
     fi
+    exit
+    ;;
+  install_name_tool)
+    printf 'rpath %s\n' "$*" >> "${PACKAGE_TEST_LOG}"
     exit
     ;;
   iconutil)
@@ -44,6 +72,10 @@ case "${0##*/}" in
     exit
     ;;
   ditto)
+    if [ "$#" = 2 ]; then
+      mkdir -p "$2"
+      exit
+    fi
     printf 'zip %s\n' "$6" >> "${PACKAGE_TEST_LOG}"
     touch "$6"
     exit
@@ -69,17 +101,20 @@ test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.device.audio-input
 tmp=$(mktemp -d)
 trap 'rm -rf "${tmp}"' 0 HUP INT TERM
 mkdir -p "${tmp}/bin" "${tmp}/work"
-for command in swift lipo iconutil codesign ditto hdiutil xcrun; do
+for command in swift lipo install_name_tool iconutil codesign ditto hdiutil xcrun; do
   ln -s "${root}/scripts/test-package.sh" "${tmp}/bin/${command}"
 done
 export PACKAGE_TEST_LOG="${tmp}/events"
 export PATH="${tmp}/bin:${PATH}"
 export MACOS_SIGNING_IDENTITY='test identity'
 export MACOS_NOTARY_PROFILE='test profile'
+export MACOS_UPDATE_PRIVATE_KEY='AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+export MACOS_UPDATE_PUBLIC_KEY='AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
 cd "${tmp}/work"
 sh "${root}/scripts/package.sh" 1.2.3
 
 grep -q '^codesign .*--entitlements .*Sentrio.entitlements ' "${PACKAGE_TEST_LOG}"
+grep -q '^rpath -add_rpath @executable_path/../Frameworks ' "${PACKAGE_TEST_LOG}"
 grep -q '^notarytool submit .*\.zip .* --timeout 90m$' "${PACKAGE_TEST_LOG}"
 grep -q '^notarytool submit .*\.dmg .* --timeout 90m$' "${PACKAGE_TEST_LOG}"
 app_submission=$(grep -n '^notarytool submit .*\.zip ' "${PACKAGE_TEST_LOG}" | cut -d: -f1)
@@ -100,6 +135,12 @@ grep -q '^stapler validate .*\.app$' "${PACKAGE_TEST_LOG}"
 grep -q '^stapler validate .*\.dmg$' "${PACKAGE_TEST_LOG}"
 test -f dist/Sentrio-1.2.3.zip
 test -f dist/Sentrio-1.2.3.dmg
+test -f dist/appcast.xml
+test -d dist/Sentrio.app/Contents/Frameworks/Sparkle.framework
+grep -q '<key>SUFeedURL</key>' dist/Sentrio.app/Contents/Info.plist
+grep -q '<string>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</string>' dist/Sentrio.app/Contents/Info.plist
+grep -q '^appcast dist/appcast.xml$' "${PACKAGE_TEST_LOG}"
+grep -q '^verify appcast$' "${PACKAGE_TEST_LOG}"
 
 : > "${PACKAGE_TEST_LOG}"
 export PACKAGE_TEST_FAIL=true
@@ -109,13 +150,19 @@ if sh "${root}/scripts/package.sh" 1.2.3; then
 fi
 test ! -f dist/Sentrio-1.2.3.zip
 test ! -f dist/Sentrio-1.2.3.dmg
+test ! -f dist/appcast.xml
 
 : > "${PACKAGE_TEST_LOG}"
-unset PACKAGE_TEST_FAIL MACOS_NOTARY_PROFILE
+unset PACKAGE_TEST_FAIL MACOS_NOTARY_PROFILE MACOS_UPDATE_PRIVATE_KEY MACOS_UPDATE_PUBLIC_KEY
 export MACOS_SIGNING_IDENTITY='-'
 sh "${root}/scripts/package.sh" 1.2.3
 test -f dist/Sentrio-1.2.3.zip
 test -f dist/Sentrio-1.2.3.dmg
+test ! -f dist/appcast.xml
+if grep -q '<key>SUFeedURL</key>' dist/Sentrio.app/Contents/Info.plist; then
+  printf '%s\n' 'An ad-hoc build configured automatic updates.' >&2
+  exit 1
+fi
 if grep -Eq '^(notarytool|stapler)' "${PACKAGE_TEST_LOG}"; then
   printf '%s\n' 'An ad-hoc build attempted notarization.' >&2
   exit 1

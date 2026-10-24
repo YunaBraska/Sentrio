@@ -5,6 +5,9 @@ let package = Package(
     name: "Sentrio",
     defaultLocalization: "en",
     platforms: [.macOS(.v13)],
+    dependencies: [
+        .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.0"),
+    ],
     targets: [
         // Thin executable — only contains main.swift
         .executableTarget(
@@ -15,6 +18,9 @@ let package = Package(
         // Library with all app logic — importable by tests
         .target(
             name: "SentrioCore",
+            dependencies: [
+                .product(name: "Sparkle", package: "Sparkle"),
+            ],
             path: "Sources/SentrioCore",
             resources: [
                 .process("Resources"),

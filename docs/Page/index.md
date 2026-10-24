@@ -7,7 +7,7 @@ title: Sentrio
 
 Predictable audio routing and BusyLight automation for macOS.
 
-[Download the latest release](https://github.com/YunaBraska/Sentrio/releases/latest) | [Documentation](documentation.html) | [Install](install.html)
+[Documentation](documentation.html) | [Download the latest release](https://github.com/YunaBraska/Sentrio/releases/latest) | [Install](install.html)
 
 ## What it does
 

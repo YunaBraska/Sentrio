@@ -1,4 +1,8 @@
 title: Sentrio
+product: Sentrio
 description: Predictable audio routing and BusyLight automation for macOS.
-logo: https://raw.githubusercontent.com/YunaBraska/Sentrio/main/Assets.xcassets/AppIcon.appiconset/512-mac.png
-theme: jekyll-theme-minimal
+repository: https://github.com/YunaBraska/Sentrio
+support: https://github.com/YunaBraska/Sentrio/issues
+accent: "#1769e0"
+accent_soft: "#e8f1ff"
+color_scheme: light

@@ -12,7 +12,7 @@ description: Keep macOS input, output and BusyLight behavior predictable as devi
     <p class="actions"><a class="button" href="install.html">Get Sentrio</a><a class="button secondary" href="documentation.html">Read the documentation</a></p>
   </div>
   <figure class="hero-art">
-    <img src="https://raw.githubusercontent.com/YunaBraska/Sentrio/main/docs/screenshots/generated/preferences_output.png" alt="Sentrio output preferences with prioritized devices and saved volume levels">
+    <img src="{{ '/assets/help/preferences-output.png' | relative_url }}" alt="Sentrio output preferences with prioritized devices and saved volume levels">
     <figcaption>Make a preferred device and its volume the normal state, not a daily adjustment.</figcaption>
   </figure>
 </section>
@@ -32,7 +32,7 @@ description: Keep macOS input, output and BusyLight behavior predictable as devi
   <p class="section-intro">The menu-bar view keeps the current devices legible. Preferences make the long-term behavior explicit.</p>
   <div class="screenshot-grid">
     <figure><img src="https://raw.githubusercontent.com/YunaBraska/Sentrio/main/docs/screenshots/generated/bar_menu.png" alt="Sentrio menu bar panel showing connected audio devices"><figcaption>Current devices, levels and routing at a glance.</figcaption></figure>
-    <figure><img src="https://raw.githubusercontent.com/YunaBraska/Sentrio/main/docs/screenshots/generated/preferences_busy_light.png" alt="Sentrio BusyLight preferences"><figcaption>BusyLight rules and integrations stay in one place.</figcaption></figure>
+    <figure><img src="{{ '/assets/help/preferences-busy-light.png' | relative_url }}" alt="Sentrio BusyLight preferences"><figcaption>BusyLight rules and integrations stay in one place.</figcaption></figure>
   </div>
 </section>
 

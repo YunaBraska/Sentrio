@@ -1,24 +1,20 @@
 ---
 layout: default
 title: Documentation
-description: Practical Sentrio guides for routing, BusyLight automation and recovery.
+description: Help for routing, BusyLight automation and saved settings.
 ---
 
 <header class="page-heading">
   <p class="eyebrow">Documentation</p>
   <h1>Set it up once. Know where to look later.</h1>
-  <p>Start with the device behavior you want, then use the focused guides when you need a deeper setting, an integration or help recovering a configuration.</p>
+  <p>Learn the app from the menu bar outward. The help covers device routing, BusyLight behavior and keeping a working configuration safe.</p>
 </header>
 
 <section class="section">
   <ul class="doc-list">
-    <li><a href="{{ '/reference/docs/getting-started/README.html' | relative_url }}">Getting started</a><p>Install Sentrio, grant the required access and define a first priority order.</p></li>
-    <li><a href="{{ '/reference/docs/output-input/README.html' | relative_url }}">Output and input</a><p>Set routing priorities and per-device volume behavior.</p></li>
-    <li><a href="{{ '/reference/docs/icons-and-names/README.html' | relative_url }}">Icons and names</a><p>Make similar devices easy to recognize in the menu bar.</p></li>
-    <li><a href="{{ '/reference/docs/settings-backup/README.html' | relative_url }}">Settings and backup</a><p>Export a working setup and restore it on another Mac.</p></li>
-    <li><a href="{{ '/reference/docs/busylight/README.html' | relative_url }}">BusyLight</a><p>Configure rules, colors and manual control for a connected BusyLight.</p></li>
-    <li><a href="{{ '/reference/docs/busylight-http-api/README.html' | relative_url }}">BusyLight HTTP API</a><p>Control presence from a local script or service.</p></li>
-    <li><a href="{{ '/reference/docs/busylight-macos-integrations/README.html' | relative_url }}">macOS integrations</a><p>Connect BusyLight behavior with supported macOS apps and status.</p></li>
-    <li><a href="{{ '/reference/docs/troubleshooting/README.html' | relative_url }}">Troubleshooting</a><p>Work through device, permission and routing problems methodically.</p></li>
+    <li><a href="{{ '/help/index.html' | relative_url }}">Use Sentrio</a><p>Set device priorities, choose input behavior and recognise routes in the menu bar.</p></li>
+    <li><a href="{{ '/help/index.html#busylight' | relative_url }}">BusyLight</a><p>Use rules or direct control to show the state that matters.</p></li>
+    <li><a href="{{ '/help/index.html#settings-and-backup' | relative_url }}">Settings and backup</a><p>Keep a known-good setup and move it to another Mac.</p></li>
+    <li><a href="{{ '/install.html' | relative_url }}">Install and update</a><p>Choose Homebrew, a signed download or the App Store when it becomes available.</p></li>
   </ul>
 </section>

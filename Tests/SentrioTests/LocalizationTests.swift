@@ -37,6 +37,36 @@ final class LocalizationTests: XCTestCase {
         return dict
     }
 
+    func test_resourceBundleUsesPackagedCandidate() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        let resources = root.appendingPathComponent("Resources", isDirectory: true)
+        let bundleURL = resources.appendingPathComponent("Sentrio_SentrioCore.bundle", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        try FileManager.default.createDirectory(at: bundleURL, withIntermediateDirectories: true)
+        try PropertyListSerialization.data(
+            fromPropertyList: ["CFBundleIdentifier": "com.sentrio.tests.localization"],
+            format: .xml,
+            options: 0
+        ).write(to: bundleURL.appendingPathComponent("Info.plist"))
+
+        let bundle = L10n.resourceBundle(
+            named: L10n.resourceBundleName,
+            in: [resources],
+            fallback: .main
+        )
+
+        XCTAssertEqual(bundle.bundleURL, bundleURL)
+    }
+
+    func test_resourceBundleFallsBackWhenThePackagedBundleIsMissing() {
+        XCTAssertEqual(
+            L10n.resourceBundle(named: "missing", in: [], fallback: .main).bundleURL,
+            Bundle.main.bundleURL
+        )
+    }
+
     func test_localizations_containAllKeys() throws {
         let en = try loadStrings(localization: "en")
         XCTAssertFalse(en.isEmpty, "en Localizable.strings should not be empty")

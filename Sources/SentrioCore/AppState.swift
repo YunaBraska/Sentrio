@@ -29,8 +29,8 @@ final class AppState: ObservableObject {
             BusyLightIntegrationBridge.shared.bind(engine: resolvedBusyLight)
         }
 
-        // ── Forward changes from nested ObservableObjects so App.body re-evaluates ──
-        // This is what makes the dynamic menu bar icon and hideMenuBarIcon work.
+        // Forward changes from nested ObservableObjects to the app presentation.
+        // This keeps the menu bar icon and its visibility in sync with the current state.
         settings.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
@@ -44,7 +44,7 @@ final class AppState: ObservableObject {
             .sink { [weak self] _ in self?.preferencesWindow?.title = L10n.tr("prefs.window.title") }
             .store(in: &cancellables)
 
-        // Listen for reopen (Launchpad click) to open Preferences
+        // Open Preferences when the app is reopened from macOS.
         NotificationCenter.default.addObserver(
             self, selector: #selector(reopenApp),
             name: .reopenApp, object: nil

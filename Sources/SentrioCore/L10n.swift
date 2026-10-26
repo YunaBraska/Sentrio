@@ -2,12 +2,14 @@ import Foundation
 
 enum L10n {
     static let resourceBundleName = "Sentrio_SentrioCore"
-    static let baseBundle = resourceBundle(
-        named: resourceBundleName,
-        in: [Bundle.main.resourceURL, Bundle(for: BundleMarker.self).resourceURL, Bundle.main.bundleURL],
-        fallback: .main
-    )
-
+    #if DEBUG
+        static let baseBundle: Bundle = .module
+    #else
+        static let baseBundle = resourceBundle(
+            named: resourceBundleName,
+            in: [Bundle.main.resourceURL, Bundle(for: BundleMarker.self).resourceURL, Bundle.main.bundleURL]
+        ) ?? .main
+    #endif
     private final class BundleMarker {}
 
     /// When set, forces a specific localization bundle (e.g. "de", "pt-BR", "zh-Hans").
@@ -43,11 +45,11 @@ enum L10n {
         return Bundle(path: path)
     }
 
-    static func resourceBundle(named name: String, in candidateURLs: [URL?], fallback: Bundle) -> Bundle {
+    static func resourceBundle(named name: String, in candidateURLs: [URL?]) -> Bundle? {
         candidateURLs
             .compactMap { $0?.appendingPathComponent("\(name).bundle") }
             .compactMap(Bundle.init(url:))
-            .first ?? fallback
+            .first
     }
 
     static func tr(_ key: String) -> String {

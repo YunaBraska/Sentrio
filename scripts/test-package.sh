@@ -13,7 +13,7 @@ case "${0##*/}" in
       fi
       shift
     done
-    mkdir -p "${scratch}/out/Products/Release/Sentrio_SentrioCore.bundle/en.lproj"
+    mkdir -p "${scratch}/out/Products/Release/Sentrio_SentrioCore.bundle/Contents/Resources/en.lproj"
     mkdir -p "${scratch}/artifacts/sparkle/Sparkle/bin" "${scratch}/artifacts/sparkle/Sparkle/Sparkle.framework"
     cat > "${scratch}/artifacts/sparkle/Sparkle/bin/generate_appcast" <<'EOF'
 #!/bin/sh
@@ -38,7 +38,7 @@ set -eu
 printf 'verify appcast\n' >> "${PACKAGE_TEST_LOG}"
 EOF
     chmod +x "${scratch}/artifacts/sparkle/Sparkle/bin/generate_appcast" "${scratch}/artifacts/sparkle/Sparkle/bin/sign_update"
-    touch "${scratch}/out/Products/Release/Sentrio" "${scratch}/out/Products/Release/Sentrio_SentrioCore.bundle/en.lproj/Localizable.strings"
+    touch "${scratch}/out/Products/Release/Sentrio" "${scratch}/out/Products/Release/Sentrio_SentrioCore.bundle/Contents/Resources/en.lproj/Localizable.strings"
     if [ "${show_bin_path}" = true ]; then
       printf '%s\n' "${scratch}/out/Products/Release"
     fi
@@ -137,7 +137,7 @@ test -f dist/Sentrio-1.2.3.zip
 test -f dist/Sentrio-1.2.3.dmg
 test -f dist/appcast.xml
 test -d dist/Sentrio.app/Contents/Frameworks/Sparkle.framework
-test -f dist/Sentrio.app/Contents/Resources/Sentrio_SentrioCore.bundle/en.lproj/Localizable.strings
+test -f dist/Sentrio.app/Contents/Resources/Sentrio_SentrioCore.bundle/Contents/Resources/en.lproj/Localizable.strings
 grep -q '<key>SUFeedURL</key>' dist/Sentrio.app/Contents/Info.plist
 grep -q '<string>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</string>' dist/Sentrio.app/Contents/Info.plist
 grep -q '^appcast dist/appcast.xml$' "${PACKAGE_TEST_LOG}"

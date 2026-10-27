@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "Varattu";
 "status.active" = "Aktiivinen";
 "action.privacyPolicy" = "Tietosuojakäytäntö";
+"action.openMicrophoneSettings" = "Avaa mikrofoniasetukset";
+"prefs.general.inputLevelUnavailable" = "Reaaliaikainen tulotaso ei ole käytettävissä. Tarkista mikrofonin käyttöoikeus macOS-asetuksista.";
 "prefs.general.activity" = "Toiminta";

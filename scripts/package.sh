@@ -71,6 +71,14 @@ notary_profile=${MACOS_NOTARY_PROFILE:-}
 update_private_key=${MACOS_UPDATE_PRIVATE_KEY:-}
 update_public_key=${MACOS_UPDATE_PUBLIC_KEY:-}
 
+run_swift_package_command() {
+  if [ "${distribution}" = 'app-store' ]; then
+    "${script_dir}/scripts/with-preserved-package-resolution.sh" "$@"
+  else
+    "$@"
+  fi
+}
+
 if [ "${distribution}" = 'direct' ] && { [ -n "${update_public_key}" ] || [ -n "${update_private_key}" ]; }; then
   test -n "${update_public_key}"
   test -n "${update_private_key}"
@@ -94,10 +102,10 @@ fi
 rm -rf "${dist_dir}" "${build_prefix}-arm64" "${build_prefix}-x86_64"
 mkdir -p "${contents_dir}/MacOS" "${contents_dir}/Resources"
 
-swift build -c release --arch arm64 --product "${executable_name}" --scratch-path "${build_prefix}-arm64"
-swift build -c release --arch x86_64 --product "${executable_name}" --scratch-path "${build_prefix}-x86_64"
-arm64_bin=$(swift build -c release --arch arm64 --product "${executable_name}" --scratch-path "${build_prefix}-arm64" --show-bin-path)
-x86_64_bin=$(swift build -c release --arch x86_64 --product "${executable_name}" --scratch-path "${build_prefix}-x86_64" --show-bin-path)
+run_swift_package_command swift build -c release --arch arm64 --product "${executable_name}" --scratch-path "${build_prefix}-arm64"
+run_swift_package_command swift build -c release --arch x86_64 --product "${executable_name}" --scratch-path "${build_prefix}-x86_64"
+arm64_bin=$(run_swift_package_command swift build -c release --arch arm64 --product "${executable_name}" --scratch-path "${build_prefix}-arm64" --show-bin-path)
+x86_64_bin=$(run_swift_package_command swift build -c release --arch x86_64 --product "${executable_name}" --scratch-path "${build_prefix}-x86_64" --show-bin-path)
 lipo -create \
   -output "${contents_dir}/MacOS/${executable_name}" \
   "${arm64_bin}/${executable_name}" \

@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "Meşgul";
 "status.active" = "Etkin";
 "action.privacyPolicy" = "Gizlilik Politikası";
+"action.openMicrophoneSettings" = "Mikrofon Ayarlarını Aç";
+"prefs.general.inputLevelUnavailable" = "Canlı giriş düzeyi kullanılamıyor. macOS Ayarları’nda mikrofon erişimini kontrol edin.";
 "prefs.general.activity" = "Etkinlik";

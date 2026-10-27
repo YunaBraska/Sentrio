@@ -311,6 +311,12 @@ private struct PriorityTab: View {
 
                     ScrollView {
                         VStack(spacing: 0) {
+                            if allKnownUIDs.isEmpty, disabledUIDs.isEmpty {
+                                Text(L10n.tr("menu.noDevices"))
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                                    .frame(maxWidth: .infinity, minHeight: 96)
+                            }
                             ForEach(allKnownUIDs, id: \.self) { uid in
                                 PriorityRow(
                                     uid: uid,
@@ -386,18 +392,36 @@ private struct PriorityTab: View {
                     onEditingEnded: isOutput ? { SoundLibrary.play(settings.testSound) } : nil
                 )
                 if isOutput {
-                    sliderRow(
-                        icon: "bell",
-                        label: L10n.tr("label.alert"),
-                        volume: Binding(
-                            get: { audio.alertVolume },
-                            set: { v in
-                                audio.setAlertVolume(v)
+                    if AudioManager.supportsSystemAlertVolumeControl {
+                        sliderRow(
+                            icon: "bell",
+                            label: L10n.tr("label.alert"),
+                            volume: Binding(
+                                get: { audio.alertVolume },
+                                set: { v in
+                                    audio.setAlertVolume(v)
+                                }
+                            ),
+                            playAction: { SoundLibrary.play(settings.alertSound) },
+                            onEditingEnded: { SoundLibrary.play(settings.alertSound) }
+                        )
+                    } else {
+                        HStack(spacing: 8) {
+                            Image(systemName: "bell")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(width: 16)
+                                .accessibilityHidden(true)
+                            Text(L10n.tr("label.alert"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Button(L10n.tr("action.soundSettings")) {
+                                NSWorkspace.shared.open(SystemSettingsLinks.sound)
                             }
-                        ),
-                        playAction: { SoundLibrary.play(settings.alertSound) },
-                        onEditingEnded: { SoundLibrary.play(settings.alertSound) }
-                    )
+                            .controlSize(.small)
+                        }
+                    }
                 }
             }
         } label: {
@@ -418,6 +442,7 @@ private struct PriorityTab: View {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.caption).foregroundStyle(.secondary).frame(width: 16)
+                .accessibilityHidden(true)
             Text(label)
                 .font(.caption).foregroundStyle(.secondary).frame(width: 44, alignment: .leading)
             Slider(
@@ -429,8 +454,11 @@ private struct PriorityTab: View {
                     }
                 }
             )
+            .accessibilityLabel(label)
+            .accessibilityValue(Text("\(Int((volume.wrappedValue * 100).rounded()))%"))
             Image(systemName: "\(icon).fill")
                 .font(.caption).foregroundStyle(.secondary).frame(width: 16)
+                .accessibilityHidden(true)
 
             if let playAction {
                 Button(action: playAction) {
@@ -441,6 +469,7 @@ private struct PriorityTab: View {
                 }
                 .buttonStyle(.plain)
                 .help(L10n.tr("action.playSound"))
+                .accessibilityLabel(L10n.tr("action.playSound"))
             }
         }
     }
@@ -525,6 +554,7 @@ private struct PriorityRow: View {
     @State private var showIconPicker = false
     @State private var showRenamePopover = false
     @State private var pendingName = ""
+    @State private var isShowingForgetConfirmation = false
 
     private var name: String {
         settings.displayName(for: uid, isOutput: isOutput, fallbackName: device?.name)
@@ -584,6 +614,7 @@ private struct PriorityRow: View {
             Circle()
                 .fill(isConnected ? Color.green : Color.secondary.opacity(0.3))
                 .frame(width: 7, height: 7)
+                .accessibilityHidden(true)
 
             // Icon button — volume-reactive for active output speaker icons
             let displayedIcon = (isOutput && device?.uid == audio.defaultOutput?.uid)
@@ -603,6 +634,7 @@ private struct PriorityRow: View {
             .buttonStyle(.plain)
             .help(device.flatMap(\.iconBaseName).map { L10n.format("prefs.iconHelp.withCoreAudioFormat", $0) }
                 ?? L10n.tr("prefs.iconHelp.noCoreAudio"))
+            .accessibilityLabel(L10n.tr("action.chooseIcon"))
             .popover(isPresented: $showIconPicker, arrowEdge: .trailing) {
                 IconPickerPopover(uid: uid, isOutput: isOutput)
                     .environmentObject(settings)
@@ -693,7 +725,7 @@ private struct PriorityRow: View {
                     settings.hideDevice(uid: uid, isOutput: isOutput)
                 }
                 Button(L10n.tr("action.forgetDevice")) {
-                    settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+                    isShowingForgetConfirmation = true
                 }
                 .disabled(!canForget)
                 Button {
@@ -714,10 +746,17 @@ private struct PriorityRow: View {
             }
             .buttonStyle(.plain)
             .help(L10n.tr("action.deviceActions"))
+            .accessibilityLabel(L10n.tr("action.deviceActions"))
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .opacity(isConnected ? 1 : 0.6)
+        .alert(L10n.tr("action.forgetDevice"), isPresented: $isShowingForgetConfirmation) {
+            Button(L10n.tr("action.forgetDevice"), role: .destructive) {
+                settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+            }
+            Button(L10n.tr("action.cancel"), role: .cancel) {}
+        }
     }
 
     private func moveTarget(direction: Int) -> String? {
@@ -823,6 +862,7 @@ private struct DisabledRow: View {
 
     @State private var showRenamePopover = false
     @State private var pendingName = ""
+    @State private var isShowingForgetConfirmation = false
 
     private var device: AudioDevice? {
         (isOutput ? audio.outputDevices : audio.inputDevices).first { $0.uid == uid }
@@ -872,12 +912,14 @@ private struct DisabledRow: View {
             Circle()
                 .fill(Color.orange.opacity(0.75))
                 .frame(width: 7, height: 7)
+                .accessibilityHidden(true)
 
             // Device icon in the same column as PriorityRow's icon button
             Image(systemName: iconName)
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
                 .frame(width: 24, height: 24)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(settings.displayName(for: uid, isOutput: isOutput, fallbackName: device?.name))
@@ -918,7 +960,7 @@ private struct DisabledRow: View {
                     settings.enableDevice(uid: uid, isOutput: isOutput)
                 }
                 Button(L10n.tr("action.forgetDevice")) {
-                    settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+                    isShowingForgetConfirmation = true
                 }
                 .disabled(!canForget)
                 Button {
@@ -937,10 +979,17 @@ private struct DisabledRow: View {
             }
             .buttonStyle(.plain)
             .help(L10n.tr("action.deviceActions"))
+            .accessibilityLabel(L10n.tr("action.deviceActions"))
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .opacity(0.82)
+        .alert(L10n.tr("action.forgetDevice"), isPresented: $isShowingForgetConfirmation) {
+            Button(L10n.tr("action.forgetDevice"), role: .destructive) {
+                settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+            }
+            Button(L10n.tr("action.cancel"), role: .cancel) {}
+        }
     }
 
     private var iconPickerMenu: some View {
@@ -1026,9 +1075,11 @@ private struct GeneralTab: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
     @State private var launchAtLogin = false
+    @State private var launchAtLoginError: String?
     @State private var importExportStatus: String?
     @State private var importExportStatusIsError = false
     @State private var lastExportURL: URL?
+    @State private var isShowingClearVolumeMemoryConfirmation = false
 
     var body: some View {
         Form {
@@ -1064,10 +1115,29 @@ private struct GeneralTab: View {
 
             // ── System ──────────────────────────────────────────────
             Section(L10n.tr("prefs.general.system")) {
-                Toggle(L10n.tr("prefs.general.launchAtLogin"), isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { settings.setLaunchAtLogin($0) }
+                Toggle(
+                    L10n.tr("prefs.general.launchAtLogin"),
+                    isOn: Binding(
+                        get: { launchAtLogin },
+                        set: { enabled in
+                            switch settings.setLaunchAtLogin(enabled) {
+                            case let .success(actualValue):
+                                launchAtLogin = actualValue
+                                launchAtLoginError = nil
+                            case let .failure(error):
+                                launchAtLogin = settings.isLaunchAtLoginEnabled
+                                launchAtLoginError = error.localizedDescription
+                            }
+                        }
+                    )
+                )
+                if let launchAtLoginError {
+                    Text(launchAtLoginError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
                 Button(L10n.tr("action.openSoundSettings")) {
-                    openSite("x-apple.systempreferences:com.apple.preference.sound")
+                    NSWorkspace.shared.open(SystemSettingsLinks.sound)
                 }
             }
 
@@ -1077,6 +1147,14 @@ private struct GeneralTab: View {
                 Text(L10n.tr("prefs.general.showInputLevelMeter.description"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if settings.showInputLevelMeter, audio.inputLevelMonitoringProblem {
+                    Text(L10n.tr("prefs.general.inputLevelUnavailable"))
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                    Button(L10n.tr("action.openMicrophoneSettings")) {
+                        NSWorkspace.shared.open(SystemSettingsLinks.microphonePrivacy)
+                    }
+                }
                 Button(L10n.tr("action.privacyPolicy")) {
                     openSite("https://yunabraska.github.io/Sentrio/privacy/")
                 }
@@ -1105,8 +1183,10 @@ private struct GeneralTab: View {
             Section(L10n.tr("prefs.general.volumeMemory")) {
                 Text(L10n.tr("prefs.general.volumeMemory.description"))
                     .font(.caption).foregroundStyle(.secondary)
-                Button(L10n.tr("action.clearVolumeMemory")) { settings.volumeMemory = [:] }
-                    .foregroundStyle(.red)
+                Button(L10n.tr("action.clearVolumeMemory")) {
+                    isShowingClearVolumeMemoryConfirmation = true
+                }
+                .foregroundStyle(.red)
             }
 
             // ── Activity ────────────────────────────────────────────
@@ -1161,6 +1241,15 @@ private struct GeneralTab: View {
         .scrollContentBackground(.hidden)
         .onAppear {
             launchAtLogin = settings.isLaunchAtLoginEnabled
+        }
+        .alert(
+            L10n.tr("action.clearVolumeMemory"),
+            isPresented: $isShowingClearVolumeMemoryConfirmation
+        ) {
+            Button(L10n.tr("action.clearVolumeMemory"), role: .destructive) {
+                settings.volumeMemory = [:]
+            }
+            Button(L10n.tr("action.cancel"), role: .cancel) {}
         }
     }
 

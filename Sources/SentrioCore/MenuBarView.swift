@@ -154,18 +154,20 @@ struct MenuBarView: View {
                     }
                 )
             )
-            VolumeRow(
-                icon: "bell",
-                label: L10n.tr("label.alert"),
-                volume: Binding(
-                    get: { audio.alertVolume },
-                    set: { v in
-                        audio.setAlertVolume(v)
-                    }
-                ),
-                playAction: { SoundLibrary.play(settings.alertSound) },
-                onEditingEnded: { SoundLibrary.play(settings.alertSound) }
-            )
+            if AudioManager.supportsSystemAlertVolumeControl {
+                VolumeRow(
+                    icon: "bell",
+                    label: L10n.tr("label.alert"),
+                    volume: Binding(
+                        get: { audio.alertVolume },
+                        set: { v in
+                            audio.setAlertVolume(v)
+                        }
+                    ),
+                    playAction: { SoundLibrary.play(settings.alertSound) },
+                    onEditingEnded: { SoundLibrary.play(settings.alertSound) }
+                )
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -382,9 +384,7 @@ struct MenuBarView: View {
                     .buttonStyle(.plain).foregroundStyle(.secondary)
                 Spacer()
                 Button(L10n.tr("action.soundSettings")) {
-                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.sound") {
-                        NSWorkspace.shared.open(url)
-                    }
+                    NSWorkspace.shared.open(SystemSettingsLinks.sound)
                 }
                 .buttonStyle(.plain).foregroundStyle(.secondary)
                 Spacer()
@@ -421,6 +421,7 @@ struct VolumeRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(width: 16)
+                .accessibilityHidden(true)
             Slider(
                 value: $volume,
                 in: 0 ... 1,
@@ -430,10 +431,13 @@ struct VolumeRow: View {
                     }
                 }
             )
+            .accessibilityLabel(label)
+            .accessibilityValue(Text("\(Int((volume * 100).rounded()))%"))
             Image(systemName: "\(icon).fill")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .frame(width: 16)
+                .accessibilityHidden(true)
 
             if let playAction {
                 Button(action: playAction) {
@@ -444,6 +448,7 @@ struct VolumeRow: View {
                 }
                 .buttonStyle(.plain)
                 .help(L10n.tr("action.playSound"))
+                .accessibilityLabel(L10n.tr("action.playSound"))
             }
         }
     }
@@ -463,6 +468,7 @@ private struct MenuDeviceRow: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var appState: AppState
+    @State private var isShowingForgetConfirmation = false
 
     private var connectedUIDs: Set<String> {
         Set(audio.outputDevices.map(\.uid) + audio.inputDevices.map(\.uid))
@@ -526,6 +532,7 @@ private struct MenuDeviceRow: View {
             .menuIndicator(.hidden)
             .frame(width: 28)
             .help(L10n.tr("action.deviceActions"))
+            .accessibilityLabel(L10n.tr("action.deviceActions"))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
@@ -534,6 +541,12 @@ private struct MenuDeviceRow: View {
         .padding(.vertical, 1)
         .contextMenu {
             deviceActions
+        }
+        .alert(L10n.tr("action.forgetDevice"), isPresented: $isShowingForgetConfirmation) {
+            Button(L10n.tr("action.forgetDevice"), role: .destructive) {
+                settings.forgetDevice(uid: device.uid, connectedUIDs: connectedUIDs)
+            }
+            Button(L10n.tr("action.cancel"), role: .cancel) {}
         }
     }
 
@@ -580,7 +593,7 @@ private struct MenuDeviceRow: View {
             settings.hideDevice(uid: device.uid, isOutput: !isInput)
         }
         Button(L10n.tr("action.forgetDevice")) {
-            settings.forgetDevice(uid: device.uid, connectedUIDs: connectedUIDs)
+            isShowingForgetConfirmation = true
         }
         .disabled(!canForget)
         Button {
@@ -673,8 +686,7 @@ private struct MenuDeviceRow: View {
     }
 
     private func openBluetoothSettings() {
-        guard let url = URL(string: "x-apple.systempreferences:com.apple.BluetoothSettings") else { return }
-        NSWorkspace.shared.open(url)
+        NSWorkspace.shared.open(SystemSettingsLinks.bluetooth)
     }
 
     private func renameDevice() {

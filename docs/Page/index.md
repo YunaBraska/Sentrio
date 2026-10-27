@@ -22,7 +22,7 @@ description: Keep macOS input, output and BusyLight behavior predictable as devi
   <p class="section-intro">Use Sentrio to describe the result you want at a desk, in a meeting room or with a docking station. It handles the ordinary device churn around it.</p>
   <div class="feature-grid">
     <article class="feature"><h3>Choose the real priority</h3><p>Rank microphones and speakers once. Sentrio selects the best available device instead of leaving the decision to chance.</p></article>
-    <article class="feature"><h3>Restore the right levels</h3><p>Keep separate output, input and alert volumes for each device. Switching hardware does not have to reset a working setup.</p></article>
+    <article class="feature"><h3>Restore the right levels</h3><p>Keep separate output and input volumes for each device. Direct builds can also restore the macOS alert volume.</p></article>
     <article class="feature"><h3>Make presence visible</h3><p>Drive a BusyLight with rules, manual controls, local HTTP and macOS integrations that fit your day.</p></article>
   </div>
 </section>

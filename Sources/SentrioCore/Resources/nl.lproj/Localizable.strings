@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "Bezet";
 "status.active" = "Actief";
 "action.privacyPolicy" = "Privacybeleid";
+"action.openMicrophoneSettings" = "Microfooninstellingen openen";
+"prefs.general.inputLevelUnavailable" = "Het live-invoerniveau is niet beschikbaar. Controleer de microfoontoegang in macOS-instellingen.";
 "prefs.general.activity" = "Activiteit";

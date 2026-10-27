@@ -13,7 +13,7 @@ Sentrio keeps the audio route you expect ready in the menu bar. Set the order on
 
 ## Start with device priorities
 
-Open **Settings**, then choose **Output** and **Input**. Put the device you prefer first and keep alternatives below it. Sentrio uses the highest eligible device in each list. Device-specific output, input and alert volumes return when macOS makes the device available again.
+Open **Settings**, then choose **Output** and **Input**. Put the device you prefer first and keep alternatives below it. Sentrio uses the highest eligible device in each list. Device-specific output and input volumes return when macOS makes the device available again. Direct builds can also restore alert volume; App Store builds open macOS Sound for that system-owned setting.
 
 ![Output device priorities]({{ '/assets/help/preferences-output.png' | relative_url }})
 

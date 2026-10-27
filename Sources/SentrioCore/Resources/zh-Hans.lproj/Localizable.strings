@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "忙碌";
 "status.active" = "活跃";
 "action.privacyPolicy" = "隐私政策";
+"action.openMicrophoneSettings" = "打开麦克风设置";
+"prefs.general.inputLevelUnavailable" = "实时输入电平不可用。请在 macOS“设置”中检查麦克风访问权限。";
 "prefs.general.activity" = "活动";

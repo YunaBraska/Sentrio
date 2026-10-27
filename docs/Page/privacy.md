@@ -2,6 +2,7 @@
 layout: default
 title: Privacy Policy
 description: How Sentrio handles device information, activity signals, settings, and diagnostics.
+permalink: /privacy/
 ---
 
 # Sentrio Privacy Policy

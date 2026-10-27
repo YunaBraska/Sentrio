@@ -18,6 +18,7 @@ The direct build also uses `system_profiler` as one optional source of Bluetooth
 5. Include `PrivacyInfo.xcprivacy` in both distribution variants and declare the approved `UserDefaults` required-reason use.
 6. Do not launch `system_profiler` in the App Store build. Preserve battery reporting through the existing in-process IOPowerSources, CoreAudio, and IOKit sources. This affects optional Bluetooth metadata only, not routing or switching.
 7. Keep Developer ID notarization, Sparkle, ZIP, DMG, and appcast generation exclusive to direct distribution. Keep App Store package signing exclusive to the App Store path.
+8. Keep system alert-volume control in direct builds only. App Sandbox cannot modify another process's preferences, so the App Store build links to macOS Sound instead of presenting a control that cannot work.
 
 ## Consequences
 

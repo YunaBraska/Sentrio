@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "Busy";
 "status.active" = "Active";
 "action.privacyPolicy" = "Privacy Policy";
+"action.openMicrophoneSettings" = "Open Microphone Settings";
+"prefs.general.inputLevelUnavailable" = "The live input level is unavailable. Check microphone access in macOS Settings.";
 "prefs.general.activity" = "Activity";

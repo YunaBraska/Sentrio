@@ -47,4 +47,9 @@ if strings "${contents_dir}/MacOS/${executable_name}" | grep -qF 'github.com/spo
   exit 1
 fi
 
+if strings "${contents_dir}/MacOS/${executable_name}" | grep -qF 'com.apple.systemsound'; then
+  printf '%s\n' 'App Store bundle contains unsupported cross-domain system preference access.' >&2
+  exit 1
+fi
+
 printf '%s\n' 'App Store bundle verification passed.'

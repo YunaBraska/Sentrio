@@ -191,7 +191,7 @@ private final class DocumentationScreenshotFixture {
         settings.inputPriority = [
             "usb:14ed:1019:mv7plus-serial",
             "builtin:mic",
-            "continuity:iphone-hellishsky",
+            "continuity:iphone-studio",
         ]
         settings.disabledOutputDevices = ["bt:jbl-flip6-office"]
         settings.disabledInputDevices = ["usb:blue-yeti-backup"]
@@ -202,7 +202,7 @@ private final class DocumentationScreenshotFixture {
             "bt:airpods-pro2": "AirPods Pro",
             "builtin:speakers": "MacBook Pro Speakers",
             "builtin:mic": "MacBook Pro Microphone",
-            "continuity:iphone-hellishsky": "HellishSky iPhone",
+            "continuity:iphone-studio": "Studio iPhone",
             "bt:jbl-flip6-office": "JBL Flip 6 (Office)",
             "usb:blue-yeti-backup": "Blue Yeti Backup",
         ]
@@ -213,7 +213,7 @@ private final class DocumentationScreenshotFixture {
             "bt:airpods-pro2": .bluetooth,
             "builtin:speakers": .builtIn,
             "builtin:mic": .builtIn,
-            "continuity:iphone-hellishsky": .virtual,
+            "continuity:iphone-studio": .virtual,
             "bt:jbl-flip6-office": .bluetooth,
             "usb:blue-yeti-backup": .usb,
         ]
@@ -224,7 +224,7 @@ private final class DocumentationScreenshotFixture {
             "bt:airpods-pro2": "AirPods Pro (2nd generation)",
             "builtin:speakers": "MacBookPro Speakers",
             "builtin:mic": "MacBookPro Microphone",
-            "continuity:iphone-hellishsky": "iPhone Mic",
+            "continuity:iphone-studio": "iPhone Mic",
             "bt:jbl-flip6-office": "JBL Flip 6",
             "usb:blue-yeti-backup": "Blue Yeti",
         ]
@@ -232,7 +232,7 @@ private final class DocumentationScreenshotFixture {
         settings.deviceIcons = [
             "usb:14ed:1019:mv7plus-serial": ["output": "mic.fill", "input": "mic.fill"],
             "bt:airpods-pro2": ["output": "airpodspro"],
-            "continuity:iphone-hellishsky": ["input": "iphone"],
+            "continuity:iphone-studio": ["input": "iphone"],
             "bt:jbl-flip6-office": ["output": "speaker.wave.2"],
             "usb:blue-yeti-backup": ["input": "mic"],
         ]
@@ -290,8 +290,8 @@ private final class DocumentationScreenshotFixture {
 
         let iPhoneContinuity = AudioDevice(
             id: AudioDeviceID(105),
-            uid: "continuity:iphone-hellishsky",
-            name: "HellishSky iPhone",
+            uid: "continuity:iphone-studio",
+            name: "Studio iPhone",
             hasInput: true,
             hasOutput: false,
             transportType: .virtual,

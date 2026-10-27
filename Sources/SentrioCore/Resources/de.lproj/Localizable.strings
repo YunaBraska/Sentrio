@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "Beschäftigt";
 "status.active" = "Aktiv";
 "action.privacyPolicy" = "Datenschutzrichtlinie";
+"action.openMicrophoneSettings" = "Mikrofoneinstellungen öffnen";
+"prefs.general.inputLevelUnavailable" = "Der Live-Eingangspegel ist nicht verfügbar. Prüfe den Mikrofonzugriff in den macOS-Einstellungen.";
 "prefs.general.activity" = "Aktivität";

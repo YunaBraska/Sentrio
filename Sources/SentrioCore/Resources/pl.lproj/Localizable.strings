@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "Zajęty";
 "status.active" = "Aktywne";
 "action.privacyPolicy" = "Polityka prywatności";
+"action.openMicrophoneSettings" = "Otwórz ustawienia mikrofonu";
+"prefs.general.inputLevelUnavailable" = "Poziom wejścia na żywo jest niedostępny. Sprawdź dostęp do mikrofonu w ustawieniach macOS.";
 "prefs.general.activity" = "Aktywność";

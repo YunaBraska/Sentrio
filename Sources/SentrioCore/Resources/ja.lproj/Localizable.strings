@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "取り込み中";
 "status.active" = "アクティブ";
 "action.privacyPolicy" = "プライバシーポリシー";
+"action.openMicrophoneSettings" = "マイク設定を開く";
+"prefs.general.inputLevelUnavailable" = "ライブ入力レベルを利用できません。macOSの設定でマイクへのアクセスを確認してください。";
 "prefs.general.activity" = "アクティビティ";

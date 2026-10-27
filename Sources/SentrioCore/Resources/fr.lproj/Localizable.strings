@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "Occupé";
 "status.active" = "Actif";
 "action.privacyPolicy" = "Politique de confidentialité";
+"action.openMicrophoneSettings" = "Ouvrir les réglages du microphone";
+"prefs.general.inputLevelUnavailable" = "Le niveau d’entrée en direct est indisponible. Vérifiez l’accès au microphone dans Réglages macOS.";
 "prefs.general.activity" = "Activité";

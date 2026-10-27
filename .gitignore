@@ -13,6 +13,7 @@ build/
 dist/
 dist-app-store/
 dist-review/
+dist-*/
 .swiftpm/
 DerivedData/
 *.xcuserstate

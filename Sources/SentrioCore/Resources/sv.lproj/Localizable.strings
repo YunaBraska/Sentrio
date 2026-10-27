@@ -254,4 +254,6 @@
 "menu.busylight.busy" = "Upptagen";
 "status.active" = "Aktiv";
 "action.privacyPolicy" = "Integritetspolicy";
+"action.openMicrophoneSettings" = "Öppna mikrofoninställningar";
+"prefs.general.inputLevelUnavailable" = "Live-ingångsnivån är inte tillgänglig. Kontrollera mikrofonåtkomsten i macOS-inställningarna.";
 "prefs.general.activity" = "Aktivitet";

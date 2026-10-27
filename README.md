@@ -14,7 +14,7 @@ A lightweight macOS menu bar app that keeps your audio routing and BusyLight beh
 
 - Auto-switches output and input devices based on your priority order
 - Uses explicit manual connect for Continuity/iPhone routes (shown as `Continuity` transport); failed manual connects fall back to next eligible priority
-- Restores per-device Output, Input, and Alert volumes
+- Restores per-device output and input volumes. Direct builds also restore the macOS alert volume; App Store builds open macOS Sound for that system-owned setting.
 - Supports custom device names and icons
 - Shows battery info when macOS exposes it
 - Adds BusyLight automation (rules/manual), HTTP control, and macOS integrations
@@ -55,6 +55,12 @@ open dist-app-store/Sentrio.app
 ```
 
 The argument is the three-component marketing version. Set `MACOS_BUILD_VERSION` to an independently increasing one-to-three-component numeric build version when needed. The submission package is produced only when Mac App Store application and installer signing identities are supplied.
+
+Use [docs/app-store-review-notes.md](docs/app-store-review-notes.md) for reviewer context. Generate App Store Connect screenshots with:
+
+```bash
+sh scripts/generate-app-store-screenshots.sh
+```
 
 ## Screenshots
 

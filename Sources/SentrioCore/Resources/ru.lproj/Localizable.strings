@@ -10,7 +10,7 @@
 "label.manualConnect" = "Ручное подключение";
 
 /* Общие действия */
-"action.preferences" = "Настройки Sentrio…";
+"action.preferences" = "Настройки…";
 "action.soundSettings" = "Звук macOS…";
 "action.bluetoothSettings" = "Настройки Bluetooth…";
 "action.quit" = "Выйти";

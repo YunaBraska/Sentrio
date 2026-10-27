@@ -10,7 +10,7 @@
 "label.manualConnect" = "Conexión manual";
 
 /* Acciones comunes */
-"action.preferences" = "Ajustes de Sentrio…";
+"action.preferences" = "Ajustes…";
 "action.soundSettings" = "Sonido de macOS…";
 "action.bluetoothSettings" = "Ajustes de Bluetooth…";
 "action.quit" = "Salir";

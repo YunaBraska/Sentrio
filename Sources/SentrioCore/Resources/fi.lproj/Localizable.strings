@@ -10,7 +10,7 @@
 "label.manualConnect" = "Manuaalinen yhteys";
 
 /* Yleiset toiminnot */
-"action.preferences" = "Sentrio-asetukset…";
+"action.preferences" = "Asetukset…";
 "action.soundSettings" = "macOS-ääni…";
 "action.bluetoothSettings" = "Bluetooth-asetukset…";
 "action.quit" = "Lopeta";

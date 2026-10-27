@@ -16,49 +16,6 @@ enum SentrioVisualStyle {
     }
 }
 
-struct SentrioBackdrop: View {
-    @Environment(\.colorScheme) private var colorScheme
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
-    var body: some View {
-        ZStack {
-            Color(nsColor: .windowBackgroundColor)
-
-            LinearGradient(
-                colors: [
-                    SentrioVisualStyle.accent.opacity(primaryOpacity),
-                    SentrioVisualStyle.secondaryAccent.opacity(secondaryOpacity),
-                    Color.clear,
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-
-            RadialGradient(
-                colors: [
-                    SentrioVisualStyle.liveAccent.opacity(tertiaryOpacity),
-                    Color.clear,
-                ],
-                center: .topTrailing,
-                startRadius: 10,
-                endRadius: 380
-            )
-        }
-    }
-
-    private var primaryOpacity: Double {
-        reduceTransparency ? 0.055 : colorScheme == .dark ? 0.22 : 0.16
-    }
-
-    private var secondaryOpacity: Double {
-        reduceTransparency ? 0.035 : colorScheme == .dark ? 0.16 : 0.11
-    }
-
-    private var tertiaryOpacity: Double {
-        reduceTransparency ? 0.025 : colorScheme == .dark ? 0.12 : 0.08
-    }
-}
-
 struct SentrioChromeBackground: View {
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
@@ -96,8 +53,20 @@ struct SentrioCardBackground: View {
             if reduceTransparency {
                 shape.fill(Color(nsColor: .controlBackgroundColor))
             } else {
-                shape.fill(.regularMaterial)
+                shape.fill(.ultraThinMaterial)
             }
+
+            shape.fill(
+                LinearGradient(
+                    colors: [
+                        SentrioVisualStyle.accent.opacity(colorScheme == .dark ? 0.09 : 0.055),
+                        SentrioVisualStyle.secondaryAccent.opacity(colorScheme == .dark ? 0.055 : 0.03),
+                        Color.clear,
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
         }
         .overlay(
             shape.strokeBorder(
@@ -106,9 +75,9 @@ struct SentrioCardBackground: View {
             )
         )
         .shadow(
-            color: Color.black.opacity(reduceTransparency ? 0 : colorScheme == .dark ? 0.18 : 0.08),
-            radius: 10,
-            y: 4
+            color: Color.black.opacity(reduceTransparency ? 0 : colorScheme == .dark ? 0.12 : 0.04),
+            radius: 5,
+            y: 2
         )
     }
 }

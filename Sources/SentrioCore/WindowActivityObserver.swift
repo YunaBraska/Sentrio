@@ -6,10 +6,19 @@ import SwiftUI
 /// Uses occlusion state so it turns off when the window is not visible (closed, hidden,
 /// or fully covered), which is ideal for privacy-sensitive features like mic monitoring.
 struct WindowActivityObserver: NSViewRepresentable {
+    var onWindowAttached: ((NSWindow) -> Void)?
     var onChange: (Bool) -> Void
 
+    init(
+        onWindowAttached: ((NSWindow) -> Void)? = nil,
+        onChange: @escaping (Bool) -> Void
+    ) {
+        self.onWindowAttached = onWindowAttached
+        self.onChange = onChange
+    }
+
     func makeCoordinator() -> Coordinator {
-        Coordinator(onChange: onChange)
+        Coordinator(onWindowAttached: onWindowAttached, onChange: onChange)
     }
 
     func makeNSView(context: Context) -> NSView {
@@ -23,6 +32,7 @@ struct WindowActivityObserver: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
+        context.coordinator.onWindowAttached = onWindowAttached
         context.coordinator.onChange = onChange
         if let view = nsView as? ObserverView {
             view.onWindowChanged = { [weak coordinator = context.coordinator] window in
@@ -44,12 +54,14 @@ struct WindowActivityObserver: NSViewRepresentable {
     }
 
     final class Coordinator: NSObject {
+        var onWindowAttached: ((NSWindow) -> Void)?
         var onChange: (Bool) -> Void
         private weak var window: NSWindow?
         private var observers: [NSObjectProtocol] = []
         private var isActive = false
 
-        init(onChange: @escaping (Bool) -> Void) {
+        init(onWindowAttached: ((NSWindow) -> Void)?, onChange: @escaping (Bool) -> Void) {
+            self.onWindowAttached = onWindowAttached
             self.onChange = onChange
         }
 
@@ -61,6 +73,7 @@ struct WindowActivityObserver: NSViewRepresentable {
                 setActive(false)
                 return
             }
+            onWindowAttached?(newWindow)
 
             let center = NotificationCenter.default
             let names: [Notification.Name] = [

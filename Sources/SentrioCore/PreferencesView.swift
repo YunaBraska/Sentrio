@@ -34,31 +34,32 @@ struct PreferencesView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            switch renderMode {
-            case .native:
-                nativeTabContainer
-            case .screenshot:
-                screenshotTabContainer
+        settingsContainer
+            .frame(width: 540, height: 680)
+            .background(SentrioChromeBackground().ignoresSafeArea())
+            .tint(SentrioVisualStyle.accent)
+            .background(
+                WindowActivityObserver(
+                    onWindowAttached: { window in
+                        window.titleVisibility = .hidden
+                        window.titlebarAppearsTransparent = true
+                        window.styleMask.insert(.fullSizeContentView)
+                        window.isMovableByWindowBackground = true
+                    },
+                    onChange: { active in
+                        isWindowActive = active
+                        updateInputLevelMonitoringDemand()
+                    }
+                )
+            )
+            .onChange(of: settings.showInputLevelMeter) { _ in updateInputLevelMonitoringDemand() }
+            .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in
+                if renderMode == .native, isEmpty, selectedPane.wrappedValue == .busyLight {
+                    selectedPane.wrappedValue = .output
+                }
             }
-        }
-        .frame(width: 540, height: 680)
-        .background(SentrioBackdrop().ignoresSafeArea())
-        .tint(SentrioVisualStyle.accent)
-        .background(
-            WindowActivityObserver { active in
-                isWindowActive = active
-                updateInputLevelMonitoringDemand()
-            }
-        )
-        .onChange(of: settings.showInputLevelMeter) { _ in updateInputLevelMonitoringDemand() }
-        .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in
-            if renderMode == .native, isEmpty, selectedPane.wrappedValue == .busyLight {
-                selectedPane.wrappedValue = .output
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
     }
 
     private var hasBusyLightTab: Bool {
@@ -74,46 +75,42 @@ struct PreferencesView: View {
         }
     }
 
-    private var nativeTabContainer: some View {
-        TabView(selection: selectedPane) {
-            PriorityTab(isOutput: true)
-                .tabItem { Label(L10n.tr("label.output"), systemImage: "speaker.wave.2") }
-                .tag(PreferencesPane.output)
-            PriorityTab(isOutput: false)
-                .tabItem { Label(L10n.tr("label.input"), systemImage: "mic") }
-                .tag(PreferencesPane.input)
-            if hasBusyLightTab {
-                BusyLightTab()
-                    .tabItem { Label(L10n.tr("label.busyLight"), systemImage: "lightbulb") }
-                    .tag(PreferencesPane.busyLight)
+    private var settingsContainer: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                Image(systemName: "waveform.circle.fill")
+                    .font(.system(size: 25, weight: .semibold))
+                    .foregroundStyle(SentrioVisualStyle.brandGradient)
+                    .accessibilityHidden(true)
+                Text(L10n.tr("prefs.window.title"))
+                    .font(.system(.headline, design: .rounded, weight: .semibold))
+                Spacer()
             }
-            GeneralTab()
-                .tabItem { Label(L10n.tr("label.general"), systemImage: "gear") }
-                .tag(PreferencesPane.general)
-        }
-        .padding()
-    }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
 
-    private var screenshotTabContainer: some View {
-        VStack(spacing: 12) {
+            Divider()
+
             Picker("", selection: selectedPane) {
                 Label(L10n.tr("label.output"), systemImage: "speaker.wave.2")
                     .tag(PreferencesPane.output)
                 Label(L10n.tr("label.input"), systemImage: "mic")
                     .tag(PreferencesPane.input)
-                Label(L10n.tr("label.busyLight"), systemImage: "lightbulb")
-                    .tag(PreferencesPane.busyLight)
+                if hasBusyLightTab || renderMode == .screenshot {
+                    Label(L10n.tr("label.busyLight"), systemImage: "lightbulb")
+                        .tag(PreferencesPane.busyLight)
+                }
                 Label(L10n.tr("label.general"), systemImage: "gear")
                     .tag(PreferencesPane.general)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
-            .padding(5)
-            .background(SentrioCardBackground(cornerRadius: 13))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
 
             activeTabContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding()
         .groupBoxStyle(SentrioGroupBoxStyle())
     }
 

@@ -167,11 +167,8 @@ struct MenuBarView: View {
                 onEditingEnded: { SoundLibrary.play(settings.alertSound) }
             )
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(SentrioCardBackground(cornerRadius: 12))
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
     }
 
     // MARK: – Device section

@@ -3,18 +3,43 @@ set -eu
 
 test "$#" = 1
 
-app_name='Sentrio'
+executable_name='Sentrio'
+app_name=${MACOS_APP_NAME:-Sentrio}
 version=$1
-dist_dir='dist'
+distribution=${SENTRIO_DISTRIBUTION:-direct}
+case "${distribution}" in
+  direct|app-store) ;;
+  *)
+    printf '%s\n' "Unsupported SENTRIO_DISTRIBUTION: ${distribution}" >&2
+    exit 2
+    ;;
+esac
+
+if [ "${distribution}" = 'app-store' ]; then
+  default_dist_dir='dist-app-store'
+  build_prefix='.build-app-store-release'
+  export SENTRIO_APP_STORE_BUILD=1
+else
+  default_dist_dir='dist'
+  build_prefix='.build-release'
+fi
+
+dist_dir=${MACOS_DIST_DIR:-${default_dist_dir}}
 app_dir="${dist_dir}/${app_name}.app"
 contents_dir="${app_dir}/Contents"
 script_dir=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
-signing_identity=${MACOS_SIGNING_IDENTITY:--}
+bundle_identifier=${MACOS_BUNDLE_IDENTIFIER:-com.sentrio.app}
+if [ "${distribution}" = 'app-store' ]; then
+  signing_identity=${MACOS_APP_STORE_APPLICATION_IDENTITY:--}
+else
+  signing_identity=${MACOS_SIGNING_IDENTITY:--}
+fi
+installer_identity=${MACOS_APP_STORE_INSTALLER_IDENTITY:-}
 notary_profile=${MACOS_NOTARY_PROFILE:-}
 update_private_key=${MACOS_UPDATE_PRIVATE_KEY:-}
 update_public_key=${MACOS_UPDATE_PUBLIC_KEY:-}
 
-if [ -n "${update_public_key}" ] || [ -n "${update_private_key}" ]; then
+if [ "${distribution}" = 'direct' ] && { [ -n "${update_public_key}" ] || [ -n "${update_private_key}" ]; }; then
   test -n "${update_public_key}"
   test -n "${update_private_key}"
   update_properties="
@@ -34,24 +59,26 @@ else
   update_properties=''
 fi
 
-rm -rf "${dist_dir}" .build-release-arm64 .build-release-x86_64
+rm -rf "${dist_dir}" "${build_prefix}-arm64" "${build_prefix}-x86_64"
 mkdir -p "${contents_dir}/MacOS" "${contents_dir}/Resources"
 
-swift build -c release --arch arm64 --product "${app_name}" --scratch-path .build-release-arm64
-swift build -c release --arch x86_64 --product "${app_name}" --scratch-path .build-release-x86_64
-arm64_bin=$(swift build -c release --arch arm64 --product "${app_name}" --scratch-path .build-release-arm64 --show-bin-path)
-x86_64_bin=$(swift build -c release --arch x86_64 --product "${app_name}" --scratch-path .build-release-x86_64 --show-bin-path)
+swift build -c release --arch arm64 --product "${executable_name}" --scratch-path "${build_prefix}-arm64"
+swift build -c release --arch x86_64 --product "${executable_name}" --scratch-path "${build_prefix}-x86_64"
+arm64_bin=$(swift build -c release --arch arm64 --product "${executable_name}" --scratch-path "${build_prefix}-arm64" --show-bin-path)
+x86_64_bin=$(swift build -c release --arch x86_64 --product "${executable_name}" --scratch-path "${build_prefix}-x86_64" --show-bin-path)
 lipo -create \
-  -output "${contents_dir}/MacOS/${app_name}" \
-  "${arm64_bin}/${app_name}" \
-  "${x86_64_bin}/${app_name}"
-install_name_tool -add_rpath '@executable_path/../Frameworks' "${contents_dir}/MacOS/${app_name}"
-lipo -info "${contents_dir}/MacOS/${app_name}"
+  -output "${contents_dir}/MacOS/${executable_name}" \
+  "${arm64_bin}/${executable_name}" \
+  "${x86_64_bin}/${executable_name}"
+lipo -info "${contents_dir}/MacOS/${executable_name}"
 
-sparkle_framework=$(find .build-release-arm64 -type d -name 'Sparkle.framework' -print -quit)
-test -n "${sparkle_framework}"
-mkdir -p "${contents_dir}/Frameworks"
-ditto "${sparkle_framework}" "${contents_dir}/Frameworks/Sparkle.framework"
+if [ "${distribution}" = 'direct' ]; then
+  install_name_tool -add_rpath '@executable_path/../Frameworks' "${contents_dir}/MacOS/${executable_name}"
+  sparkle_framework=$(find "${build_prefix}-arm64" -type d -name 'Sparkle.framework' -print -quit)
+  test -n "${sparkle_framework}"
+  mkdir -p "${contents_dir}/Frameworks"
+  ditto "${sparkle_framework}" "${contents_dir}/Frameworks/Sparkle.framework"
+fi
 
 binary_dir=${arm64_bin}
 find "${binary_dir}" -maxdepth 1 -type d -name '*.bundle' -exec cp -R {} "${contents_dir}/Resources/" \;
@@ -64,6 +91,7 @@ find "${binary_dir}" -maxdepth 1 -type d -name '*.appintents' -exec sh -c '
     fi
   done
 ' sh "${contents_dir}/Resources" {} +
+cp "${script_dir}/scripts/PrivacyInfo.xcprivacy" "${contents_dir}/Resources/PrivacyInfo.xcprivacy"
 
 cat > "${contents_dir}/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -72,11 +100,11 @@ cat > "${contents_dir}/Info.plist" <<EOF
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Sentrio</string>
+    <string>${app_name}</string>
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleIdentifier</key>
-    <string>com.sentrio.app</string>
+    <string>${bundle_identifier}</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleVersion</key>
@@ -84,11 +112,13 @@ cat > "${contents_dir}/Info.plist" <<EOF
     <key>CFBundleShortVersionString</key>
     <string>${version}</string>
     <key>CFBundleExecutable</key>
-    <string>Sentrio</string>
+    <string>${executable_name}</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
     <key>LSUIElement</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
@@ -97,11 +127,13 @@ cat > "${contents_dir}/Info.plist" <<EOF
     <string>NSApplication</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Sentrio uses the microphone input level to show a live activity indicator next to your input device.</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
             <key>CFBundleURLName</key>
-            <string>com.sentrio.app.busylight</string>
+            <string>${bundle_identifier}.busylight</string>
             <key>CFBundleURLSchemes</key>
             <array>
                 <string>sentrio</string>
@@ -135,12 +167,30 @@ cp "${icon_source}/1024-mac.png" "${iconset}/AppIcon.iconset/icon_512x512@2x.png
 iconutil -c icns "${iconset}/AppIcon.iconset" -o "${contents_dir}/Resources/AppIcon.icns"
 printf 'APPL????' > "${contents_dir}/PkgInfo"
 
-if [ "${signing_identity}" = '-' ]; then
-  codesign --force --deep --entitlements "${script_dir}/scripts/Sentrio.entitlements" --sign - --timestamp=none "${app_dir}"
+if [ "${distribution}" = 'app-store' ]; then
+  entitlements="${script_dir}/scripts/Sentrio-AppStore.entitlements"
 else
-  codesign --force --deep --entitlements "${script_dir}/scripts/Sentrio.entitlements" --options runtime --sign "${signing_identity}" --timestamp "${app_dir}"
+  entitlements="${script_dir}/scripts/Sentrio.entitlements"
+fi
+
+if [ "${signing_identity}" = '-' ]; then
+  codesign --force --deep --entitlements "${entitlements}" --sign - --timestamp=none "${app_dir}"
+elif [ "${distribution}" = 'app-store' ]; then
+  codesign --force --entitlements "${entitlements}" --sign "${signing_identity}" --timestamp "${app_dir}"
+else
+  codesign --force --deep --entitlements "${entitlements}" --options runtime --sign "${signing_identity}" --timestamp "${app_dir}"
 fi
 codesign --verify --deep --verbose=2 "${app_dir}"
+
+if [ "${distribution}" = 'app-store' ]; then
+  if [ -n "${installer_identity}" ]; then
+    productbuild \
+      --component "${app_dir}" /Applications \
+      --sign "${installer_identity}" \
+      "${dist_dir}/${app_name}-${version}.pkg"
+  fi
+  exit 0
+fi
 
 if [ -n "${notary_profile}" ]; then
   ditto -c -k --sequesterRsrc --keepParent "${app_dir}" "${iconset}/${app_name}-notary.zip"
@@ -167,8 +217,8 @@ if [ -n "${update_public_key}" ]; then
   update_key="${update_stage}/private-key"
   trap 'rm -rf "${iconset}" "${dmg_stage}" "${update_stage}"' 0 HUP INT TERM
   (umask 077; printf '%s' "${update_private_key}" > "${update_key}")
-  generate_appcast=$(find .build-release-arm64 -type f -name generate_appcast -print -quit)
-  sign_update=$(find .build-release-arm64 -type f -name sign_update -print -quit)
+  generate_appcast=$(find "${build_prefix}-arm64" -type f -name generate_appcast -print -quit)
+  sign_update=$(find "${build_prefix}-arm64" -type f -name sign_update -print -quit)
   test -n "${generate_appcast}"
   test -n "${sign_update}"
   cp "${dist_dir}/${app_name}-${version}.dmg" "${update_stage}/"

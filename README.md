@@ -46,13 +46,23 @@ sh scripts/package.sh 0.0.1
 open dist/Sentrio.app
 ```
 
+To produce a local, ad-hoc signed App Store variant without releasing it:
+
+```bash
+SENTRIO_DISTRIBUTION=app-store sh scripts/package.sh 0.0.1
+scripts/verify-app-store-bundle.sh dist-app-store/Sentrio.app
+open dist-app-store/Sentrio.app
+```
+
+The submission package is produced only when Mac App Store application and installer signing identities are supplied.
+
 ## Screenshots
 
 ![Menu bar panel](docs/screenshots/generated/bar_menu.png)
-![Preferences - Output](docs/screenshots/generated/preferences_output.png)
-![Preferences - Input](docs/screenshots/generated/preferences_input.png)
-![Preferences - Busy Light](docs/screenshots/generated/preferences_busy_light.png)
-![Preferences - General](docs/screenshots/generated/preferences_general.png)
+![Settings - Output](docs/screenshots/generated/preferences_output.png)
+![Settings - Input](docs/screenshots/generated/preferences_input.png)
+![Settings - Busy Light](docs/screenshots/generated/preferences_busy_light.png)
+![Settings - General](docs/screenshots/generated/preferences_general.png)
 
 ## Regenerate Screenshots
 

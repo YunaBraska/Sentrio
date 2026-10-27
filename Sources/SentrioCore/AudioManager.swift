@@ -635,80 +635,86 @@ final class AudioManager: ObservableObject {
     }
 
     private static func fetchBluetoothBatterySnapshotFromSystemProfiler() -> BluetoothBatterySnapshot {
-        let profilerPath = "/usr/sbin/system_profiler"
-        guard FileManager.default.isExecutableFile(atPath: profilerPath) else { return BluetoothBatterySnapshot() }
+        #if SENTRIO_APP_STORE
+            // Sandboxed Mac App Store apps cannot launch system_profiler. Battery data
+            // still resolves through IOPowerSources, CoreAudio, and IOKit below.
+            return BluetoothBatterySnapshot()
+        #else
+            let profilerPath = "/usr/sbin/system_profiler"
+            guard FileManager.default.isExecutableFile(atPath: profilerPath) else { return BluetoothBatterySnapshot() }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: profilerPath)
-        process.arguments = ["SPBluetoothDataType", "-json"]
-        let out = Pipe()
-        process.standardOutput = out
-        process.standardError = Pipe()
-        do { try process.run() } catch { return BluetoothBatterySnapshot() }
-        let data = out.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
-        guard process.terminationStatus == 0 else { return BluetoothBatterySnapshot() }
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: profilerPath)
+            process.arguments = ["SPBluetoothDataType", "-json"]
+            let out = Pipe()
+            process.standardOutput = out
+            process.standardError = Pipe()
+            do { try process.run() } catch { return BluetoothBatterySnapshot() }
+            let data = out.fileHandleForReading.readDataToEndOfFile()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else { return BluetoothBatterySnapshot() }
 
-        guard
-            let obj = try? JSONSerialization.jsonObject(with: data, options: []),
-            let top = obj as? [String: Any],
-            let roots = top["SPBluetoothDataType"] as? [[String: Any]]
-        else { return BluetoothBatterySnapshot() }
+            guard
+                let obj = try? JSONSerialization.jsonObject(with: data, options: []),
+                let top = obj as? [String: Any],
+                let roots = top["SPBluetoothDataType"] as? [[String: Any]]
+            else { return BluetoothBatterySnapshot() }
 
-        var snapshot = BluetoothBatterySnapshot()
+            var snapshot = BluetoothBatterySnapshot()
 
-        func ingestSection(from root: [String: Any], _ sectionKey: String) {
-            guard let section = root[sectionKey] as? [Any] else { return }
-            for entry in section {
-                guard let entryDict = entry as? [String: Any] else { continue }
-                for (deviceName, infoAny) in entryDict {
-                    guard let info = infoAny as? [String: Any] else { continue }
-                    let states = batteryStatesFromSystemProfilerDeviceInfo(info)
-                    let vendorID = vendorIDFromSystemProfilerDeviceInfo(info)
-                    let productID = productIDFromSystemProfilerDeviceInfo(info)
-                    let minorType = minorTypeFromSystemProfilerDeviceInfo(info)
+            func ingestSection(from root: [String: Any], _ sectionKey: String) {
+                guard let section = root[sectionKey] as? [Any] else { return }
+                for entry in section {
+                    guard let entryDict = entry as? [String: Any] else { continue }
+                    for (deviceName, infoAny) in entryDict {
+                        guard let info = infoAny as? [String: Any] else { continue }
+                        let states = batteryStatesFromSystemProfilerDeviceInfo(info)
+                        let vendorID = vendorIDFromSystemProfilerDeviceInfo(info)
+                        let productID = productIDFromSystemProfilerDeviceInfo(info)
+                        let minorType = minorTypeFromSystemProfilerDeviceInfo(info)
 
-                    if let macRaw = info["device_address"] as? String {
-                        let mac = macRaw.lowercased()
-                        if !states.isEmpty {
-                            snapshot.byMAC[mac] = normalizedBatteryStates((snapshot.byMAC[mac] ?? []) + states)
+                        if let macRaw = info["device_address"] as? String {
+                            let mac = macRaw.lowercased()
+                            if !states.isEmpty {
+                                snapshot.byMAC[mac] = normalizedBatteryStates((snapshot.byMAC[mac] ?? []) + states)
+                            }
+                            if let vendorID {
+                                snapshot.vendorIDByMAC[mac] = vendorID
+                            }
+                            if let productID {
+                                snapshot.productIDByMAC[mac] = productID
+                            }
+                            if let minorType {
+                                snapshot.minorTypeByMAC[mac] = minorType
+                            }
                         }
-                        if let vendorID {
-                            snapshot.vendorIDByMAC[mac] = vendorID
-                        }
-                        if let productID {
-                            snapshot.productIDByMAC[mac] = productID
-                        }
-                        if let minorType {
-                            snapshot.minorTypeByMAC[mac] = minorType
-                        }
-                    }
 
-                    let nameKey = batteryMatchKey(deviceName)
-                    if !nameKey.isEmpty {
-                        if !states.isEmpty {
-                            snapshot.byNameKey[nameKey] = normalizedBatteryStates((snapshot.byNameKey[nameKey] ?? []) + states)
-                        }
-                        if let vendorID {
-                            snapshot.vendorIDByNameKey[nameKey] = vendorID
-                        }
-                        if let productID {
-                            snapshot.productIDByNameKey[nameKey] = productID
-                        }
-                        if let minorType {
-                            snapshot.minorTypeByNameKey[nameKey] = minorType
+                        let nameKey = batteryMatchKey(deviceName)
+                        if !nameKey.isEmpty {
+                            if !states.isEmpty {
+                                snapshot.byNameKey[nameKey] = normalizedBatteryStates((snapshot.byNameKey[nameKey] ?? []) + states)
+                            }
+                            if let vendorID {
+                                snapshot.vendorIDByNameKey[nameKey] = vendorID
+                            }
+                            if let productID {
+                                snapshot.productIDByNameKey[nameKey] = productID
+                            }
+                            if let minorType {
+                                snapshot.minorTypeByNameKey[nameKey] = minorType
+                            }
                         }
                     }
                 }
             }
-        }
 
-        for root in roots {
-            ingestSection(from: root, "device_connected")
-            ingestSection(from: root, "device_not_connected")
-        }
+            for root in roots {
+                ingestSection(from: root, "device_connected")
+                ingestSection(from: root, "device_not_connected")
+            }
 
-        return snapshot
+            return snapshot
+        #endif
     }
 
     private func batteryStatesFromBluetoothSnapshot(

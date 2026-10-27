@@ -59,8 +59,9 @@ final class DocumentationScreenshotTests: XCTestCase {
             MenuBarView()
                 .environmentObject(screenshotFixture.settings)
                 .environmentObject(screenshotFixture.audio)
+                .environmentObject(screenshotFixture.busyLight)
                 .environmentObject(screenshotFixture.appState),
-            size: NSSize(width: 340, height: 600),
+            size: NSSize(width: 370, height: 680),
             to: menuBarURL
         )
 

@@ -6,7 +6,7 @@ Control BusyLight from local scripts or automation tools.
 
 ## Enable API
 
-- Open **Preferences -> BusyLight -> Remote API**
+- Open **Settings -> BusyLight -> Remote API**
 - Enable local REST API
 - Pick your port
 
@@ -37,7 +37,7 @@ http://127.0.0.1:<port>/v1/busylight
 
 - Action endpoints switch BusyLight to **manual**.
 - `/auto` returns control to rules.
-- API and Preferences always reflect the same state.
+- API and Settings always reflect the same state.
 
 ## Curl examples
 

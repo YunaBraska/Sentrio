@@ -8,8 +8,11 @@ Icon?
 .build/
 .build-release-arm64/
 .build-release-x86_64/
+.build-app-store-*/
 build/
 dist/
+dist-app-store/
+dist-review/
 .swiftpm/
 DerivedData/
 *.xcuserstate

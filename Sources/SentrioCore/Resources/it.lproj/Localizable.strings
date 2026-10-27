@@ -10,7 +10,7 @@
 "label.manualConnect" = "Connessione manuale";
 
 /* Azioni comuni */
-"action.preferences" = "Preferenze…";
+"action.preferences" = "Impostazioni…";
 "action.soundSettings" = "Impostazioni audio…";
 "action.bluetoothSettings" = "Impostazioni Bluetooth…";
 "action.quit" = "Esci";
@@ -107,12 +107,12 @@
 "prefs.general.enableAutoSwitching.description" = "Attiva automaticamente il dispositivo con priorità più alta quando i dispositivi si connettono o si disconnettono, o quando riordini la lista di priorità.";
 "prefs.general.visibility" = "Visibilità";
 "prefs.general.hideMenuBarIcon" = "Nascondi icona barra dei menu";
-"prefs.general.hideMenuBarIcon.description" = "Quando nascosta, apri Preferenze avviando di nuovo Sentrio da Launchpad.";
+"prefs.general.hideMenuBarIcon.description" = "Quando nascosta, apri Impostazioni avviando di nuovo Sentrio da Launchpad.";
 "prefs.general.system" = "Sistema";
 "prefs.general.launchAtLogin" = "Avvia all’accesso";
 "prefs.general.privacy" = "Privacy";
-"prefs.general.showInputLevelMeter" = "Mostra indicatore livello ingresso (Preferenze)";
-"prefs.general.showInputLevelMeter.description" = "Se abilitato, Sentrio monitora il dispositivo di ingresso predefinito solo mentre Preferenze è aperto. macOS mostrerà l’indicatore micro in uso durante questo periodo.";
+"prefs.general.showInputLevelMeter" = "Mostra indicatore livello ingresso (Impostazioni)";
+"prefs.general.showInputLevelMeter.description" = "Se abilitato, Sentrio monitora il dispositivo di ingresso predefinito solo mentre Impostazioni è aperto. macOS mostrerà l’indicatore micro in uso durante questo periodo.";
 "prefs.general.settings" = "Impostazioni";
 "prefs.general.settings.description" = "L’esportazione include liste di priorità, dispositivi nascosti, nomi/icono personalizzati e memoria volume.";
 "prefs.general.volumeMemory" = "Memoria volume";
@@ -153,7 +153,7 @@
 "prefs.busylight.signal.screenRecording" = "Registrazione schermo";
 
 /* Titoli finestra */
-"prefs.window.title" = "Preferenze Sentrio";
+"prefs.window.title" = "Impostazioni Sentrio";
 
 /* Importa / esporta */
 "error.importExport.invalidFile" = "Questo file non sembra un’esportazione delle impostazioni di Sentrio.";
@@ -247,3 +247,11 @@
 "prefs.busylight.rule.metrics.avgDay" = "Med./giorno";
 "prefs.busylight.rule.metrics.avgMonth" = "Med./mese";
 "prefs.busylight.rule.metrics.avgYear" = "Med./anno";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Audio";
+"menu.busylight.available" = "Disponibile";
+"menu.busylight.busy" = "Occupato";
+"status.active" = "Attivo";
+"action.privacyPolicy" = "Informativa sulla privacy";
+"prefs.general.activity" = "Attività";

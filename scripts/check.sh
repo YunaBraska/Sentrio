@@ -15,3 +15,4 @@ fi
 swiftformat "$@" Package.swift Sources Tests
 swiftformat --lint "$@" Package.swift Sources Tests
 swift test
+SENTRIO_APP_STORE_BUILD=1 swift build --scratch-path .build-app-store-check

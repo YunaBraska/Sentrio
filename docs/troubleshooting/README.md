@@ -29,7 +29,7 @@ Quick fixes for common issues.
 - Check API port for HTTP calls.
 - For URL commands, use `sentrio://busylight/...`.
 
-## Preferences issue persists
+## Settings issue persists
 
 - Export settings.
 - Restart app.

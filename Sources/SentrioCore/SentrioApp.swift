@@ -1,6 +1,8 @@
 import AppKit
 import Combine
-import Sparkle
+#if canImport(Sparkle)
+    import Sparkle
+#endif
 import SwiftUI
 
 public struct SentrioApp: App {
@@ -9,7 +11,13 @@ public struct SentrioApp: App {
     public init() {}
 
     public var body: some Scene {
-        Settings { EmptyView() }
+        Settings {
+            PreferencesView()
+                .environmentObject(appDelegate.appState.settings)
+                .environmentObject(appDelegate.appState.audio)
+                .environmentObject(appDelegate.appState.busyLight)
+                .environmentObject(appDelegate.appState)
+        }
     }
 }
 
@@ -25,26 +33,30 @@ enum MenuBarPresentation {
 
 @MainActor
 public class AppDelegate: NSObject, NSApplicationDelegate {
-    private let appState = AppState()
+    let appState = AppState()
 
     private var statusItem: NSStatusItem?
     private let menuPopover = NSPopover()
     private var cancellables = Set<AnyCancellable>()
 
-    private lazy var updater: SPUStandardUpdaterController? = {
-        guard let publicKey = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
-              !publicKey.isEmpty else { return nil }
-        let controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
-        controller.updater.automaticallyChecksForUpdates = true
-        controller.updater.automaticallyDownloadsUpdates = false
-        controller.startUpdater()
-        return controller
-    }()
+    #if canImport(Sparkle)
+        private lazy var updater: SPUStandardUpdaterController? = {
+            guard let publicKey = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
+                  !publicKey.isEmpty else { return nil }
+            let controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
+            controller.updater.automaticallyChecksForUpdates = true
+            controller.updater.automaticallyDownloadsUpdates = false
+            controller.startUpdater()
+            return controller
+        }()
+    #endif
 
     public func applicationDidFinishLaunching(_: Notification) {
         configureMenuBar()
         observeMenuBarState()
-        _ = updater
+        #if canImport(Sparkle)
+            _ = updater
+        #endif
         if #available(macOS 13.0, *) {
             BusyLightAppShortcuts.updateAppShortcutParameters()
         }
@@ -82,6 +94,7 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
             rootView: MenuBarView()
                 .environmentObject(appState.settings)
                 .environmentObject(appState.audio)
+                .environmentObject(appState.busyLight)
                 .environmentObject(appState)
         )
         updateStatusItem()

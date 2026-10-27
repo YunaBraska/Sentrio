@@ -247,3 +247,11 @@
 "prefs.busylight.rule.metrics.avgDay" = "Ka./päivä";
 "prefs.busylight.rule.metrics.avgMonth" = "Ka./kuukausi";
 "prefs.busylight.rule.metrics.avgYear" = "Ka./vuosi";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Ääni";
+"menu.busylight.available" = "Vapaa";
+"menu.busylight.busy" = "Varattu";
+"status.active" = "Aktiivinen";
+"action.privacyPolicy" = "Tietosuojakäytäntö";
+"prefs.general.activity" = "Toiminta";

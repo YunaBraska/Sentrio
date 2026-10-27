@@ -3,6 +3,7 @@ set -eu
 
 case "${0##*/}" in
   swift)
+    printf 'swift app_store=%s %s\n' "${SENTRIO_APP_STORE_BUILD:-0}" "$*" >> "${PACKAGE_TEST_LOG}"
     show_bin_path=false
     while [ "$#" -gt 0 ]; do
       if [ "$1" = '--scratch-path' ]; then
@@ -94,14 +95,26 @@ EOF
     fi
     exit
     ;;
+  productbuild)
+    for last do :; done
+    printf 'productbuild %s\n' "$*" >> "${PACKAGE_TEST_LOG}"
+    touch "${last}"
+    exit
+    ;;
 esac
 
 root=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
 test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.device.audio-input' "${root}/scripts/Sentrio.entitlements")" = true
+test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.app-sandbox' "${root}/scripts/Sentrio-AppStore.entitlements")" = true
+test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.device.audio-input' "${root}/scripts/Sentrio-AppStore.entitlements")" = true
+test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.device.bluetooth' "${root}/scripts/Sentrio-AppStore.entitlements")" = true
+test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.device.usb' "${root}/scripts/Sentrio-AppStore.entitlements")" = true
+test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.files.user-selected.read-write' "${root}/scripts/Sentrio-AppStore.entitlements")" = true
+test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.network.server' "${root}/scripts/Sentrio-AppStore.entitlements")" = true
 tmp=$(mktemp -d)
 trap 'rm -rf "${tmp}"' 0 HUP INT TERM
 mkdir -p "${tmp}/bin" "${tmp}/work"
-for command in swift lipo install_name_tool iconutil codesign ditto hdiutil xcrun; do
+for command in swift lipo install_name_tool iconutil codesign ditto hdiutil xcrun productbuild; do
   ln -s "${root}/scripts/test-package.sh" "${tmp}/bin/${command}"
 done
 export PACKAGE_TEST_LOG="${tmp}/events"
@@ -137,7 +150,9 @@ test -f dist/Sentrio-1.2.3.zip
 test -f dist/Sentrio-1.2.3.dmg
 test -f dist/appcast.xml
 test -d dist/Sentrio.app/Contents/Frameworks/Sparkle.framework
+test -f dist/Sentrio.app/Contents/Resources/PrivacyInfo.xcprivacy
 test -f dist/Sentrio.app/Contents/Resources/Sentrio_SentrioCore.bundle/Contents/Resources/en.lproj/Localizable.strings
+grep -q '<string>public.app-category.utilities</string>' dist/Sentrio.app/Contents/Info.plist
 grep -q '<key>SUFeedURL</key>' dist/Sentrio.app/Contents/Info.plist
 grep -q '<string>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</string>' dist/Sentrio.app/Contents/Info.plist
 grep -q '^appcast dist/appcast.xml$' "${PACKAGE_TEST_LOG}"
@@ -166,5 +181,26 @@ if grep -q '<key>SUFeedURL</key>' dist/Sentrio.app/Contents/Info.plist; then
 fi
 if grep -Eq '^(notarytool|stapler)' "${PACKAGE_TEST_LOG}"; then
   printf '%s\n' 'An ad-hoc build attempted notarization.' >&2
+  exit 1
+fi
+
+: > "${PACKAGE_TEST_LOG}"
+export SENTRIO_DISTRIBUTION='app-store'
+export MACOS_APP_STORE_APPLICATION_IDENTITY='test app store identity'
+export MACOS_APP_STORE_INSTALLER_IDENTITY='test installer identity'
+sh "${root}/scripts/package.sh" 1.2.3
+test -d dist-app-store/Sentrio.app
+test -f dist-app-store/Sentrio-1.2.3.pkg
+test -f dist-app-store/Sentrio.app/Contents/Resources/PrivacyInfo.xcprivacy
+test ! -e dist-app-store/Sentrio.app/Contents/Frameworks/Sparkle.framework
+grep -q '^codesign .*--entitlements .*Sentrio-AppStore.entitlements ' "${PACKAGE_TEST_LOG}"
+grep -q '^productbuild .*dist-app-store/Sentrio-1.2.3.pkg$' "${PACKAGE_TEST_LOG}"
+grep -q '^swift app_store=1 ' "${PACKAGE_TEST_LOG}"
+if grep -q '<key>SUFeedURL</key>' dist-app-store/Sentrio.app/Contents/Info.plist; then
+  printf '%s\n' 'An App Store build configured Sparkle updates.' >&2
+  exit 1
+fi
+if grep -Eq '^(notarytool|stapler|rpath)' "${PACKAGE_TEST_LOG}"; then
+  printf '%s\n' 'An App Store build used the direct-distribution pipeline.' >&2
   exit 1
 fi

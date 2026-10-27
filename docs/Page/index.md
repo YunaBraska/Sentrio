@@ -29,7 +29,7 @@ description: Keep macOS input, output and BusyLight behavior predictable as devi
 
 <section class="section">
   <h2>See the state. Change it once.</h2>
-  <p class="section-intro">The menu-bar view keeps the current devices legible. Preferences make the long-term behavior explicit.</p>
+  <p class="section-intro">The menu-bar view keeps the current devices legible. Settings make the long-term behavior explicit.</p>
   <div class="screenshot-grid">
     <figure><img src="https://raw.githubusercontent.com/YunaBraska/Sentrio/main/docs/screenshots/generated/bar_menu.png" alt="Sentrio menu bar panel showing connected audio devices"><figcaption>Current devices, levels and routing at a glance.</figcaption></figure>
     <figure><img src="{{ '/assets/help/preferences-busy-light.png' | relative_url }}" alt="Sentrio BusyLight preferences"><figcaption>BusyLight rules and integrations stay in one place.</figcaption></figure>

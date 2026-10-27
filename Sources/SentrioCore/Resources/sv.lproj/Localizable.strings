@@ -247,3 +247,11 @@
 "prefs.busylight.rule.metrics.avgDay" = "Snitt/dag";
 "prefs.busylight.rule.metrics.avgMonth" = "Snitt/månad";
 "prefs.busylight.rule.metrics.avgYear" = "Snitt/år";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Ljud";
+"menu.busylight.available" = "Tillgänglig";
+"menu.busylight.busy" = "Upptagen";
+"status.active" = "Aktiv";
+"action.privacyPolicy" = "Integritetspolicy";
+"prefs.general.activity" = "Aktivitet";

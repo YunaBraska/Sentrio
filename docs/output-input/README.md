@@ -4,8 +4,8 @@
 
 This guide explains how audio switching works.
 
-![Preferences - Output tab](../screenshots/generated/preferences_output.png)
-![Preferences - Input tab](../screenshots/generated/preferences_input.png)
+![Settings - Output tab](../screenshots/generated/preferences_output.png)
+![Settings - Input tab](../screenshots/generated/preferences_input.png)
 
 ## Core behavior
 
@@ -20,7 +20,7 @@ This guide explains how audio switching works.
 - **Auto OFF**: you select devices manually from the menu panel.
 - **Continuity routes (for example iPhone as mic/speaker)**: shown as transport **Continuity** and require explicit **Connect now** user action before they can become active. If that connect attempt fails, Sentrio immediately tries the next eligible device by priority.
 
-## Common actions in Preferences
+## Common actions in Settings
 
 | Action | Result |
 |---|---|

@@ -4,12 +4,12 @@
 
 BusyLight controls a USB status light from app signals and rules.
 
-![Preferences - Busy Light tab](../screenshots/generated/preferences_busy_light.png)
+![Settings - Busy Light tab](../screenshots/generated/preferences_busy_light.png)
 
 ## Setup
 
 1. Connect a supported BusyLight USB device.
-2. Open **Preferences -> BusyLight**.
+2. Open **Settings -> BusyLight**.
 3. Enable BusyLight.
 4. Enable rules for automatic mode.
 5. On first detection after app start, Sentrio runs a short hello sequence before normal rules/manual action apply.

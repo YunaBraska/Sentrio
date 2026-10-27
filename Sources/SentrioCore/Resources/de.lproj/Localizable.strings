@@ -247,3 +247,11 @@
 "prefs.busylight.rule.metrics.avgDay" = "Ø/Tag";
 "prefs.busylight.rule.metrics.avgMonth" = "Ø/Monat";
 "prefs.busylight.rule.metrics.avgYear" = "Ø/Jahr";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Ton";
+"menu.busylight.available" = "Verfügbar";
+"menu.busylight.busy" = "Beschäftigt";
+"status.active" = "Aktiv";
+"action.privacyPolicy" = "Datenschutzrichtlinie";
+"prefs.general.activity" = "Aktivität";

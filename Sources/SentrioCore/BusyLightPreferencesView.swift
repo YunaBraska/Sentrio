@@ -148,6 +148,7 @@ struct BusyLightTab: View {
                     .disabled(busyLight.recentEvents.isEmpty)
             }
         }
+        .frame(width: 500)
         .formStyle(.grouped)
         .onAppear {
             apiPortText = String(settings.busyLightAPIPort)
@@ -167,9 +168,13 @@ struct BusyLightTab: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
                 if settings.busyLightManualAction.mode != .off {
-                    ColorPicker("", selection: manualColorBinding, supportsOpacity: false)
-                        .labelsHidden()
-                        .frame(width: 44)
+                    ColorPicker(
+                        L10n.tr("prefs.busylight.color"),
+                        selection: manualColorBinding,
+                        supportsOpacity: false
+                    )
+                    .labelsHidden()
+                    .frame(width: 44)
                 }
 
                 Picker(L10n.tr("prefs.busylight.manualAction"), selection: manualModeBinding) {
@@ -331,6 +336,7 @@ private struct BusyLightRuleEditor: View {
             Toggle("", isOn: $rule.isEnabled)
                 .labelsHidden()
                 .help(L10n.tr("prefs.busylight.rule.enableHelp"))
+                .accessibilityLabel(L10n.tr("prefs.busylight.rule.enableHelp"))
 
             TextField(L10n.tr("prefs.busylight.rule.namePlaceholder"), text: $rule.name)
                 .textFieldStyle(.roundedBorder)
@@ -341,18 +347,24 @@ private struct BusyLightRuleEditor: View {
 
             Button { moveUp() } label: { Image(systemName: "arrow.up") }
                 .buttonStyle(.plain)
+                .frame(width: 28, height: 28)
                 .disabled(index == 0)
                 .help(L10n.tr("action.moveUp"))
+                .accessibilityLabel(L10n.tr("action.moveUp"))
 
             Button { moveDown() } label: { Image(systemName: "arrow.down") }
                 .buttonStyle(.plain)
+                .frame(width: 28, height: 28)
                 .disabled(index >= total - 1)
                 .help(L10n.tr("action.moveDown"))
+                .accessibilityLabel(L10n.tr("action.moveDown"))
 
             Button(role: .destructive) { delete() } label: { Image(systemName: "trash") }
                 .buttonStyle(.plain)
+                .frame(width: 28, height: 28)
                 .disabled(total <= 1)
                 .help(L10n.tr("action.deleteRule"))
+                .accessibilityLabel(L10n.tr("action.deleteRule"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -367,6 +379,7 @@ private struct BusyLightRuleEditor: View {
                 HStack(spacing: 10) {
                     Toggle("", isOn: signalEnabledBinding(signal))
                         .labelsHidden()
+                        .accessibilityLabel(signalLabel(signal))
 
                     Text(signalLabel(signal))
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -379,6 +392,7 @@ private struct BusyLightRuleEditor: View {
                     .pickerStyle(.segmented)
                     .frame(width: 130)
                     .disabled(!BusyLightRuleConditionEditor.isSignalEnabled(signal, in: rule.expression))
+                    .accessibilityLabel(signalLabel(signal))
                 }
             }
 
@@ -456,32 +470,33 @@ private struct BusyLightRuleEditor: View {
     }
 
     private var metricsFooter: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                let summary = busyLight.ruleMetricsSummary(for: rule.id, now: context.date)
-                HStack(spacing: 12) {
-                    metricValue(
-                        label: L10n.tr("prefs.busylight.rule.metrics.total"),
-                        value: BusyLightDurationFormatter.string(milliseconds: Double(summary.totalActiveMilliseconds))
-                    )
-                    metricValue(
-                        label: L10n.tr("prefs.busylight.rule.metrics.avgDay"),
-                        value: BusyLightDurationFormatter.string(milliseconds: summary.averagePerDayMilliseconds)
-                    )
-                    metricValue(
-                        label: L10n.tr("prefs.busylight.rule.metrics.avgMonth"),
-                        value: BusyLightDurationFormatter.string(milliseconds: summary.averagePerMonthMilliseconds)
-                    )
-                    metricValue(
-                        label: L10n.tr("prefs.busylight.rule.metrics.avgYear"),
-                        value: BusyLightDurationFormatter.string(milliseconds: summary.averagePerYearMilliseconds)
-                    )
-                    Spacer(minLength: 0)
-                }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .monospacedDigit()
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let summary = busyLight.ruleMetricsSummary(for: rule.id, now: context.date)
+            LazyVGrid(
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
+                alignment: .leading,
+                spacing: 6
+            ) {
+                metricValue(
+                    label: L10n.tr("prefs.busylight.rule.metrics.total"),
+                    value: BusyLightDurationFormatter.string(milliseconds: Double(summary.totalActiveMilliseconds))
+                )
+                metricValue(
+                    label: L10n.tr("prefs.busylight.rule.metrics.avgDay"),
+                    value: BusyLightDurationFormatter.string(milliseconds: summary.averagePerDayMilliseconds)
+                )
+                metricValue(
+                    label: L10n.tr("prefs.busylight.rule.metrics.avgMonth"),
+                    value: BusyLightDurationFormatter.string(milliseconds: summary.averagePerMonthMilliseconds)
+                )
+                metricValue(
+                    label: L10n.tr("prefs.busylight.rule.metrics.avgYear"),
+                    value: BusyLightDurationFormatter.string(milliseconds: summary.averagePerYearMilliseconds)
+                )
             }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .monospacedDigit()
         }
     }
 
@@ -490,6 +505,7 @@ private struct BusyLightRuleEditor: View {
             Text(label)
             Text(value)
                 .foregroundStyle(.tertiary)
+            Spacer(minLength: 0)
         }
     }
 
@@ -559,7 +575,7 @@ private struct BusyLightRuleEditor: View {
     }
 }
 
-private extension BusyLightColor {
+extension BusyLightColor {
     var swiftUIColor: Color {
         Color(
             .sRGB,

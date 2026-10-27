@@ -247,3 +247,11 @@
 "prefs.busylight.rule.metrics.avgDay" = "Ср./день";
 "prefs.busylight.rule.metrics.avgMonth" = "Ср./мес.";
 "prefs.busylight.rule.metrics.avgYear" = "Ср./год";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Звук";
+"menu.busylight.available" = "Доступен";
+"menu.busylight.busy" = "Занят";
+"status.active" = "Активно";
+"action.privacyPolicy" = "Политика конфиденциальности";
+"prefs.general.activity" = "Активность";

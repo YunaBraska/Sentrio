@@ -247,3 +247,11 @@
 "prefs.busylight.rule.metrics.avgDay" = "平均/日";
 "prefs.busylight.rule.metrics.avgMonth" = "平均/月";
 "prefs.busylight.rule.metrics.avgYear" = "平均/年";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "サウンド";
+"menu.busylight.available" = "対応可能";
+"menu.busylight.busy" = "取り込み中";
+"status.active" = "アクティブ";
+"action.privacyPolicy" = "プライバシーポリシー";
+"prefs.general.activity" = "アクティビティ";

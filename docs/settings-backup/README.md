@@ -4,14 +4,14 @@
 
 Use this page for app-wide options and safe migration.
 
-![Preferences - General tab](../screenshots/generated/preferences_general.png)
+![Settings - General tab](../screenshots/generated/preferences_general.png)
 
 ## General settings
 
 - Auto-switching master toggle
 - Launch at login
 - Hide menu bar icon
-- Input level meter visibility in Preferences
+- Input level meter visibility in Settings
 - Language selection
 
 ## Export settings

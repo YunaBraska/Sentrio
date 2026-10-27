@@ -7,6 +7,11 @@ private struct MenuReorderGestureState {
     var carryTranslation: CGFloat
 }
 
+private enum MenuSurface: Hashable {
+    case sound
+    case busyLight
+}
+
 enum MenuPriorityReorderPath {
     static func targetUID(for sourceUID: String, direction: Int, orderedUIDs: [String]) -> String? {
         guard direction == -1 || direction == 1 else { return nil }
@@ -34,14 +39,96 @@ enum MenuPriorityRanker {
 struct MenuBarView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
+    @EnvironmentObject var busyLight: BusyLightEngine
     @EnvironmentObject var appState: AppState
     @State private var outputDragState: MenuReorderGestureState?
     @State private var inputDragState: MenuReorderGestureState?
+    @State private var selectedSurface: MenuSurface = .sound
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             headerRow
+            if !busyLight.connectedDevices.isEmpty {
+                Divider()
+                surfacePicker
+            }
             Divider()
+            if selectedSurface == .busyLight, !busyLight.connectedDevices.isEmpty {
+                busyLightSurface
+            } else {
+                soundSurface
+            }
+            Divider()
+            footerRow
+        }
+        .frame(width: 370)
+        .background(Color(NSColor.windowBackgroundColor))
+        .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in
+            if isEmpty {
+                selectedSurface = .sound
+            }
+        }
+    }
+
+    // MARK: – Header
+
+    private var headerRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 10) {
+                Text("Sentrio").font(.headline)
+                Spacer()
+                Toggle(L10n.tr("label.auto"), isOn: $settings.isAutoMode)
+                    .toggleStyle(.switch).controlSize(.mini)
+                    .help(L10n.tr("menu.autoHelp"))
+            }
+            activeDeviceSummary(
+                label: L10n.tr("label.output"),
+                systemImage: "speaker.wave.2",
+                name: audio.defaultOutput.map {
+                    settings.displayName(for: $0.uid, isOutput: true, fallbackName: $0.name)
+                }
+            )
+            activeDeviceSummary(
+                label: L10n.tr("label.input"),
+                systemImage: "mic",
+                name: audio.defaultInput.map {
+                    settings.displayName(for: $0.uid, isOutput: false, fallbackName: $0.name)
+                }
+            )
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+    }
+
+    private func activeDeviceSummary(label: String, systemImage: String, name: String?) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: systemImage)
+                .frame(width: 14)
+            Text(label)
+                .foregroundStyle(.secondary)
+            Text(name ?? L10n.tr("status.disconnected"))
+                .lineLimit(1)
+                .truncationMode(.tail)
+            Spacer(minLength: 0)
+        }
+        .font(.caption)
+    }
+
+    private var surfacePicker: some View {
+        Picker("", selection: $selectedSurface) {
+            Label(L10n.tr("menu.sound"), systemImage: "speaker.wave.2")
+                .tag(MenuSurface.sound)
+            Label(L10n.tr("label.busyLight"), systemImage: "lightbulb")
+                .tag(MenuSurface.busyLight)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+
+    private var soundSurface: some View {
+        VStack(alignment: .leading, spacing: 0) {
             masterVolumeSection
             Divider()
             deviceSection(title: L10n.tr("label.output"), systemImage: "speaker.wave.2",
@@ -61,25 +148,7 @@ struct MenuBarView: View {
                           defaultUID: audio.defaultInput?.uid,
                           isInput: true,
                           gestureDragState: $inputDragState)
-            Divider()
-            footerRow
         }
-        .frame(width: 340)
-        .background(Color(NSColor.windowBackgroundColor))
-    }
-
-    // MARK: – Header
-
-    private var headerRow: some View {
-        HStack(spacing: 10) {
-            Text("Sentrio").font(.headline)
-            Spacer()
-            Toggle(L10n.tr("label.auto"), isOn: $settings.isAutoMode)
-                .toggleStyle(.switch).controlSize(.mini)
-                .help(L10n.tr("menu.autoHelp"))
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
     }
 
     // MARK: – Master volume controls
@@ -153,6 +222,7 @@ struct MenuBarView: View {
             } else {
                 let rankByUID = MenuPriorityRanker.rankMap(for: devices.map(\.uid))
                 ForEach(devices) { device in
+                    let orderedUIDs = devices.map(\.uid)
                     MenuDeviceRow(
                         device: device,
                         isDefault: device.uid == defaultUID,
@@ -197,11 +267,158 @@ struct MenuBarView: View {
                         },
                         onGestureDragEnded: {
                             gestureDragState.wrappedValue = nil
+                        },
+                        moveUp: {
+                            guard let targetUID = MenuPriorityReorderPath.targetUID(
+                                for: device.uid,
+                                direction: -1,
+                                orderedUIDs: orderedUIDs
+                            ) else { return }
+                            settings.reorderPriorityForDrag(
+                                uid: device.uid,
+                                over: targetUID,
+                                isOutput: !isInput
+                            )
+                        },
+                        moveDown: {
+                            guard let targetUID = MenuPriorityReorderPath.targetUID(
+                                for: device.uid,
+                                direction: 1,
+                                orderedUIDs: orderedUIDs
+                            ) else { return }
+                            settings.reorderPriorityForDrag(
+                                uid: device.uid,
+                                over: targetUID,
+                                isOutput: !isInput
+                            )
                         }
                     )
                 }
             }
         }
+    }
+
+    // MARK: – BusyLight quick controls
+
+    private var busyLightSurface: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(busyLightStatusColor)
+                    .frame(width: 12, height: 12)
+                    .overlay(Circle().stroke(Color.primary.opacity(0.2), lineWidth: 1))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(busyLight.connectedDevices.first?.name ?? L10n.tr("label.busyLight"))
+                    Text(busyLightStatusText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Toggle("", isOn: $settings.busyLightEnabled)
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .controlSize(.mini)
+                    .accessibilityLabel(L10n.tr("prefs.busylight.enable"))
+            }
+
+            Toggle(L10n.tr("prefs.busylight.rules.enable"), isOn: busyLightRulesEnabled)
+                .disabled(!settings.busyLightEnabled)
+
+            if settings.busyLightControlMode == .manual {
+                HStack(spacing: 8) {
+                    busyLightPresetButton(
+                        L10n.tr("menu.busylight.available"),
+                        color: .green,
+                        action: .defaultIdle
+                    )
+                    busyLightPresetButton(
+                        L10n.tr("menu.busylight.busy"),
+                        color: .red,
+                        action: .defaultBusy
+                    )
+                    busyLightPresetButton(
+                        L10n.tr("status.off"),
+                        color: .secondary,
+                        action: BusyLightAction(mode: .off, color: .offColor, periodMilliseconds: 600)
+                    )
+                }
+            }
+
+            VStack(spacing: 6) {
+                busyLightSignalRow(
+                    L10n.tr("prefs.busylight.signal.microphone"),
+                    isOn: busyLight.signals.microphoneInUse
+                )
+                busyLightSignalRow(
+                    L10n.tr("prefs.busylight.signal.camera"),
+                    isOn: busyLight.signals.cameraInUse
+                )
+                busyLightSignalRow(
+                    L10n.tr("prefs.busylight.signal.screenRecording"),
+                    isOn: busyLight.signals.screenRecordingInUse
+                )
+                busyLightSignalRow(
+                    L10n.tr("prefs.busylight.signal.music"),
+                    isOn: busyLight.signals.musicPlaying
+                )
+            }
+
+            Button(L10n.tr("action.preferences")) {
+                appState.openPreferences(.busyLight)
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(16)
+    }
+
+    private var busyLightRulesEnabled: Binding<Bool> {
+        Binding(
+            get: { settings.busyLightControlMode == .auto },
+            set: { settings.busyLightControlMode = $0 ? .auto : .manual }
+        )
+    }
+
+    private var busyLightStatusText: String {
+        guard settings.busyLightEnabled else { return L10n.tr("status.off") }
+        return settings.busyLightControlMode == .auto
+            ? L10n.tr("label.auto")
+            : L10n.tr("prefs.busylight.manualAction")
+    }
+
+    private var busyLightStatusColor: Color {
+        guard settings.busyLightEnabled, let action = busyLight.currentAction, action.mode != .off else {
+            return .secondary.opacity(0.5)
+        }
+        return action.color.swiftUIColor
+    }
+
+    private func busyLightPresetButton(
+        _ title: String,
+        color: Color,
+        action: BusyLightAction
+    ) -> some View {
+        Button {
+            settings.busyLightManualAction = action
+        } label: {
+            HStack(spacing: 5) {
+                Circle().fill(color).frame(width: 8, height: 8)
+                Text(title)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .disabled(!settings.busyLightEnabled)
+    }
+
+    private func busyLightSignalRow(_ title: String, isOn: Bool) -> some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Text(isOn ? L10n.tr("status.on") : L10n.tr("status.off"))
+                .foregroundStyle(isOn ? .green : .secondary)
+        }
+        .font(.caption)
     }
 
     // MARK: – Footer
@@ -294,6 +511,8 @@ private struct MenuDeviceRow: View {
     let isGestureDragging: Bool
     let onGestureDragChanged: (String, CGFloat) -> Void
     let onGestureDragEnded: () -> Void
+    let moveUp: () -> Void
+    let moveDown: () -> Void
 
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
@@ -325,6 +544,15 @@ private struct MenuDeviceRow: View {
         audio.requiresManualConnection(device)
     }
 
+    private var orderedUIDs: [String] {
+        let devices = isInput ? audio.inputDevices : audio.outputDevices
+        let disabled = isInput ? settings.disabledInputDevices : settings.disabledOutputDevices
+        let visible = devices.filter { !disabled.contains($0.uid) }
+        let priority = isInput ? settings.inputPriority : settings.outputPriority
+        let ranked = priority.compactMap { uid in visible.first { $0.uid == uid } }
+        return (ranked + visible.filter { !priority.contains($0.uid) }).map(\.uid)
+    }
+
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "line.3.horizontal")
@@ -332,56 +560,92 @@ private struct MenuDeviceRow: View {
                 .foregroundStyle(.tertiary)
                 .frame(width: 16, height: 22)
                 .help(L10n.tr("prefs.dragToReorder"))
+                .accessibilityHidden(true)
+                .highPriorityGesture(
+                    DragGesture(minimumDistance: 1)
+                        .onChanged { value in
+                            onGestureDragChanged(device.uid, value.translation.height)
+                        }
+                        .onEnded { _ in
+                            onGestureDragEnded()
+                        }
+                )
 
-            rowContent
-                .contentShape(Rectangle())
-                .onTapGesture {
+            Button {
+                if !settings.isAutoMode || requiresManualConnect {
                     guard !settings.isAutoMode || requiresManualConnect else { return }
                     appState.rules.switchTo(device, isInput: isInput)
                 }
-                .help(settings.isAutoMode && !requiresManualConnect ? L10n.tr("menu.deviceRow.autoModeHelp") : "")
+            } label: {
+                rowContent
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(settings.isAutoMode && !requiresManualConnect)
+            .help(settings.isAutoMode && !requiresManualConnect ? L10n.tr("menu.deviceRow.autoModeHelp") : "")
+
+            Menu {
+                deviceActions
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .frame(width: 28)
+            .help(L10n.tr("action.deviceActions"))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
-        .highPriorityGesture(
-            DragGesture(minimumDistance: 1)
-                .onChanged { value in
-                    onGestureDragChanged(device.uid, value.translation.height)
-                }
-                .onEnded { _ in
-                    onGestureDragEnded()
-                }
-        )
         .background(rowBackground)
         .contextMenu {
-            if requiresManualConnect {
-                Button(L10n.tr("action.connectNow")) { appState.rules.switchTo(device, isInput: isInput) }
-                Divider()
-            }
-            Button(L10n.tr("action.rename")) { renameDevice() }
-            iconPickerMenu
+            deviceActions
+        }
+    }
+
+    @ViewBuilder
+    private var deviceActions: some View {
+        if requiresManualConnect {
+            Button(L10n.tr("action.connectNow")) { appState.rules.switchTo(device, isInput: isInput) }
             Divider()
-            Button(L10n.tr("action.hideDevice")) {
-                settings.hideDevice(uid: device.uid, isOutput: !isInput)
+        }
+        Button(L10n.tr("action.moveUp"), action: moveUp)
+            .disabled(MenuPriorityReorderPath.targetUID(
+                for: device.uid,
+                direction: -1,
+                orderedUIDs: orderedUIDs
+            ) == nil)
+        Button(L10n.tr("action.moveDown"), action: moveDown)
+            .disabled(MenuPriorityReorderPath.targetUID(
+                for: device.uid,
+                direction: 1,
+                orderedUIDs: orderedUIDs
+            ) == nil)
+        Divider()
+        Button(L10n.tr("action.rename")) { renameDevice() }
+        iconPickerMenu
+        Divider()
+        Button(L10n.tr("action.hideDevice")) {
+            settings.hideDevice(uid: device.uid, isOutput: !isInput)
+        }
+        Button(L10n.tr("action.forgetDevice")) {
+            settings.forgetDevice(uid: device.uid, connectedUIDs: connectedUIDs)
+        }
+        .disabled(!canForget)
+        Button {
+            settings.setGroupByModelEnabled(!isGroupByModelEnabled, for: device.uid)
+        } label: {
+            if isGroupByModelEnabled {
+                Label(groupByModelActionTitle, systemImage: "checkmark")
+            } else {
+                Text(groupByModelActionTitle)
             }
-            Button(L10n.tr("action.forgetDevice")) {
-                settings.forgetDevice(uid: device.uid, connectedUIDs: connectedUIDs)
-            }
-            .disabled(!canForget)
-            Button {
-                settings.setGroupByModelEnabled(!isGroupByModelEnabled, for: device.uid)
-            } label: {
-                if isGroupByModelEnabled {
-                    Label(groupByModelActionTitle, systemImage: "checkmark")
-                } else {
-                    Text(groupByModelActionTitle)
-                }
-            }
-            .disabled(!isGroupByModelAvailable)
-            if isAirPodsFamily {
-                Divider()
-                Button(L10n.tr("action.bluetoothSettings")) { openBluetoothSettings() }
-            }
+        }
+        .disabled(!isGroupByModelAvailable)
+        if isAirPodsFamily {
+            Divider()
+            Button(L10n.tr("action.bluetoothSettings")) { openBluetoothSettings() }
         }
     }
 
@@ -436,6 +700,12 @@ private struct MenuDeviceRow: View {
             }
 
             Spacer()
+
+            if isDefault {
+                Text(L10n.tr("status.active"))
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(Color.accentColor)
+            }
 
             if let rank = priorityRank {
                 Text("#\(rank)")

@@ -10,8 +10,8 @@
 "label.manualConnect" = "Manuel tilslutning";
 
 /* Almindelige handlinger */
-"action.preferences" = "Indstillinger…";
-"action.soundSettings" = "Lydindstillinger…";
+"action.preferences" = "Sentrio-indstillinger…";
+"action.soundSettings" = "macOS-lyd…";
 "action.bluetoothSettings" = "Bluetooth-indstillinger…";
 "action.quit" = "Afslut";
 "action.playSound" = "Afspil lyd";

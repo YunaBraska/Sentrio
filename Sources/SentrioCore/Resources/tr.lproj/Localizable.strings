@@ -10,8 +10,8 @@
 "label.manualConnect" = "Manuel bağlantı";
 
 /* Ortak eylemler */
-"action.preferences" = "Ayarlar…";
-"action.soundSettings" = "Ses Ayarları…";
+"action.preferences" = "Sentrio Ayarları…";
+"action.soundSettings" = "macOS Sesi…";
 "action.bluetoothSettings" = "Bluetooth Ayarları…";
 "action.quit" = "Çıkış";
 "action.playSound" = "Sesi çal";

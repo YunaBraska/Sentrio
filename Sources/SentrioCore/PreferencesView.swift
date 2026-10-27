@@ -444,38 +444,6 @@ private struct PriorityTab: View {
     }
 }
 
-// MARK: – Drag-and-drop delegate
-
-//
-// Items reorder in real time as the drag crosses row boundaries (dropEntered),
-// so the user sees immediate visual feedback and doesn't need to release at
-// a precise location — this is far more reliable than List.onMove on macOS.
-
-private struct PriorityDropDelegate: DropDelegate {
-    let targetUID: String
-    @Binding var draggedUID: String?
-    let onMove: (String, String) -> Void
-
-    func dropEntered(info _: DropInfo) {
-        guard
-            let source = draggedUID,
-            source != targetUID
-        else { return }
-        withAnimation(.easeInOut(duration: 0.18)) {
-            onMove(source, targetUID)
-        }
-    }
-
-    func dropUpdated(info _: DropInfo) -> DropProposal? {
-        DropProposal(operation: .move)
-    }
-
-    func performDrop(info _: DropInfo) -> Bool {
-        draggedUID = nil
-        return true
-    }
-}
-
 // MARK: – Priority Row (enabled)
 
 private struct PriorityRow: View {

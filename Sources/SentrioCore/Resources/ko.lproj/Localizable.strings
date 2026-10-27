@@ -10,8 +10,8 @@
 "label.manualConnect" = "수동 연결";
 
 /* 공통 동작 */
-"action.preferences" = "설정…";
-"action.soundSettings" = "사운드 설정…";
+"action.preferences" = "Sentrio 설정…";
+"action.soundSettings" = "macOS 사운드…";
 "action.bluetoothSettings" = "Bluetooth 설정…";
 "action.quit" = "종료";
 "action.playSound" = "소리 재생";

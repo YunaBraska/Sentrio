@@ -10,8 +10,8 @@
 "label.manualConnect" = "Manual connection";
 
 /* Common actions */
-"action.preferences" = "Settings…";
-"action.soundSettings" = "Sound Settings…";
+"action.preferences" = "Sentrio Settings…";
+"action.soundSettings" = "macOS Sound…";
 "action.bluetoothSettings" = "Bluetooth Settings…";
 "action.quit" = "Quit";
 "action.playSound" = "Play sound";

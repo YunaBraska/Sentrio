@@ -1,12 +1,6 @@
 import AppKit
 import SwiftUI
 
-private struct MenuReorderGestureState {
-    let sourceUID: String
-    var lastTranslation: CGFloat
-    var carryTranslation: CGFloat
-}
-
 private enum MenuSurface: Hashable {
     case sound
     case busyLight
@@ -41,8 +35,8 @@ struct MenuBarView: View {
     @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var busyLight: BusyLightEngine
     @EnvironmentObject var appState: AppState
-    @State private var outputDragState: MenuReorderGestureState?
-    @State private var inputDragState: MenuReorderGestureState?
+    @State private var draggedOutputUID: String?
+    @State private var draggedInputUID: String?
     @State private var selectedSurface: MenuSurface = .sound
 
     var body: some View {
@@ -73,45 +67,15 @@ struct MenuBarView: View {
     // MARK: – Header
 
     private var headerRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 10) {
-                Text("Sentrio").font(.headline)
-                Spacer()
-                Toggle(L10n.tr("label.auto"), isOn: $settings.isAutoMode)
-                    .toggleStyle(.switch).controlSize(.mini)
-                    .help(L10n.tr("menu.autoHelp"))
-            }
-            activeDeviceSummary(
-                label: L10n.tr("label.output"),
-                systemImage: "speaker.wave.2",
-                name: audio.defaultOutput.map {
-                    settings.displayName(for: $0.uid, isOutput: true, fallbackName: $0.name)
-                }
-            )
-            activeDeviceSummary(
-                label: L10n.tr("label.input"),
-                systemImage: "mic",
-                name: audio.defaultInput.map {
-                    settings.displayName(for: $0.uid, isOutput: false, fallbackName: $0.name)
-                }
-            )
+        HStack(spacing: 10) {
+            Text("Sentrio").font(.headline)
+            Spacer()
+            Toggle(L10n.tr("label.auto"), isOn: $settings.isAutoMode)
+                .toggleStyle(.switch).controlSize(.mini)
+                .help(L10n.tr("menu.autoHelp"))
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-    }
-
-    private func activeDeviceSummary(label: String, systemImage: String, name: String?) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: systemImage)
-                .frame(width: 14)
-            Text(label)
-                .foregroundStyle(.secondary)
-            Text(name ?? L10n.tr("status.disconnected"))
-                .lineLimit(1)
-                .truncationMode(.tail)
-            Spacer(minLength: 0)
-        }
-        .font(.caption)
+        .padding(.vertical, 8)
     }
 
     private var surfacePicker: some View {
@@ -138,7 +102,7 @@ struct MenuBarView: View {
                           ),
                           defaultUID: audio.defaultOutput?.uid,
                           isInput: false,
-                          gestureDragState: $outputDragState)
+                          draggedUID: $draggedOutputUID)
             Divider()
             deviceSection(title: L10n.tr("label.input"), systemImage: "mic",
                           devices: sorted(
@@ -147,7 +111,7 @@ struct MenuBarView: View {
                           ),
                           defaultUID: audio.defaultInput?.uid,
                           isInput: true,
-                          gestureDragState: $inputDragState)
+                          draggedUID: $draggedInputUID)
         }
     }
 
@@ -205,7 +169,7 @@ struct MenuBarView: View {
     private func deviceSection(
         title: String, systemImage: String,
         devices: [AudioDevice], defaultUID: String?, isInput: Bool,
-        gestureDragState: Binding<MenuReorderGestureState?>
+        draggedUID: Binding<String?>
     ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Label(title, systemImage: systemImage)
@@ -228,46 +192,7 @@ struct MenuBarView: View {
                         isDefault: device.uid == defaultUID,
                         isInput: isInput,
                         priorityRank: rankByUID[device.uid],
-                        isGestureDragging: gestureDragState.wrappedValue?.sourceUID == device.uid,
-                        onGestureDragChanged: { sourceUID, translationHeight in
-                            if gestureDragState.wrappedValue?.sourceUID != sourceUID {
-                                gestureDragState.wrappedValue = MenuReorderGestureState(
-                                    sourceUID: sourceUID,
-                                    lastTranslation: 0,
-                                    carryTranslation: 0
-                                )
-                            }
-                            guard var state = gestureDragState.wrappedValue else { return }
-
-                            let delta = translationHeight - state.lastTranslation
-                            state.lastTranslation = translationHeight
-                            state.carryTranslation += delta
-
-                            let stepHeight: CGFloat = 28
-                            if abs(state.carryTranslation) >= stepHeight {
-                                let direction = state.carryTranslation > 0 ? 1 : -1
-                                if let targetUID = MenuPriorityReorderPath.targetUID(
-                                    for: sourceUID,
-                                    direction: direction,
-                                    orderedUIDs: devices.map(\.uid)
-                                ) {
-                                    withAnimation(.easeInOut(duration: 0.16)) {
-                                        settings.reorderPriorityForDrag(
-                                            uid: sourceUID,
-                                            over: targetUID,
-                                            isOutput: !isInput
-                                        )
-                                    }
-                                    state.carryTranslation -= CGFloat(direction) * stepHeight
-                                } else {
-                                    state.carryTranslation = 0
-                                }
-                            }
-                            gestureDragState.wrappedValue = state
-                        },
-                        onGestureDragEnded: {
-                            gestureDragState.wrappedValue = nil
-                        },
+                        draggedUID: draggedUID,
                         moveUp: {
                             guard let targetUID = MenuPriorityReorderPath.targetUID(
                                 for: device.uid,
@@ -293,6 +218,21 @@ struct MenuBarView: View {
                             )
                         }
                     )
+                    .background(draggedUID.wrappedValue == device.uid
+                        ? Color.accentColor.opacity(0.06)
+                        : Color.clear)
+                    .onDrop(of: [.plainText],
+                            delegate: PriorityDropDelegate(
+                                targetUID: device.uid,
+                                draggedUID: draggedUID,
+                                onMove: { sourceUID, targetUID in
+                                    settings.reorderPriorityForDrag(
+                                        uid: sourceUID,
+                                        over: targetUID,
+                                        isOutput: !isInput
+                                    )
+                                }
+                            ))
                 }
             }
         }
@@ -508,9 +448,7 @@ private struct MenuDeviceRow: View {
     let isDefault: Bool
     let isInput: Bool
     let priorityRank: Int?
-    let isGestureDragging: Bool
-    let onGestureDragChanged: (String, CGFloat) -> Void
-    let onGestureDragEnded: () -> Void
+    @Binding var draggedUID: String?
     let moveUp: () -> Void
     let moveDown: () -> Void
 
@@ -561,15 +499,11 @@ private struct MenuDeviceRow: View {
                 .frame(width: 16, height: 22)
                 .help(L10n.tr("prefs.dragToReorder"))
                 .accessibilityHidden(true)
-                .highPriorityGesture(
-                    DragGesture(minimumDistance: 1)
-                        .onChanged { value in
-                            onGestureDragChanged(device.uid, value.translation.height)
-                        }
-                        .onEnded { _ in
-                            onGestureDragEnded()
-                        }
-                )
+                .contentShape(Rectangle())
+                .onDrag {
+                    draggedUID = device.uid
+                    return NSItemProvider(object: device.uid as NSString)
+                }
 
             Button {
                 if !settings.isAutoMode || requiresManualConnect {
@@ -650,9 +584,6 @@ private struct MenuDeviceRow: View {
     }
 
     private var rowBackground: Color {
-        if isGestureDragging {
-            return Color.accentColor.opacity(0.06)
-        }
         if isDefault {
             return Color.accentColor.opacity(0.08)
         }
@@ -700,12 +631,6 @@ private struct MenuDeviceRow: View {
             }
 
             Spacer()
-
-            if isDefault {
-                Text(L10n.tr("status.active"))
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(Color.accentColor)
-            }
 
             if let rank = priorityRank {
                 Text("#\(rank)")

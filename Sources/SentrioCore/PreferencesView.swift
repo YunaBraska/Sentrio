@@ -91,20 +91,32 @@ struct PreferencesView: View {
 
             Divider()
 
-            Picker("", selection: selectedPane) {
-                Label(L10n.tr("label.output"), systemImage: "speaker.wave.2")
-                    .tag(PreferencesPane.output)
-                Label(L10n.tr("label.input"), systemImage: "mic")
-                    .tag(PreferencesPane.input)
+            HStack(spacing: 4) {
+                settingsPaneButton(
+                    .output,
+                    title: L10n.tr("label.output"),
+                    systemImage: "speaker.wave.2"
+                )
+                settingsPaneButton(
+                    .input,
+                    title: L10n.tr("label.input"),
+                    systemImage: "mic"
+                )
                 if hasBusyLightTab || renderMode == .screenshot {
-                    Label(L10n.tr("label.busyLight"), systemImage: "lightbulb")
-                        .tag(PreferencesPane.busyLight)
+                    settingsPaneButton(
+                        .busyLight,
+                        title: L10n.tr("label.busyLight"),
+                        systemImage: "lightbulb"
+                    )
                 }
-                Label(L10n.tr("label.general"), systemImage: "gear")
-                    .tag(PreferencesPane.general)
+                settingsPaneButton(
+                    .general,
+                    title: L10n.tr("label.general"),
+                    systemImage: "gearshape"
+                )
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+            .padding(4)
+            .background(SentrioCardBackground(cornerRadius: 13))
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
 
@@ -112,6 +124,44 @@ struct PreferencesView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .groupBoxStyle(SentrioGroupBoxStyle())
+    }
+
+    private func settingsPaneButton(
+        _ pane: PreferencesPane,
+        title: String,
+        systemImage: String
+    ) -> some View {
+        let isSelected = selectedPane.wrappedValue == pane
+
+        return Button {
+            selectedPane.wrappedValue = pane
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 17, weight: isSelected ? .semibold : .regular))
+                Text(title)
+                    .font(.caption.weight(isSelected ? .semibold : .medium))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(isSelected ? SentrioVisualStyle.accent : Color.secondary)
+            .frame(maxWidth: .infinity, minHeight: 46)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(isSelected ? SentrioVisualStyle.accent.opacity(0.12) : Color.clear)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(
+                        isSelected ? SentrioVisualStyle.accent.opacity(0.22) : Color.clear,
+                        lineWidth: 1
+                    )
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(title)
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     @ViewBuilder

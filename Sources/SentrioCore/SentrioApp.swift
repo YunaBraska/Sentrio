@@ -1,6 +1,8 @@
 import AppKit
 import Combine
+#if !SENTRIO_APP_STORE
 import Sparkle
+#endif
 import SwiftUI
 
 public struct SentrioApp: App {
@@ -31,6 +33,7 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
     private let menuPopover = NSPopover()
     private var cancellables = Set<AnyCancellable>()
 
+    #if !SENTRIO_APP_STORE
     private lazy var updater: SPUStandardUpdaterController? = {
         guard let publicKey = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
               !publicKey.isEmpty else { return nil }
@@ -40,11 +43,14 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
         controller.startUpdater()
         return controller
     }()
+    #endif
 
     public func applicationDidFinishLaunching(_: Notification) {
         configureMenuBar()
         observeMenuBarState()
+        #if !SENTRIO_APP_STORE
         _ = updater
+        #endif
         if #available(macOS 13.0, *) {
             BusyLightAppShortcuts.updateAppShortcutParameters()
         }

@@ -114,18 +114,20 @@ struct MenuBarView: View {
                     }
                 )
             )
-            VolumeRow(
-                icon: "bell",
-                label: L10n.tr("label.alert"),
-                volume: Binding(
-                    get: { audio.alertVolume },
-                    set: { v in
-                        audio.setAlertVolume(v)
-                    }
-                ),
-                playAction: { SoundLibrary.play(settings.alertSound) },
-                onEditingEnded: { SoundLibrary.play(settings.alertSound) }
-            )
+            if AudioManager.supportsSystemAlertVolumeControl {
+                VolumeRow(
+                    icon: "bell",
+                    label: L10n.tr("label.alert"),
+                    volume: Binding(
+                        get: { audio.alertVolume },
+                        set: { v in
+                            audio.setAlertVolume(v)
+                        }
+                    ),
+                    playAction: { SoundLibrary.play(settings.alertSound) },
+                    onEditingEnded: { SoundLibrary.play(settings.alertSound) }
+                )
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 6)

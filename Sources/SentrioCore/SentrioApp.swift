@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 #if !SENTRIO_APP_STORE
-import Sparkle
+    import Sparkle
 #endif
 import SwiftUI
 
@@ -34,22 +34,22 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
     private var cancellables = Set<AnyCancellable>()
 
     #if !SENTRIO_APP_STORE
-    private lazy var updater: SPUStandardUpdaterController? = {
-        guard let publicKey = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
-              !publicKey.isEmpty else { return nil }
-        let controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
-        controller.updater.automaticallyChecksForUpdates = true
-        controller.updater.automaticallyDownloadsUpdates = false
-        controller.startUpdater()
-        return controller
-    }()
+        private lazy var updater: SPUStandardUpdaterController? = {
+            guard let publicKey = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
+                  !publicKey.isEmpty else { return nil }
+            let controller = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
+            controller.updater.automaticallyChecksForUpdates = true
+            controller.updater.automaticallyDownloadsUpdates = false
+            controller.startUpdater()
+            return controller
+        }()
     #endif
 
     public func applicationDidFinishLaunching(_: Notification) {
         configureMenuBar()
         observeMenuBarState()
         #if !SENTRIO_APP_STORE
-        _ = updater
+            _ = updater
         #endif
         if #available(macOS 13.0, *) {
             BusyLightAppShortcuts.updateAppShortcutParameters()

@@ -277,7 +277,8 @@ final class RulesEngine {
                     }
                     if !isInput,
                        AudioManager.supportsSystemAlertVolumeControl,
-                       let alertVol = settings.savedAlertVolume(for: device.uid) {
+                       let alertVol = settings.savedAlertVolume(for: device.uid)
+                    {
                         audio.setAlertVolume(alertVol)
                     }
                 }
@@ -311,7 +312,8 @@ final class RulesEngine {
                 }
                 if !isInput,
                    AudioManager.supportsSystemAlertVolumeControl,
-                   let alertVol = settings.savedAlertVolume(for: fallback.uid) {
+                   let alertVol = settings.savedAlertVolume(for: fallback.uid)
+                {
                     audio.setAlertVolume(alertVol)
                 }
             }

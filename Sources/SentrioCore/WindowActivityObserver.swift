@@ -66,7 +66,12 @@ struct WindowActivityObserver: NSViewRepresentable {
         }
 
         func updateWindow(_ newWindow: NSWindow?) {
-            guard window !== newWindow else { return }
+            guard window !== newWindow else {
+                if let newWindow {
+                    onWindowAttached?(newWindow)
+                }
+                return
+            }
             detach()
             window = newWindow
             guard let newWindow else {

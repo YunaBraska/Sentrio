@@ -6,6 +6,38 @@ test "$#" = 1
 executable_name='Sentrio'
 app_name=${MACOS_APP_NAME:-Sentrio}
 version=$1
+build_version=${MACOS_BUILD_VERSION:-${version}}
+
+case "${version}" in
+  ''|*[!0-9.]*|.*|*.|*..*)
+    printf '%s\n' "Invalid marketing version: ${version}. Expected Major.Minor.Patch." >&2
+    exit 2
+    ;;
+esac
+previous_ifs=$IFS
+IFS=.
+set -- ${version}
+IFS=$previous_ifs
+if [ "$#" -ne 3 ]; then
+  printf '%s\n' "Invalid marketing version: ${version}. Expected Major.Minor.Patch." >&2
+  exit 2
+fi
+
+case "${build_version}" in
+  ''|*[!0-9.]*|.*|*.|*..*)
+    printf '%s\n' "Invalid build version: ${build_version}. Expected one to three numeric components." >&2
+    exit 2
+    ;;
+esac
+previous_ifs=$IFS
+IFS=.
+set -- ${build_version}
+IFS=$previous_ifs
+if [ "$#" -gt 3 ]; then
+  printf '%s\n' "Invalid build version: ${build_version}. Expected one to three numeric components." >&2
+  exit 2
+fi
+
 distribution=${SENTRIO_DISTRIBUTION:-direct}
 case "${distribution}" in
   direct|app-store) ;;
@@ -82,6 +114,16 @@ fi
 
 binary_dir=${arm64_bin}
 find "${binary_dir}" -maxdepth 1 -type d -name '*.bundle' -exec cp -R {} "${contents_dir}/Resources/" \;
+find "${contents_dir}/Resources" -type f -path '*.bundle/Contents/Resources/*.lproj/InfoPlist.strings' -exec sh -c '
+  destination=$1
+  shift
+  for source do
+    localization_dir=${source%/InfoPlist.strings}
+    localization=${localization_dir##*/}
+    mkdir -p "${destination}/${localization}"
+    cp "${source}" "${destination}/${localization}/InfoPlist.strings"
+  done
+' sh "${contents_dir}/Resources" {} +
 find "${binary_dir}" -maxdepth 1 -type d -name '*.appintents' -exec sh -c '
   destination=$1
   shift
@@ -108,7 +150,7 @@ cat > "${contents_dir}/Info.plist" <<EOF
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleVersion</key>
-    <string>${version}</string>
+    <string>${build_version}</string>
     <key>CFBundleShortVersionString</key>
     <string>${version}</string>
     <key>CFBundleExecutable</key>
@@ -127,6 +169,8 @@ cat > "${contents_dir}/Info.plist" <<EOF
     <string>NSApplication</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Sentrio uses the microphone input level to show a live activity indicator next to your input device.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Sentrio checks whether a camera is active to control BusyLight rules. It does not capture or store video.</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
     <key>CFBundleURLTypes</key>
@@ -140,8 +184,6 @@ cat > "${contents_dir}/Info.plist" <<EOF
             </array>
         </dict>
     </array>
-    <key>NSAppleScriptEnabled</key>
-    <true/>
     <key>NSSupportsAppIntents</key>
     <true/>
 ${update_properties}

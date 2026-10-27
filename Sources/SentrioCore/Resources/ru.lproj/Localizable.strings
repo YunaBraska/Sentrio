@@ -10,8 +10,8 @@
 "label.manualConnect" = "Ручное подключение";
 
 /* Общие действия */
-"action.preferences" = "Настройки…";
-"action.soundSettings" = "Звук macOS…";
+"action.preferences" = "Настройки";
+"action.soundSettings" = "Звук macOS";
 "action.bluetoothSettings" = "Настройки Bluetooth…";
 "action.quit" = "Выйти";
 "action.playSound" = "Воспроизвести звук";

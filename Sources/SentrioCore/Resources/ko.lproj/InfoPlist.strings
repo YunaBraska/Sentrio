@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Sentrio는 마이크 입력 레벨을 사용하여 입력 기기 옆에 실시간 활동 표시기를 표시합니다.";
+"NSCameraUsageDescription" = "Sentrio는 BusyLight 규칙을 제어하기 위해 카메라가 사용 중인지 확인합니다. 영상을 촬영하거나 저장하지 않습니다.";

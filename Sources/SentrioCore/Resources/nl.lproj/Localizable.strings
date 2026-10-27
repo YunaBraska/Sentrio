@@ -10,8 +10,8 @@
 "label.manualConnect" = "Handmatige verbinding";
 
 /* Algemene acties */
-"action.preferences" = "Instellingen…";
-"action.soundSettings" = "macOS-geluid…";
+"action.preferences" = "Instellingen";
+"action.soundSettings" = "macOS-geluid";
 "action.bluetoothSettings" = "Bluetooth-instellingen…";
 "action.quit" = "Stop";
 "action.playSound" = "Geluid afspelen";

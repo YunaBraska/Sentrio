@@ -45,8 +45,9 @@ final class BusyLightRESTServer {
         do {
             let parameters = NWParameters.tcp
             parameters.allowLocalEndpointReuse = true
+            parameters.requiredLocalEndpoint = .hostPort(host: .ipv4(.loopback), port: nwPort)
 
-            let listener = try NWListener(using: parameters, on: nwPort)
+            let listener = try NWListener(using: parameters)
             listener.stateUpdateHandler = { [weak self] state in
                 guard let self else { return }
                 switch state {
@@ -136,6 +137,26 @@ final class BusyLightRESTServer {
         let method = String(parts[0])
         let target = String(parts[1])
         let path = target.split(separator: "?", maxSplits: 1, omittingEmptySubsequences: false).first.map(String.init) ?? "/"
+        let headers = requestText.components(separatedBy: "\r\n").dropFirst().prefix { !$0.isEmpty }.reduce(into: [String: String]()) { result, line in
+            guard !line.isEmpty, let separator = line.firstIndex(of: ":") else { return }
+            let name = line[..<separator].trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let value = line[line.index(after: separator)...].trimmingCharacters(in: .whitespacesAndNewlines)
+            result[name] = value
+        }
+
+        let fetchSite = headers["sec-fetch-site"]?.lowercased()
+        if fetchSite == "cross-site" || fetchSite == "same-site" {
+            send(BusyLightRESTResponse.text(statusCode: 403, body: "Cross-site requests are not allowed"), on: connection)
+            return
+        }
+
+        if let originValue = headers["origin"] {
+            let host = URL(string: originValue)?.host?.lowercased()
+            if host != "127.0.0.1", host != "::1", host != "localhost" {
+                send(BusyLightRESTResponse.text(statusCode: 403, body: "Cross-site requests are not allowed"), on: connection)
+                return
+            }
+        }
 
         let request = BusyLightRESTRequest(method: method, path: path)
         DispatchQueue.main.async { [weak self] in
@@ -149,19 +170,23 @@ final class BusyLightRESTServer {
     }
 
     private func send(_ response: BusyLightRESTResponse, on connection: NWConnection) {
-        let header = """
-        HTTP/1.1 \(response.statusCode) \(statusText(for: response.statusCode))\r
-        Content-Type: \(response.contentType)\r
-        Content-Length: \(response.body.count)\r
-        Connection: close\r
-        \r
-        """
+        let header = "HTTP/1.1 \(response.statusCode) \(statusText(for: response.statusCode))\r\n" +
+            "Content-Type: \(response.contentType)\r\n" +
+            "Content-Length: \(response.body.count)\r\n" +
+            "Connection: close\r\n\r\n"
         var payload = Data(header.utf8)
         payload.append(response.body)
 
-        connection.send(content: payload, completion: .contentProcessed { _ in
-            connection.cancel()
-        })
+        connection.send(
+            content: payload,
+            contentContext: .defaultStream,
+            isComplete: true,
+            completion: .contentProcessed { error in
+                if error != nil {
+                    connection.cancel()
+                }
+            }
+        )
     }
 
     private func notifyState(running: Bool, error: String?) {
@@ -174,6 +199,7 @@ final class BusyLightRESTServer {
         switch code {
         case 200: "OK"
         case 400: "Bad Request"
+        case 403: "Forbidden"
         case 404: "Not Found"
         case 405: "Method Not Allowed"
         case 413: "Payload Too Large"

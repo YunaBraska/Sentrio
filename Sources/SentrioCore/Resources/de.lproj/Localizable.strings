@@ -10,8 +10,8 @@
 "label.manualConnect" = "Manuelle Verbindung";
 
 /* Allgemeine Aktionen */
-"action.preferences" = "Einstellungen…";
-"action.soundSettings" = "macOS-Ton…";
+"action.preferences" = "Einstellungen";
+"action.soundSettings" = "macOS-Ton";
 "action.bluetoothSettings" = "Bluetooth‑Einstellungen…";
 "action.quit" = "Beenden";
 "action.playSound" = "Sound abspielen";

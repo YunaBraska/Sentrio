@@ -54,7 +54,7 @@ scripts/verify-app-store-bundle.sh dist-app-store/Sentrio.app
 open dist-app-store/Sentrio.app
 ```
 
-The submission package is produced only when Mac App Store application and installer signing identities are supplied.
+The argument is the three-component marketing version. Set `MACOS_BUILD_VERSION` to an independently increasing one-to-three-component numeric build version when needed. The submission package is produced only when Mac App Store application and installer signing identities are supplied.
 
 ## Screenshots
 

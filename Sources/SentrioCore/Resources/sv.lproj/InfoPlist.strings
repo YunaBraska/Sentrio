@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Sentrio använder mikrofonens ingångsnivå för att visa en aktivitetsindikator i realtid bredvid din inmatningsenhet.";
+"NSCameraUsageDescription" = "Sentrio kontrollerar om en kamera är aktiv för att styra BusyLight-regler. Appen spelar inte in eller lagrar video.";

@@ -10,8 +10,8 @@
 "label.manualConnect" = "Połączenie ręczne";
 
 /* Wspólne akcje */
-"action.preferences" = "Ustawienia…";
-"action.soundSettings" = "Dźwięk macOS…";
+"action.preferences" = "Ustawienia";
+"action.soundSettings" = "Dźwięk macOS";
 "action.bluetoothSettings" = "Ustawienia Bluetooth…";
 "action.quit" = "Zakończ";
 "action.playSound" = "Odtwórz dźwięk";

@@ -35,6 +35,8 @@ http://127.0.0.1:<port>/v1/busylight
 
 ## Important behavior
 
+- The listener binds only to `127.0.0.1`; it is not reachable from other devices on the network.
+- Cross-site browser requests are rejected. Local scripts and automation tools can call the API directly.
 - Action endpoints switch BusyLight to **manual**.
 - `/auto` returns control to rules.
 - API and Settings always reflect the same state.

@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Sentrio verwendet den Mikrofon-Eingangspegel, um neben deinem Eingabegerät eine Live-Aktivitätsanzeige anzuzeigen.";
+"NSCameraUsageDescription" = "Sentrio prüft, ob eine Kamera aktiv ist, um BusyLight-Regeln zu steuern. Es nimmt keine Videos auf und speichert sie nicht.";

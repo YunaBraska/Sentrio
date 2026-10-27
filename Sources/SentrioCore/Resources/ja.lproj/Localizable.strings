@@ -10,8 +10,8 @@
 "label.manualConnect" = "手動接続";
 
 /* 共通アクション */
-"action.preferences" = "設定…";
-"action.soundSettings" = "macOS サウンド…";
+"action.preferences" = "設定";
+"action.soundSettings" = "macOS サウンド";
 "action.bluetoothSettings" = "Bluetooth 設定…";
 "action.quit" = "終了";
 "action.playSound" = "サウンドを再生";

@@ -14,8 +14,8 @@ The direct build also uses `system_profiler` as one optional source of Bluetooth
 1. Keep one source tree and one set of user-facing behavior.
 2. Select distribution with `SENTRIO_DISTRIBUTION=direct|app-store`. Direct remains the default.
 3. Compile the App Store variant without Sparkle. Updates are owned by the Mac App Store.
-4. Sign the App Store variant with `scripts/Sentrio-AppStore.entitlements`, including sandbox access required for microphone level monitoring, supported USB and Bluetooth devices, the optional local REST server, and user-selected settings files.
-5. Include `PrivacyInfo.xcprivacy` in both distribution variants.
+4. Sign the App Store variant with `scripts/Sentrio-AppStore.entitlements`, including sandbox access required for microphone and camera activity monitoring, supported USB and Bluetooth devices, the optional local REST server, and user-selected settings files.
+5. Include `PrivacyInfo.xcprivacy` in both distribution variants and declare the approved `UserDefaults` required-reason use.
 6. Do not launch `system_profiler` in the App Store build. Preserve battery reporting through the existing in-process IOPowerSources, CoreAudio, and IOKit sources. This affects optional Bluetooth metadata only, not routing or switching.
 7. Keep Developer ID notarization, Sparkle, ZIP, DMG, and appcast generation exclusive to direct distribution. Keep App Store package signing exclusive to the App Store path.
 

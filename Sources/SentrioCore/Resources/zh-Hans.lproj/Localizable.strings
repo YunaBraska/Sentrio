@@ -10,8 +10,8 @@
 "label.manualConnect" = "手动连接";
 
 /* 通用操作 */
-"action.preferences" = "设置…";
-"action.soundSettings" = "macOS 声音…";
+"action.preferences" = "设置";
+"action.soundSettings" = "macOS 声音";
 "action.bluetoothSettings" = "蓝牙设置…";
 "action.quit" = "退出";
 "action.playSound" = "播放声音";

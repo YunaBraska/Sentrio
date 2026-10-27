@@ -41,6 +41,7 @@ struct PreferencesView: View {
             .background(
                 WindowActivityObserver(
                     onWindowAttached: { window in
+                        window.title = selectedPaneTitle
                         window.titleVisibility = .hidden
                         window.titlebarAppearsTransparent = true
                         window.styleMask.insert(.fullSizeContentView)
@@ -72,6 +73,19 @@ struct PreferencesView: View {
             $appState.preferencesPane
         case .screenshot:
             $screenshotSelectedPane
+        }
+    }
+
+    private var selectedPaneTitle: String {
+        switch selectedPane.wrappedValue {
+        case .output:
+            L10n.tr("label.output")
+        case .input:
+            L10n.tr("label.input")
+        case .busyLight:
+            L10n.tr("label.busyLight")
+        case .general:
+            L10n.tr("label.general")
         }
     }
 
@@ -1133,9 +1147,11 @@ private struct GeneralTab: View {
                 Button(L10n.tr("action.viewSourceOnGitHub")) {
                     openSite("https://github.com/YunaBraska/Sentrio")
                 }
-                Button(L10n.tr("action.buyMeCoffee")) {
-                    openSite("https://github.com/sponsors/YunaBraska?frequency=one-time")
-                }
+                #if !SENTRIO_APP_STORE
+                    Button(L10n.tr("action.buyMeCoffee")) {
+                        openSite("https://github.com/sponsors/YunaBraska?frequency=one-time")
+                    }
+                #endif
                 Button(L10n.tr("action.reportIssue")) {
                     openSite("https://github.com/YunaBraska/Sentrio/issues/new")
                 }

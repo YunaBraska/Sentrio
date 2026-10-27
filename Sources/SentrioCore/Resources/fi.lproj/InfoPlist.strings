@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Sentrio näyttää mikrofonin tulotason avulla reaaliaikaisen aktiivisuusilmaisimen syöttölaitteesi vieressä.";
+"NSCameraUsageDescription" = "Sentrio tarkistaa BusyLight-sääntöjen ohjaamista varten, onko kamera käytössä. Se ei tallenna eikä säilytä videota.";

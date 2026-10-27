@@ -10,8 +10,8 @@
 "label.manualConnect" = "Conexão manual";
 
 /* Ações comuns */
-"action.preferences" = "Ajustes…";
-"action.soundSettings" = "Som do macOS…";
+"action.preferences" = "Ajustes";
+"action.soundSettings" = "Som do macOS";
 "action.bluetoothSettings" = "Ajustes de Bluetooth…";
 "action.quit" = "Sair";
 "action.playSound" = "Reproduzir som";

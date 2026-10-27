@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Sentrio usa el nivel de entrada del micrófono para mostrar un indicador de actividad en tiempo real junto a tu dispositivo de entrada.";
+"NSCameraUsageDescription" = "Sentrio comprueba si una cámara está activa para controlar las reglas de BusyLight. No captura ni guarda vídeo.";

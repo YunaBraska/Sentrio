@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Sentrio, giriş aygıtınızın yanında canlı bir etkinlik göstergesi görüntülemek için mikrofon giriş seviyesini kullanır.";
+"NSCameraUsageDescription" = "Sentrio, BusyLight kurallarını yönetmek için bir kameranın etkin olup olmadığını kontrol eder. Video çekmez veya kaydetmez.";

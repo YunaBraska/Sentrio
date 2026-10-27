@@ -150,6 +150,8 @@ struct BusyLightTab: View {
         }
         .frame(width: 500)
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .groupBoxStyle(SentrioGroupBoxStyle())
         .onAppear {
             apiPortText = String(settings.busyLightAPIPort)
         }

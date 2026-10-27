@@ -43,6 +43,8 @@ struct PreferencesView: View {
             }
         }
         .frame(width: 540, height: 680)
+        .background(SentrioBackdrop().ignoresSafeArea())
+        .tint(SentrioVisualStyle.accent)
         .background(
             WindowActivityObserver { active in
                 isWindowActive = active
@@ -106,10 +108,13 @@ struct PreferencesView: View {
             }
             .pickerStyle(.segmented)
             .labelsHidden()
+            .padding(5)
+            .background(SentrioCardBackground(cornerRadius: 13))
 
             activeTabContent
         }
         .padding()
+        .groupBoxStyle(SentrioGroupBoxStyle())
     }
 
     @ViewBuilder
@@ -253,7 +258,7 @@ private struct PriorityTab: View {
                                     draggedUID: $draggedUID
                                 )
                                 .background(uid == draggedUID
-                                    ? Color.accentColor.opacity(0.06)
+                                    ? SentrioVisualStyle.accent.opacity(0.08)
                                     : Color.clear)
                                 .onDrop(of: [.plainText],
                                         delegate: PriorityDropDelegate(
@@ -530,7 +535,7 @@ private struct PriorityRow: View {
             Button { showIconPicker = true } label: {
                 Image(systemName: displayedIcon)
                     .font(.system(size: 16))
-                    .foregroundStyle(isConnected ? Color.accentColor : .secondary)
+                    .foregroundStyle(isConnected ? SentrioVisualStyle.accent : .secondary)
                     .frame(width: 28, height: 28)
                     .contentShape(Rectangle())
             }
@@ -564,7 +569,7 @@ private struct PriorityRow: View {
                         if dev.uid == (isOutput ? audio.defaultOutput?.uid : audio.defaultInput?.uid) {
                             Text(L10n.tr("status.active"))
                                 .font(.caption2.weight(.medium))
-                                .foregroundStyle(Color.accentColor)
+                                .foregroundStyle(SentrioVisualStyle.accent)
                         } else {
                             Text(L10n.tr("status.connected"))
                                 .font(.caption2)
@@ -1090,6 +1095,7 @@ private struct GeneralTab: View {
             }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
         .onAppear {
             launchAtLogin = settings.isLaunchAtLoginEnabled
         }

@@ -56,7 +56,8 @@ struct MenuBarView: View {
             footerRow
         }
         .frame(width: 370)
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(SentrioBackdrop().ignoresSafeArea())
+        .tint(SentrioVisualStyle.accent)
         .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in
             if isEmpty {
                 selectedSurface = .sound
@@ -68,14 +69,20 @@ struct MenuBarView: View {
 
     private var headerRow: some View {
         HStack(spacing: 10) {
-            Text("Sentrio").font(.headline)
+            Image(systemName: "waveform.circle.fill")
+                .font(.system(size: 25, weight: .semibold))
+                .foregroundStyle(SentrioVisualStyle.brandGradient)
+                .accessibilityHidden(true)
+            Text("Sentrio")
+                .font(.system(.headline, design: .rounded, weight: .semibold))
             Spacer()
             Toggle(L10n.tr("label.auto"), isOn: $settings.isAutoMode)
                 .toggleStyle(.switch).controlSize(.mini)
                 .help(L10n.tr("menu.autoHelp"))
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
+        .background(SentrioChromeBackground())
     }
 
     private var surfacePicker: some View {
@@ -160,8 +167,11 @@ struct MenuBarView: View {
                 onEditingEnded: { SoundLibrary.play(settings.alertSound) }
             )
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(SentrioCardBackground(cornerRadius: 12))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
     }
 
     // MARK: – Device section
@@ -174,7 +184,7 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 2) {
             Label(title, systemImage: systemImage)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SentrioVisualStyle.accent)
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
                 .padding(.bottom, 2)
@@ -387,6 +397,7 @@ struct MenuBarView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
+        .background(SentrioChromeBackground())
     }
 
     // MARK: – Sort helpers
@@ -496,7 +507,7 @@ private struct MenuDeviceRow: View {
             Image(systemName: "line.3.horizontal")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.tertiary)
-                .frame(width: 16, height: 22)
+                .frame(width: 28, height: 36)
                 .help(L10n.tr("prefs.dragToReorder"))
                 .accessibilityHidden(true)
                 .contentShape(Rectangle())
@@ -505,18 +516,7 @@ private struct MenuDeviceRow: View {
                     return NSItemProvider(object: device.uid as NSString)
                 }
 
-            Button {
-                if !settings.isAutoMode || requiresManualConnect {
-                    guard !settings.isAutoMode || requiresManualConnect else { return }
-                    appState.rules.switchTo(device, isInput: isInput)
-                }
-            } label: {
-                rowContent
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .disabled(settings.isAutoMode && !requiresManualConnect)
-            .help(settings.isAutoMode && !requiresManualConnect ? L10n.tr("menu.deviceRow.autoModeHelp") : "")
+            selectionControl
 
             Menu {
                 deviceActions
@@ -533,8 +533,27 @@ private struct MenuDeviceRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 4)
         .background(rowBackground)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 1)
         .contextMenu {
             deviceActions
+        }
+    }
+
+    @ViewBuilder
+    private var selectionControl: some View {
+        if settings.isAutoMode, !requiresManualConnect {
+            rowContent
+                .contentShape(Rectangle())
+                .help(L10n.tr("menu.deviceRow.autoModeHelp"))
+        } else {
+            Button {
+                appState.rules.switchTo(device, isInput: isInput)
+            } label: {
+                rowContent
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -583,11 +602,16 @@ private struct MenuDeviceRow: View {
         }
     }
 
-    private var rowBackground: Color {
-        if isDefault {
-            return Color.accentColor.opacity(0.08)
-        }
-        return Color.clear
+    private var rowBackground: some View {
+        RoundedRectangle(cornerRadius: 10, style: .continuous)
+            .fill(isDefault ? SentrioVisualStyle.accent.opacity(0.12) : Color.clear)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(
+                        isDefault ? SentrioVisualStyle.accent.opacity(0.22) : Color.clear,
+                        lineWidth: 1
+                    )
+            )
     }
 
     private var rowContent: some View {
@@ -603,7 +627,7 @@ private struct MenuDeviceRow: View {
                 : baseIcon
             Image(systemName: icon)
                 .font(.system(size: 15))
-                .foregroundStyle(isDefault ? Color.accentColor : .secondary)
+                .foregroundStyle(isDefault ? SentrioVisualStyle.accent : .secondary)
                 .frame(width: 22)
 
             VStack(alignment: .leading, spacing: 1) {

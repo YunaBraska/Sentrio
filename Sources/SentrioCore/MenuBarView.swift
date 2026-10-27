@@ -56,7 +56,7 @@ struct MenuBarView: View {
             footerRow
         }
         .frame(width: 370)
-        .background(SentrioBackdrop().ignoresSafeArea())
+        .background(SentrioChromeBackground().ignoresSafeArea())
         .tint(SentrioVisualStyle.accent)
         .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in
             if isEmpty {

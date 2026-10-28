@@ -280,7 +280,11 @@ final class IsolatedRuntimeTests: XCTestCase {
         try await Task.sleep(nanoseconds: 120_000_000)
 
         XCTAssertEqual(settings.savedVolume(for: "usb-headset", isOutput: true) ?? -1, 0.82, accuracy: 0.001)
-        XCTAssertEqual(settings.savedAlertVolume(for: "usb-headset") ?? -1, 0.61, accuracy: 0.001)
+        if AudioManager.supportsSystemAlertVolumeControl {
+            XCTAssertEqual(settings.savedAlertVolume(for: "usb-headset") ?? -1, 0.61, accuracy: 0.001)
+        } else {
+            XCTAssertNil(settings.savedAlertVolume(for: "usb-headset"))
+        }
         XCTAssertEqual(settings.savedVolume(for: "usb-mic", isOutput: false) ?? -1, 0.47, accuracy: 0.001)
 
         // Simulate macOS auto-falling back when the USB devices disappear before the rules engine

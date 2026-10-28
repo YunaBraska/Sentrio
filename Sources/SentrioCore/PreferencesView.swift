@@ -325,7 +325,7 @@ private struct PriorityTab: View {
                     playAction: isOutput ? { SoundLibrary.play(settings.testSound) } : nil,
                     onEditingEnded: isOutput ? { SoundLibrary.play(settings.testSound) } : nil
                 )
-                if isOutput {
+                if isOutput, AudioManager.supportsSystemAlertVolumeControl {
                     sliderRow(
                         icon: "bell",
                         label: L10n.tr("label.alert"),

@@ -86,7 +86,9 @@ final class RulesEngine {
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] volume in
-                guard let self, let uid = audio.defaultOutput?.uid else { return }
+                guard AudioManager.supportsSystemAlertVolumeControl,
+                      let self,
+                      let uid = audio.defaultOutput?.uid else { return }
                 settings.saveAlertVolume(volume, for: uid)
             }
             .store(in: &cancellables)
@@ -187,7 +189,7 @@ final class RulesEngine {
             if let vol = audio.volume(for: current, isOutput: isOutput) {
                 settings.saveVolume(vol, for: current.uid, isOutput: isOutput)
             }
-            if !isInput {
+            if !isInput, AudioManager.supportsSystemAlertVolumeControl {
                 settings.saveAlertVolume(AudioManager.readAlertVolume(), for: current.uid)
             }
         }
@@ -198,7 +200,9 @@ final class RulesEngine {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
                 guard let self else { return }
                 let expectedVol = settings.savedVolume(for: target.uid, isOutput: isOutput)
-                let expectedAlertVol = !isInput ? settings.savedAlertVolume(for: target.uid) : nil
+                let expectedAlertVol = !isInput && AudioManager.supportsSystemAlertVolumeControl
+                    ? settings.savedAlertVolume(for: target.uid)
+                    : nil
 
                 var didApplyAny = false
                 if let vol = expectedVol {
@@ -259,7 +263,7 @@ final class RulesEngine {
             if let vol = audio.volume(for: current, isOutput: isOutput) {
                 settings.saveVolume(vol, for: current.uid, isOutput: isOutput)
             }
-            if !isInput {
+            if !isInput, AudioManager.supportsSystemAlertVolumeControl {
                 settings.saveAlertVolume(AudioManager.readAlertVolume(), for: current.uid)
             }
         }
@@ -271,7 +275,10 @@ final class RulesEngine {
                     if let vol = settings.savedVolume(for: device.uid, isOutput: isOutput) {
                         audio.setVolume(vol, for: device, isOutput: isOutput)
                     }
-                    if !isInput, let alertVol = settings.savedAlertVolume(for: device.uid) {
+                    if !isInput,
+                       AudioManager.supportsSystemAlertVolumeControl,
+                       let alertVol = settings.savedAlertVolume(for: device.uid)
+                    {
                         audio.setAlertVolume(alertVol)
                     }
                 }
@@ -303,7 +310,10 @@ final class RulesEngine {
                 if let vol = settings.savedVolume(for: fallback.uid, isOutput: isOutput) {
                     audio.setVolume(vol, for: fallback, isOutput: isOutput)
                 }
-                if !isInput, let alertVol = settings.savedAlertVolume(for: fallback.uid) {
+                if !isInput,
+                   AudioManager.supportsSystemAlertVolumeControl,
+                   let alertVol = settings.savedAlertVolume(for: fallback.uid)
+                {
                     audio.setAlertVolume(alertVol)
                 }
             }

@@ -1,9 +1,10 @@
 import AppKit
 import Combine
+import SwiftUI
+
 #if !SENTRIO_APP_STORE
     import Sparkle
 #endif
-import SwiftUI
 
 public struct SentrioApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate

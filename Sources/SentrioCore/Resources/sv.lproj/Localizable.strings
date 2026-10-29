@@ -36,6 +36,7 @@
 "action.showInFinder" = "Visa i Finder";
 "action.clearVolumeMemory" = "Rensa volymminne";
 "action.viewSourceOnGitHub" = "Visa källkod på GitHub";
+"action.privacyPolicy" = "Integritetspolicy";
 "action.buyMeCoffee" = "☕  Bjud mig på kaffe";
 "action.reportIssue" = "Rapportera ett problem";
 "action.addRule" = "Lägg till regel";

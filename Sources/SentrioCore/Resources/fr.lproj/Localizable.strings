@@ -36,6 +36,7 @@
 "action.showInFinder" = "Afficher dans le Finder";
 "action.clearVolumeMemory" = "Effacer la mémoire des volumes";
 "action.viewSourceOnGitHub" = "Voir le code sur GitHub";
+"action.privacyPolicy" = "Politique de confidentialité";
 "action.buyMeCoffee" = "☕  M’offrir un café";
 "action.reportIssue" = "Signaler un problème";
 "action.addRule" = "Ajouter une règle";

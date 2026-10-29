@@ -36,6 +36,7 @@
 "action.showInFinder" = "Toon in Finder";
 "action.clearVolumeMemory" = "Volumengeheugen wissen";
 "action.viewSourceOnGitHub" = "Broncode op GitHub bekijken";
+"action.privacyPolicy" = "Privacybeleid";
 "action.buyMeCoffee" = "☕  Koop me een koffie";
 "action.reportIssue" = "Meld een probleem";
 "action.addRule" = "Regel toevoegen";

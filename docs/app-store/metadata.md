@@ -13,7 +13,7 @@ This file is the review source for the Sentrio App Store Connect record. The pub
 
 ## English (U.S.)
 
-**Name:** Sentrio
+**Name:** Sentrio Sound
 
 **Subtitle:** Audio and BusyLight control
 

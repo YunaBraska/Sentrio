@@ -36,6 +36,7 @@
 "action.showInFinder" = "Показать в Finder";
 "action.clearVolumeMemory" = "Очистить память громкости";
 "action.viewSourceOnGitHub" = "Посмотреть исходники на GitHub";
+"action.privacyPolicy" = "Политика конфиденциальности";
 "action.buyMeCoffee" = "☕  Угости меня кофе";
 "action.reportIssue" = "Сообщить о проблеме";
 "action.addRule" = "Добавить правило";

@@ -36,6 +36,7 @@
 "action.showInFinder" = "Finder で表示";
 "action.clearVolumeMemory" = "音量メモリをクリア";
 "action.viewSourceOnGitHub" = "GitHub でソースを見る";
+"action.privacyPolicy" = "プライバシーポリシー";
 "action.buyMeCoffee" = "☕  コーヒーをおごる";
 "action.reportIssue" = "問題を報告";
 "action.addRule" = "ルールを追加";

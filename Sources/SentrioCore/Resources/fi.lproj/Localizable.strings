@@ -36,6 +36,7 @@
 "action.showInFinder" = "Näytä Finderissa";
 "action.clearVolumeMemory" = "Tyhjennä äänenvoimakkuusmuisti";
 "action.viewSourceOnGitHub" = "Näytä lähdekoodi GitHubissa";
+"action.privacyPolicy" = "Tietosuojakäytäntö";
 "action.buyMeCoffee" = "☕  Osta minulle kahvi";
 "action.reportIssue" = "Ilmoita ongelmasta";
 "action.addRule" = "Lisää sääntö";

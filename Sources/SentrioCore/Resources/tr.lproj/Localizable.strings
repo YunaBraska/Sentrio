@@ -36,6 +36,7 @@
 "action.showInFinder" = "Finder’da göster";
 "action.clearVolumeMemory" = "Ses hafızasını temizle";
 "action.viewSourceOnGitHub" = "Kaynağı GitHub’da görüntüle";
+"action.privacyPolicy" = "Gizlilik Politikası";
 "action.buyMeCoffee" = "☕  Bana bir kahve ısmarla";
 "action.reportIssue" = "Sorun bildir";
 "action.addRule" = "Kural ekle";

@@ -36,6 +36,7 @@
 "action.showInFinder" = "在 Finder 中显示";
 "action.clearVolumeMemory" = "清除音量记忆";
 "action.viewSourceOnGitHub" = "在 GitHub 查看源码";
+"action.privacyPolicy" = "隐私政策";
 "action.buyMeCoffee" = "☕  请我喝咖啡";
 "action.reportIssue" = "报告问题";
 "action.addRule" = "添加规则";

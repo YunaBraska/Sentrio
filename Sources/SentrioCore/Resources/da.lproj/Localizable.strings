@@ -36,6 +36,7 @@
 "action.showInFinder" = "Vis i Finder";
 "action.clearVolumeMemory" = "Ryd lydstyrkehukommelse";
 "action.viewSourceOnGitHub" = "Se kildekode på GitHub";
+"action.privacyPolicy" = "Privatlivspolitik";
 "action.buyMeCoffee" = "☕  Køb mig en kaffe";
 "action.reportIssue" = "Rapportér et problem";
 "action.addRule" = "Tilføj regel";

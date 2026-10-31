@@ -6,7 +6,7 @@ A lightweight macOS menu bar app that keeps your audio routing and BusyLight beh
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![macOS 13+](https://img.shields.io/badge/macOS-13%2B-blue)](https://developer.apple.com/macos/)
 
-**Home** | [Getting Started](docs/getting-started/README.md) | [Output + Input](docs/output-input/README.md) | [Settings + Backup](docs/settings-backup/README.md) | [Icons + Names](docs/icons-and-names/README.md) | [BusyLight](docs/busylight/README.md) | [BusyLight HTTP API](docs/busylight-http-api/README.md) | [BusyLight macOS Integrations](docs/busylight-macos-integrations/README.md) | [Troubleshooting](docs/troubleshooting/README.md)
+**[Product site](https://yunabraska.github.io/Sentrio/)** | **[User documentation](https://yunabraska.github.io/Sentrio/documentation.html)** | **[Install](https://yunabraska.github.io/Sentrio/install.html)**
 
 ---
 

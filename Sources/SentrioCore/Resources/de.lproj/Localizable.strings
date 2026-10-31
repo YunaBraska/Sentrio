@@ -36,6 +36,7 @@
 "action.showInFinder" = "Im Finder anzeigen";
 "action.clearVolumeMemory" = "Lautstärke‑Speicher löschen";
 "action.viewSourceOnGitHub" = "Quellcode auf GitHub ansehen";
+"action.privacyPolicy" = "Datenschutzerklärung";
 "action.buyMeCoffee" = "☕  Kaffee spendieren";
 "action.reportIssue" = "Problem melden";
 "action.addRule" = "Regel hinzufügen";

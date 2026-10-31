@@ -36,6 +36,7 @@
 "action.showInFinder" = "Finder에서 보기";
 "action.clearVolumeMemory" = "볼륨 메모리 지우기";
 "action.viewSourceOnGitHub" = "GitHub에서 소스 보기";
+"action.privacyPolicy" = "개인정보 처리방침";
 "action.buyMeCoffee" = "☕  커피 한 잔 사주기";
 "action.reportIssue" = "문제 신고";
 "action.addRule" = "규칙 추가";

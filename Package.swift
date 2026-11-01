@@ -5,7 +5,7 @@ import PackageDescription
 let isAppStoreBuild = ProcessInfo.processInfo.environment["SENTRIO_APP_STORE"] == "1"
 let packageDependencies: [Package.Dependency] = isAppStoreBuild
     ? []
-    : [.package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.0")]
+    : [.package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.1")]
 let coreDependencies: [Target.Dependency] = isAppStoreBuild
     ? []
     : [.product(name: "Sparkle", package: "Sparkle")]

@@ -19,4 +19,7 @@ jobs:
     uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store_upload.yml@172316ba468bd7bbdf0d57ea28856d68b7aacb2e
     with:
       app_name: Sentrio
-    secrets: inherit
+    secrets:
+      APP_STORE_CONNECT_API_KEY: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.MACOS_NOTARY_KEY }}

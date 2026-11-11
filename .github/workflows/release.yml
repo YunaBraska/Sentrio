@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   release:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_release.yml@15af7c6cd91a54d9b4738851792affff72625294
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_release.yml@29bd56f4cc120be2bdcab1b484c34fae14c51b35
     with:
       force: ${{ inputs.force }}
       app_store_app_name: Sentrio

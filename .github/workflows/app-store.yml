@@ -2,14 +2,20 @@ name: "🛍️ CD · App Store"
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: Version.
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   package:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store.yml@6c254c34cccee8f75f5baa0f63dc3b5376cd24f2
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store.yml@d95ac8aad0332a530cd76eb875f9380a88e4c531
     with:
       app_name: Sentrio
       bundle_id: berlin.yuna.sentrio
+      version: ${{ inputs.version }}
     secrets: inherit

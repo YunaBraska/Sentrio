@@ -42,7 +42,13 @@ if strings "${contents_dir}/MacOS/${app_name}" | grep -q '/usr/sbin/system_profi
   exit 1
 fi
 
-find "${arm64_bin}" -maxdepth 1 -type d -name '*.bundle' -exec cp -R {} "${contents_dir}/Resources/" \;
+find "${arm64_bin}" -maxdepth 1 -type d -name '*.bundle' -exec sh -c '
+  destination=$1
+  shift
+  for resource_bundle do
+    ditto "${resource_bundle}" "${destination}/$(basename "${resource_bundle}")"
+  done
+' sh "${contents_dir}/Resources" {} +
 find "${arm64_bin}" -maxdepth 1 -type d -name '*.appintents' -exec sh -c '
   destination=$1
   shift

@@ -21,7 +21,7 @@ case "${0##*/}" in
     cat > "${bundle}/Info.plist" <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict><key>CFBundleIdentifier</key><string>test.sentrio.resources</string></dict></plist>
+<plist version="1.0"><dict></dict></plist>
 EOF
     touch "${bundle}/en.lproj/Localizable.strings" "${scratch}/out/Products/Release/Sentrio"
     if [ "${show_bin_path}" = true ]; then
@@ -67,5 +67,5 @@ sh "${root}/scripts/package-app-store.sh" 1.2.3 4
 
 app="${root}/dist/app-store/Sentrio.app"
 test "$(/usr/libexec/PlistBuddy -c 'Print :LSApplicationCategoryType' "${app}/Contents/Info.plist")" = 'public.app-category.utilities'
-test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "${app}/Contents/Resources/Sentrio_SentrioCore.bundle/Contents/Info.plist")" = 'test.sentrio.resources'
+test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "${app}/Contents/Resources/Sentrio_SentrioCore.bundle/Contents/Info.plist")" = 'berlin.yuna.sentrio.sentrio-sentriocore'
 test -f "${app}/Contents/Resources/Sentrio_SentrioCore.bundle/Contents/Resources/en.lproj/Localizable.strings"

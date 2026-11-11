@@ -53,7 +53,16 @@ find "${arm64_bin}" -maxdepth 1 -type d -name '*.bundle' -exec sh -c '
       mv "${bundle_destination}/Info.plist" "${bundle_destination}/Contents/Info.plist"
       find "${bundle_destination}" -mindepth 1 -maxdepth 1 ! -name Contents -exec mv {} "${bundle_destination}/Contents/Resources/" \;
     fi
-    test -f "${bundle_destination}/Contents/Info.plist"
+    bundle_info="${bundle_destination}/Contents/Info.plist"
+    test -f "${bundle_info}"
+    bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "${bundle_info}" 2>/dev/null || :)
+    if test -z "${bundle_id}"; then
+      bundle_name=$(basename "${bundle_destination}" .bundle)
+      bundle_suffix=$(printf '%s' "${bundle_name}" | tr '[:upper:]_' '[:lower:]-')
+      test -n "${bundle_suffix}"
+      /usr/libexec/PlistBuddy -c "Delete :CFBundleIdentifier" "${bundle_info}" 2>/dev/null || :
+      /usr/libexec/PlistBuddy -c "Add :CFBundleIdentifier string ${APP_STORE_BUNDLE_ID}.${bundle_suffix}" "${bundle_info}"
+    fi
   done
 ' sh "${contents_dir}/Resources" {} +
 find "${arm64_bin}" -maxdepth 1 -type d -name '*.appintents' -exec sh -c '

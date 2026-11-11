@@ -15,6 +15,6 @@ concurrency:
 
 jobs:
   snapshot:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_snapshot.yml@d95ac8aad0332a530cd76eb875f9380a88e4c531
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_snapshot.yml@953cba440c761df127b9384cd757a1b3eb4b7018
     with:
       ref: ${{ github.sha }}

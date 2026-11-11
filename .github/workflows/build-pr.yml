@@ -1,4 +1,4 @@
-name: 🧩 CI · Pull Request
+name: "🔍 CI · Pull Request"
 
 on:
   pull_request:
@@ -6,18 +6,17 @@ on:
       - opened
       - synchronize
       - reopened
-      - ready_for_review
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: sentrio-pr-${{ github.event.pull_request.number }}
+  group: sentrio-pr-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_build_common.yml@e2f87d3972fef060dd16a9643d892f16cfa07d86
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_build_common.yml@d95ac8aad0332a530cd76eb875f9380a88e4c531
     with:
-      ref: ${{ github.event.pull_request.head.sha }}
-    secrets: inherit
+      ref: ${{ github.event.pull_request.head.sha || github.sha }}

@@ -16,14 +16,14 @@ case "${0##*/}" in
       shift
     done
     test -n "${scratch}"
-    bundle="${scratch}/out/Products/Release/Sentrio_SentrioCore.bundle/Contents"
-    mkdir -p "${bundle}/Resources/en.lproj"
+    bundle="${scratch}/out/Products/Release/Sentrio_SentrioCore.bundle"
+    mkdir -p "${bundle}/en.lproj"
     cat > "${bundle}/Info.plist" <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict><key>CFBundleIdentifier</key><string>test.sentrio.resources</string></dict></plist>
 EOF
-    touch "${bundle}/Resources/en.lproj/Localizable.strings" "${scratch}/out/Products/Release/Sentrio"
+    touch "${bundle}/en.lproj/Localizable.strings" "${scratch}/out/Products/Release/Sentrio"
     if [ "${show_bin_path}" = true ]; then
       printf '%s\n' "${scratch}/out/Products/Release"
     fi

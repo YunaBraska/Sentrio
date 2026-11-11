@@ -46,7 +46,14 @@ find "${arm64_bin}" -maxdepth 1 -type d -name '*.bundle' -exec sh -c '
   destination=$1
   shift
   for resource_bundle do
-    ditto "${resource_bundle}" "${destination}/$(basename "${resource_bundle}")"
+    bundle_destination="${destination}/$(basename "${resource_bundle}")"
+    ditto "${resource_bundle}" "${bundle_destination}"
+    if test ! -f "${bundle_destination}/Contents/Info.plist" && test -f "${bundle_destination}/Info.plist"; then
+      mkdir -p "${bundle_destination}/Contents/Resources"
+      mv "${bundle_destination}/Info.plist" "${bundle_destination}/Contents/Info.plist"
+      find "${bundle_destination}" -mindepth 1 -maxdepth 1 ! -name Contents -exec mv {} "${bundle_destination}/Contents/Resources/" \;
+    fi
+    test -f "${bundle_destination}/Contents/Info.plist"
   done
 ' sh "${contents_dir}/Resources" {} +
 find "${arm64_bin}" -maxdepth 1 -type d -name '*.appintents' -exec sh -c '

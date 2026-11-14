@@ -543,13 +543,12 @@ final class AudioManager: ObservableObject {
                 uid: uid,
                 snapshot: bluetoothBatterySnapshot
             )
-            if let vendorID = bluetoothVendorIDFromBluetoothSnapshot(
+            let vendorID = bluetoothVendorIDFromBluetoothSnapshot(
                 deviceName: name,
                 uid: uid,
                 snapshot: bluetoothBatterySnapshot
-            ),
-                vendorID == 0x004C
-            {
+            )
+            if vendorID == 0x004C {
                 isAppleMade = true
             }
         }
@@ -1083,10 +1082,11 @@ final class AudioManager: ObservableObject {
         while entry != 0 {
             defer { IOObjectRelease(entry); entry = IOIteratorNext(iter) }
             var propRef: Unmanaged<CFMutableDictionary>? = nil
-            guard IORegistryEntryCreateCFProperties(
+            let propertyStatus = IORegistryEntryCreateCFProperties(
                 entry, &propRef, kCFAllocatorDefault, 0
-            ) == KERN_SUCCESS,
-                let dict = propRef?.takeRetainedValue() as? [String: Any] else { continue }
+            )
+            guard propertyStatus == KERN_SUCCESS else { continue }
+            guard let dict = propRef?.takeRetainedValue() as? [String: Any] else { continue }
 
             let strings = dict.values.compactMap { $0 as? String }.map { $0.lowercased() }
             guard strings.contains(where: { $0.contains(macDash) || $0.contains(macColon) })

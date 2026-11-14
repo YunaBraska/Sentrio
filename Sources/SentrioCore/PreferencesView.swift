@@ -1227,6 +1227,9 @@ private struct GeneralTab: View {
                 Button(L10n.tr("action.viewSourceOnGitHub")) {
                     openSite("https://github.com/YunaBraska/Sentrio")
                 }
+                Button(L10n.tr("action.privacyPolicy")) {
+                    openSite("https://yunabraska.github.io/Sentrio/privacy.html")
+                }
                 #if !SENTRIO_APP_STORE
                     Button(L10n.tr("action.buyMeCoffee")) {
                         openSite("https://github.com/sponsors/YunaBraska?frequency=one-time")

@@ -556,7 +556,7 @@ final class AudioManager: ObservableObject {
 
         // Battery resolution order:
         //   1. IOPowerSources (when available)
-        //   2. system_profiler SPBluetoothDataType (Bluetooth battery, incl. multi-cell)
+        //   2. Direct builds only: system_profiler Bluetooth metadata, including multi-cell batteries
         //   3. CoreAudio 'batt' (single value)
         //   4. IOKit HID fallback for third-party BT HID devices (single value)
 
@@ -670,7 +670,7 @@ final class AudioManager: ObservableObject {
         bluetoothBatterySnapshotRefreshInFlight = true
 
         DispatchQueue.global(qos: .utility).async { [weak self] in
-            let snapshot = Self.fetchBluetoothBatterySnapshotFromSystemProfiler()
+            let snapshot = Self.fetchBluetoothBatterySnapshot()
             DispatchQueue.main.async {
                 guard let self else { return }
                 self.bluetoothBatterySnapshot = snapshot
@@ -681,12 +681,16 @@ final class AudioManager: ObservableObject {
         }
     }
 
-    private static func fetchBluetoothBatterySnapshotFromSystemProfiler() -> BluetoothBatterySnapshot {
+    private static func fetchBluetoothBatterySnapshot() -> BluetoothBatterySnapshot {
         #if SENTRIO_APP_STORE
-            // Sandboxed Mac App Store apps cannot launch system_profiler. Battery data
-            // still resolves through IOPowerSources, CoreAudio, and IOKit below.
-            return BluetoothBatterySnapshot()
+            .init()
         #else
+            fetchBluetoothBatterySnapshotFromSystemProfiler()
+        #endif
+    }
+
+    #if !SENTRIO_APP_STORE
+        private static func fetchBluetoothBatterySnapshotFromSystemProfiler() -> BluetoothBatterySnapshot {
             let profilerPath = "/usr/sbin/system_profiler"
             guard FileManager.default.isExecutableFile(atPath: profilerPath) else { return BluetoothBatterySnapshot() }
 
@@ -761,8 +765,8 @@ final class AudioManager: ObservableObject {
             }
 
             return snapshot
-        #endif
-    }
+        }
+    #endif
 
     private func batteryStatesFromBluetoothSnapshot(
         deviceName: String,
@@ -829,73 +833,75 @@ final class AudioManager: ObservableObject {
         return macDash.replacingOccurrences(of: "-", with: ":")
     }
 
-    private static func batteryStatesFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> [AudioDevice.BatteryState] {
-        let candidates: [(String, AudioDevice.BatteryState.Kind)] = [
-            ("device_batteryLevelLeft", .left),
-            ("device_batteryLevelRight", .right),
-            ("device_batteryLevelCase", .case),
-            ("device_batteryLevelMain", .device),
-            ("device_batteryLevelSingle", .device),
-            ("device_batteryLevel", .device),
-        ]
+    #if !SENTRIO_APP_STORE
+        private static func batteryStatesFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> [AudioDevice.BatteryState] {
+            let candidates: [(String, AudioDevice.BatteryState.Kind)] = [
+                ("device_batteryLevelLeft", .left),
+                ("device_batteryLevelRight", .right),
+                ("device_batteryLevelCase", .case),
+                ("device_batteryLevelMain", .device),
+                ("device_batteryLevelSingle", .device),
+                ("device_batteryLevel", .device),
+            ]
 
-        var states: [AudioDevice.BatteryState] = []
-        for (key, kind) in candidates {
-            guard let raw = info[key], let level = parseBatteryPercentFraction(raw) else { continue }
-            states.append(.init(kind: kind, level: level, sourceName: "Bluetooth"))
+            var states: [AudioDevice.BatteryState] = []
+            for (key, kind) in candidates {
+                guard let raw = info[key], let level = parseBatteryPercentFraction(raw) else { continue }
+                states.append(.init(kind: kind, level: level, sourceName: "Bluetooth"))
+            }
+            return normalizedBatteryStates(states)
         }
-        return normalizedBatteryStates(states)
-    }
 
-    private static func vendorIDFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> Int? {
-        guard let raw = info["device_vendorID"] else { return nil }
-        if let s = raw as? String {
+        private static func vendorIDFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> Int? {
+            guard let raw = info["device_vendorID"] else { return nil }
+            if let s = raw as? String {
+                let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmed.hasPrefix("0x") {
+                    return Int(trimmed.dropFirst(2), radix: 16)
+                }
+                return Int(trimmed)
+            }
+            if let n = raw as? NSNumber {
+                return n.intValue
+            }
+            return nil
+        }
+
+        private static func productIDFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> Int? {
+            guard let raw = info["device_productID"] else { return nil }
+            if let s = raw as? String {
+                let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmed.hasPrefix("0x") {
+                    return Int(trimmed.dropFirst(2), radix: 16)
+                }
+                return Int(trimmed)
+            }
+            if let n = raw as? NSNumber {
+                return n.intValue
+            }
+            return nil
+        }
+
+        private static func minorTypeFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> String? {
+            guard let s = info["device_minorType"] as? String else { return nil }
             let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.hasPrefix("0x") {
-                return Int(trimmed.dropFirst(2), radix: 16)
-            }
-            return Int(trimmed)
+            return trimmed.isEmpty ? nil : trimmed
         }
-        if let n = raw as? NSNumber {
-            return n.intValue
-        }
-        return nil
-    }
 
-    private static func productIDFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> Int? {
-        guard let raw = info["device_productID"] else { return nil }
-        if let s = raw as? String {
-            let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.hasPrefix("0x") {
-                return Int(trimmed.dropFirst(2), radix: 16)
+        private static func parseBatteryPercentFraction(_ value: Any) -> Float? {
+            if let n = value as? NSNumber {
+                let f = n.floatValue
+                if f <= 1 {
+                    return f.clamped(to: 0 ... 1)
+                }
+                return (f / 100).clamped(to: 0 ... 1)
             }
-            return Int(trimmed)
+            guard let s = value as? String else { return nil }
+            let digits = s.filter(\.isNumber)
+            guard let pct = Int(digits) else { return nil }
+            return Float(pct).clamped(to: 0 ... 100) / 100
         }
-        if let n = raw as? NSNumber {
-            return n.intValue
-        }
-        return nil
-    }
-
-    private static func minorTypeFromSystemProfilerDeviceInfo(_ info: [String: Any]) -> String? {
-        guard let s = info["device_minorType"] as? String else { return nil }
-        let trimmed = s.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? nil : trimmed
-    }
-
-    private static func parseBatteryPercentFraction(_ value: Any) -> Float? {
-        if let n = value as? NSNumber {
-            let f = n.floatValue
-            if f <= 1 {
-                return f.clamped(to: 0 ... 1)
-            }
-            return (f / 100).clamped(to: 0 ... 1)
-        }
-        guard let s = value as? String else { return nil }
-        let digits = s.filter(\.isNumber)
-        guard let pct = Int(digits) else { return nil }
-        return Float(pct).clamped(to: 0 ... 100) / 100
-    }
+    #endif
 
     /// Reads all external power sources via the public IOPowerSources API — the same source
     /// that macOS Control Center uses to show AirPods battery.

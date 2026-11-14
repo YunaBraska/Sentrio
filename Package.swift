@@ -2,14 +2,16 @@
 import Foundation
 import PackageDescription
 
-let isAppStoreBuild = ProcessInfo.processInfo.environment["SENTRIO_APP_STORE_BUILD"] == "1"
-let packageDependencies: [Package.Dependency] = isAppStoreBuild ? [] : [
-    .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.0"),
-]
-let coreDependencies: [Target.Dependency] = isAppStoreBuild ? [] : [
-    .product(name: "Sparkle", package: "Sparkle"),
-]
-let coreSwiftSettings: [SwiftSetting] = isAppStoreBuild ? [.define("SENTRIO_APP_STORE")] : []
+let isAppStoreBuild = ProcessInfo.processInfo.environment["SENTRIO_APP_STORE"] == "1"
+let packageDependencies: [Package.Dependency] = isAppStoreBuild
+    ? []
+    : [.package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.10.0")]
+let coreDependencies: [Target.Dependency] = isAppStoreBuild
+    ? []
+    : [.product(name: "Sparkle", package: "Sparkle")]
+let appStoreSettings: [SwiftSetting] = isAppStoreBuild
+    ? [.define("SENTRIO_APP_STORE")]
+    : []
 
 let package = Package(
     name: "Sentrio",
@@ -31,7 +33,7 @@ let package = Package(
             resources: [
                 .process("Resources"),
             ],
-            swiftSettings: coreSwiftSettings
+            swiftSettings: appStoreSettings
         ),
         .testTarget(
             name: "SentrioTests",

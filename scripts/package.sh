@@ -50,7 +50,7 @@ esac
 if [ "${distribution}" = 'app-store' ]; then
   default_dist_dir='dist-app-store'
   build_prefix='.build-app-store-release'
-  export SENTRIO_APP_STORE_BUILD=1
+  export SENTRIO_APP_STORE=1
 else
   default_dist_dir='dist'
   build_prefix='.build-release'
@@ -142,6 +142,9 @@ find "${binary_dir}" -maxdepth 1 -type d -name '*.appintents' -exec sh -c '
   done
 ' sh "${contents_dir}/Resources" {} +
 cp "${script_dir}/scripts/PrivacyInfo.xcprivacy" "${contents_dir}/Resources/PrivacyInfo.xcprivacy"
+if [ "${distribution}" = 'app-store' ]; then
+  cp "${script_dir}/scripts/container-migration.plist" "${contents_dir}/Resources/container-migration.plist"
+fi
 
 cat > "${contents_dir}/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>

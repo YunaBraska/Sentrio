@@ -14,6 +14,7 @@ Use these notes as the starting point for the App Review Information field in Ap
 
 - No account, login, subscription, analytics, advertising, or remote backend is used.
 - Device priorities, custom names, icons, and volume memory remain on the Mac in local preferences.
+- On first launch, macOS uses the bundled container migration manifest to copy existing preferences from the direct `com.sentrio.app` build into the App Store sandbox container.
 - Microphone permission is requested only if the user enables the optional live input-level meter. Audio is analyzed in memory and is not recorded or transmitted.
 - Camera access is used only to observe whether camera activity is present for optional BusyLight rules. Sentrio does not capture, store, or transmit video.
 - Import and export operate only on a settings file explicitly selected by the user.

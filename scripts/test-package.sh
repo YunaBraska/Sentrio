@@ -3,7 +3,7 @@ set -eu
 
 case "${0##*/}" in
   swift)
-    printf 'swift app_store=%s %s\n' "${SENTRIO_APP_STORE_BUILD:-0}" "$*" >> "${PACKAGE_TEST_LOG}"
+    printf 'swift app_store=%s %s\n' "${SENTRIO_APP_STORE:-0}" "$*" >> "${PACKAGE_TEST_LOG}"
     show_bin_path=false
     while [ "$#" -gt 0 ]; do
       if [ "$1" = '--scratch-path' ]; then
@@ -168,6 +168,7 @@ test -f dist/Sentrio-1.2.3.dmg
 test -f dist/appcast.xml
 test -d dist/Sentrio.app/Contents/Frameworks/Sparkle.framework
 test -f dist/Sentrio.app/Contents/Resources/PrivacyInfo.xcprivacy
+test ! -e dist/Sentrio.app/Contents/Resources/container-migration.plist
 test -f dist/Sentrio.app/Contents/Resources/Sentrio_SentrioCore.bundle/Contents/Resources/en.lproj/Localizable.strings
 test -f dist/Sentrio.app/Contents/Resources/en.lproj/InfoPlist.strings
 grep -q '<string>public.app-category.utilities</string>' dist/Sentrio.app/Contents/Info.plist
@@ -211,6 +212,7 @@ sh "${root}/scripts/package.sh" 1.2.3
 test -d dist-app-store/Sentrio.app
 test -f dist-app-store/Sentrio-1.2.3.pkg
 test -f dist-app-store/Sentrio.app/Contents/Resources/PrivacyInfo.xcprivacy
+test -f dist-app-store/Sentrio.app/Contents/Resources/container-migration.plist
 test -f dist-app-store/Sentrio.app/Contents/Resources/en.lproj/InfoPlist.strings
 test ! -e dist-app-store/Sentrio.app/Contents/Frameworks/Sparkle.framework
 test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' dist-app-store/Sentrio.app/Contents/Info.plist)" = '1.2.3'
@@ -228,6 +230,8 @@ if grep -q '<key>NSAppleScriptEnabled</key>' dist-app-store/Sentrio.app/Contents
 fi
 test "$(/usr/libexec/PlistBuddy -c 'Print :NSPrivacyAccessedAPITypes:0:NSPrivacyAccessedAPIType' dist-app-store/Sentrio.app/Contents/Resources/PrivacyInfo.xcprivacy)" = 'NSPrivacyAccessedAPICategoryUserDefaults'
 test "$(/usr/libexec/PlistBuddy -c 'Print :NSPrivacyAccessedAPITypes:0:NSPrivacyAccessedAPITypeReasons:0' dist-app-store/Sentrio.app/Contents/Resources/PrivacyInfo.xcprivacy)" = 'CA92.1'
+test "$(/usr/libexec/PlistBuddy -c 'Print :Move:0:0' dist-app-store/Sentrio.app/Contents/Resources/container-migration.plist)" = '${Library}/Preferences/com.sentrio.app.plist'
+test "$(/usr/libexec/PlistBuddy -c 'Print :Move:0:1' dist-app-store/Sentrio.app/Contents/Resources/container-migration.plist)" = '${Library}/Preferences/${BundleId}.plist'
 if grep -Eq '^(notarytool|stapler|rpath)' "${PACKAGE_TEST_LOG}"; then
   printf '%s\n' 'An App Store build used the direct-distribution pipeline.' >&2
   exit 1

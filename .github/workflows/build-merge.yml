@@ -1,22 +1,20 @@
-name: 🧩 CI · Merge
+name: "🔄 CD · Snapshot"
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: sentrio-merge-${{ github.ref }}
-  cancel-in-progress: true
+  group: sentrio-merge-${{ github.sha }}
+  cancel-in-progress: false
 
 jobs:
-  build:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_build_common.yml@e2f87d3972fef060dd16a9643d892f16cfa07d86
+  snapshot:
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_swift_snapshot.yml@29bd56f4cc120be2bdcab1b484c34fae14c51b35
     with:
       ref: ${{ github.sha }}
-      dry_run: true
-      upload_artifact: true
-    secrets: inherit

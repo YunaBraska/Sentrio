@@ -15,7 +15,8 @@ codesign -d --entitlements :- "${app_dir}" > "${entitlements}" 2>/dev/null
 plutil -lint \
   "${entitlements}" \
   "${contents_dir}/Info.plist" \
-  "${contents_dir}/Resources/PrivacyInfo.xcprivacy"
+  "${contents_dir}/Resources/PrivacyInfo.xcprivacy" \
+  "${contents_dir}/Resources/container-migration.plist"
 
 test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.app-sandbox' "${entitlements}")" = true
 test "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.device.camera' "${entitlements}")" = true
@@ -23,6 +24,8 @@ test "$(/usr/libexec/PlistBuddy -c 'Print :LSApplicationCategoryType' "${content
 test "$(/usr/libexec/PlistBuddy -c 'Print :ITSAppUsesNonExemptEncryption' "${contents_dir}/Info.plist")" = false
 test "$(/usr/libexec/PlistBuddy -c 'Print :NSPrivacyAccessedAPITypes:0:NSPrivacyAccessedAPIType' "${contents_dir}/Resources/PrivacyInfo.xcprivacy")" = 'NSPrivacyAccessedAPICategoryUserDefaults'
 test "$(/usr/libexec/PlistBuddy -c 'Print :NSPrivacyAccessedAPITypes:0:NSPrivacyAccessedAPITypeReasons:0' "${contents_dir}/Resources/PrivacyInfo.xcprivacy")" = 'CA92.1'
+test "$(/usr/libexec/PlistBuddy -c 'Print :Move:0:0' "${contents_dir}/Resources/container-migration.plist")" = '${Library}/Preferences/com.sentrio.app.plist'
+test "$(/usr/libexec/PlistBuddy -c 'Print :Move:0:1' "${contents_dir}/Resources/container-migration.plist")" = '${Library}/Preferences/${BundleId}.plist'
 test ! -e "${contents_dir}/Frameworks/Sparkle.framework"
 
 if /usr/libexec/PlistBuddy -c 'Print :NSAppleScriptEnabled' "${contents_dir}/Info.plist" >/dev/null 2>&1; then

@@ -1,9 +1,10 @@
 import AppKit
 import Combine
-#if canImport(Sparkle)
+import SwiftUI
+
+#if !SENTRIO_APP_STORE
     import Sparkle
 #endif
-import SwiftUI
 
 public struct SentrioApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -71,7 +72,7 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
     private let menuLayout = MenuBarLayout()
     private var cancellables = Set<AnyCancellable>()
 
-    #if canImport(Sparkle)
+    #if !SENTRIO_APP_STORE
         private lazy var updater: SPUStandardUpdaterController? = {
             guard let publicKey = Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String,
                   !publicKey.isEmpty else { return nil }
@@ -86,7 +87,7 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
     public func applicationDidFinishLaunching(_: Notification) {
         configureMenuBar()
         observeMenuBarState()
-        #if canImport(Sparkle)
+        #if !SENTRIO_APP_STORE
             _ = updater
         #endif
         if #available(macOS 13.0, *) {

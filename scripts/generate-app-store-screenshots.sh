@@ -7,7 +7,7 @@ fixture_dir=$(mktemp -d)
 trap 'rm -rf "${fixture_dir}"' 0
 trap 'exit 1' HUP INT TERM
 
-SENTRIO_APP_STORE_BUILD=1 \
+SENTRIO_APP_STORE=1 \
 SENTRIO_GENERATE_SCREENSHOTS=1 \
 SENTRIO_SCREENSHOT_DIR="${fixture_dir}" \
 "${script_dir}/scripts/with-preserved-package-resolution.sh" swift test \

@@ -1,34 +1,30 @@
 ---
 layout: default
-title: Privacy Policy
-description: How Sentrio handles device information, activity signals, settings, and diagnostics.
-permalink: /privacy/
+title: Privacy
+description: How Sentrio handles data on your Mac.
 ---
 
-# Sentrio Privacy Policy
+<header class="page-heading">
+  <p class="eyebrow">Privacy</p>
+  <h1>Your desk setup stays on your Mac.</h1>
+  <p>Sentrio has no account, advertising, analytics, crash reporting or YunaBraska data service.</p>
+</header>
 
-Last updated: October 27, 2026
+<section class="section">
+  <h2>What Sentrio keeps</h2>
+  <p>Sentrio reads device names, connection state, volume, transport type and available battery information provided by macOS. Device priorities, hidden devices, custom names and icons, volume memory, rules and app preferences are stored locally on your Mac.</p>
+  <p>The optional live input meter reads only the current input level while Sentrio Settings is open. BusyLight rules use local microphone, camera, screen-recording and media-activity signals. Sentrio does not record, retain or transmit microphone audio, camera video, screen recordings or media content.</p>
+  <p>BusyLight event history is held in memory, limited to the latest 20 events and cleared when Sentrio quits. A settings backup is created only when you choose a destination.</p>
+</section>
 
-Sentrio is designed to work locally on your Mac. It does not require an account and does not include advertising, analytics, or tracking.
+<section class="section">
+  <h2>Network connections</h2>
+  <p>Sentrio does not send product or usage data to YunaBraska. The direct-download edition checks the signed GitHub update feed. GitHub receives the normal connection metadata, such as your IP address, needed to serve that request. The App Store edition uses Apple's update service instead.</p>
+  <p>If you enable the local BusyLight HTTP interface or connect a supported device, Sentrio communicates only with the device or endpoint you chose.</p>
+</section>
 
-## Information Sentrio uses
-
-Sentrio reads information that macOS provides about audio and supported BusyLight devices, including device names, connection state, volume, transport type, and available battery information. It stores your priorities, hidden devices, custom names and icons, volume memory, BusyLight rules, and app preferences on your Mac.
-
-The optional live input meter requests microphone permission to read the current input level while Sentrio Settings is open. Sentrio does not record, retain, or transmit microphone audio.
-
-BusyLight rules use local, best-effort status signals for microphone, camera, screen recording, and media activity. Sentrio does not capture the content of calls, camera video, screen recordings, or media.
-
-## Storage and sharing
-
-Settings remain in the app's local preferences until you reset them or remove the app's data. BusyLight event history is held in memory, is limited to the latest 20 events, and is cleared when Sentrio quits. A settings export is created only when you choose a destination and remains under your control.
-
-Sentrio does not sell or share personal information. The optional BusyLight REST API listens only on your Mac and is disabled by default.
-
-## Updates and external links
-
-The Mac App Store version receives updates through the App Store. Direct builds can check GitHub Releases for signed updates. Links to documentation, support, and project pages open in your browser and are governed by the destination site's privacy policy.
-
-## Contact
-
-For privacy questions, [open an issue in the Sentrio repository](https://github.com/YunaBraska/Sentrio/issues).
+<section class="section">
+  <h2>Your choices</h2>
+  <p>You can remove settings from Sentrio or uninstall the app at any time. For help, open an issue through <a href="{{ site.support }}">Sentrio support</a>. Do not include secrets or private device data in a public issue.</p>
+  <p>Last updated: 14 November 2026.</p>
+</section>

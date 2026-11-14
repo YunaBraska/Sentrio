@@ -4,7 +4,7 @@
 
 You can customize device identity without changing hardware behavior.
 
-![Preferences - Output tab](../screenshots/generated/preferences_output.png)
+![Settings - Output tab](../screenshots/generated/preferences_output.png)
 
 ## Custom icons
 
@@ -15,7 +15,7 @@ You can customize device identity without changing hardware behavior.
 
 ## Custom names
 
-- Rename devices in Preferences.
+- Rename devices in Settings.
 - Names are also role-specific.
 - Useful when the same physical device appears in multiple profiles.
 

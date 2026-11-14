@@ -10,8 +10,8 @@
 "label.manualConnect" = "Ручное подключение";
 
 /* Общие действия */
-"action.preferences" = "Настройки…";
-"action.soundSettings" = "Настройки звука…";
+"action.preferences" = "Настройки";
+"action.soundSettings" = "Звук macOS";
 "action.bluetoothSettings" = "Настройки Bluetooth…";
 "action.quit" = "Выйти";
 "action.playSound" = "Воспроизвести звук";
@@ -36,7 +36,6 @@
 "action.showInFinder" = "Показать в Finder";
 "action.clearVolumeMemory" = "Очистить память громкости";
 "action.viewSourceOnGitHub" = "Посмотреть исходники на GitHub";
-"action.privacyPolicy" = "Политика конфиденциальности";
 "action.buyMeCoffee" = "☕  Угости меня кофе";
 "action.reportIssue" = "Сообщить о проблеме";
 "action.addRule" = "Добавить правило";
@@ -248,3 +247,13 @@
 "prefs.busylight.rule.metrics.avgDay" = "Ср./день";
 "prefs.busylight.rule.metrics.avgMonth" = "Ср./мес.";
 "prefs.busylight.rule.metrics.avgYear" = "Ср./год";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Звук";
+"menu.busylight.available" = "Доступен";
+"menu.busylight.busy" = "Занят";
+"status.active" = "Активно";
+"action.privacyPolicy" = "Политика конфиденциальности";
+"action.openMicrophoneSettings" = "Открыть настройки микрофона";
+"prefs.general.inputLevelUnavailable" = "Уровень входного сигнала в реальном времени недоступен. Проверьте доступ к микрофону в настройках macOS.";
+"prefs.general.activity" = "Активность";

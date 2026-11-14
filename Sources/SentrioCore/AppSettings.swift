@@ -723,14 +723,17 @@ final class AppSettings: ObservableObject {
         SMAppService.mainApp.status == .enabled
     }
 
-    func setLaunchAtLogin(_ enabled: Bool) {
+    func setLaunchAtLogin(_ enabled: Bool) -> Result<Bool, Error> {
         do {
             if enabled {
                 try SMAppService.mainApp.register()
             } else {
                 try SMAppService.mainApp.unregister()
             }
-        } catch { print("Launch-at-login error: \(error)") }
+            return .success(isLaunchAtLoginEnabled)
+        } catch {
+            return .failure(error)
+        }
     }
 
     // MARK: – Import / export

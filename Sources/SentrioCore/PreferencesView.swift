@@ -2,16 +2,16 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
+enum PreferencesPane: String, Hashable {
+    case output
+    case input
+    case busyLight
+    case general
+}
+
 // MARK: – Root
 
 struct PreferencesView: View {
-    enum PreferencesTab: Hashable {
-        case output
-        case input
-        case busyLight
-        case general
-    }
-
     enum RenderMode {
         case native
         case screenshot
@@ -23,93 +23,164 @@ struct PreferencesView: View {
     @EnvironmentObject var appState: AppState
     private let renderMode: RenderMode
     @State private var isWindowActive = false
-    @State private var selectedTab: PreferencesTab
+    @State private var screenshotSelectedPane: PreferencesPane
 
     init(
         renderMode: RenderMode = .native,
-        initialTab: PreferencesTab = .output
+        initialTab: PreferencesPane = .output
     ) {
         self.renderMode = renderMode
-        _selectedTab = State(initialValue: initialTab)
+        _screenshotSelectedPane = State(initialValue: initialTab)
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            switch renderMode {
-            case .native:
-                nativeTabContainer
-            case .screenshot:
-                screenshotTabContainer
+        settingsContainer
+            .frame(width: 540, height: 680)
+            .background(SentrioChromeBackground().ignoresSafeArea())
+            .tint(SentrioVisualStyle.accent)
+            .background(
+                WindowActivityObserver(
+                    onWindowAttached: { window in
+                        window.title = selectedPaneTitle
+                        window.titleVisibility = .hidden
+                        window.titlebarAppearsTransparent = true
+                        window.styleMask.insert(.fullSizeContentView)
+                        window.isMovableByWindowBackground = true
+                    },
+                    onChange: { active in
+                        isWindowActive = active
+                        updateInputLevelMonitoringDemand()
+                    }
+                )
+            )
+            .onChange(of: settings.showInputLevelMeter) { _ in updateInputLevelMonitoringDemand() }
+            .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in
+                if renderMode == .native, isEmpty, selectedPane.wrappedValue == .busyLight {
+                    selectedPane.wrappedValue = .output
+                }
             }
-
-            Divider()
-            PreferencesFooterView()
-                .environmentObject(settings)
-        }
-        .frame(width: 540, height: 680)
-        .background(
-            WindowActivityObserver { active in
-                isWindowActive = active
-                updateInputLevelMonitoringDemand()
-            }
-        )
-        .onChange(of: settings.showInputLevelMeter) { _ in updateInputLevelMonitoringDemand() }
-        .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in
-            if renderMode == .native, isEmpty, selectedTab == .busyLight {
-                selectedTab = .output
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
+            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in updateInputLevelMonitoringDemand() }
     }
 
     private var hasBusyLightTab: Bool {
         !busyLight.connectedDevices.isEmpty
     }
 
-    private var nativeTabContainer: some View {
-        TabView(selection: $selectedTab) {
-            PriorityTab(isOutput: true)
-                .tabItem { Label(L10n.tr("label.output"), systemImage: "speaker.wave.2") }
-                .tag(PreferencesTab.output)
-            PriorityTab(isOutput: false)
-                .tabItem { Label(L10n.tr("label.input"), systemImage: "mic") }
-                .tag(PreferencesTab.input)
-            if hasBusyLightTab {
-                BusyLightTab()
-                    .tabItem { Label(L10n.tr("label.busyLight"), systemImage: "lightbulb") }
-                    .tag(PreferencesTab.busyLight)
-            }
-            GeneralTab()
-                .tabItem { Label(L10n.tr("label.general"), systemImage: "gear") }
-                .tag(PreferencesTab.general)
+    private var selectedPane: Binding<PreferencesPane> {
+        switch renderMode {
+        case .native:
+            $appState.preferencesPane
+        case .screenshot:
+            $screenshotSelectedPane
         }
-        .padding()
     }
 
-    private var screenshotTabContainer: some View {
-        VStack(spacing: 12) {
-            Picker("", selection: $selectedTab) {
-                Label(L10n.tr("label.output"), systemImage: "speaker.wave.2")
-                    .tag(PreferencesTab.output)
-                Label(L10n.tr("label.input"), systemImage: "mic")
-                    .tag(PreferencesTab.input)
-                Label(L10n.tr("label.busyLight"), systemImage: "lightbulb")
-                    .tag(PreferencesTab.busyLight)
-                Label(L10n.tr("label.general"), systemImage: "gear")
-                    .tag(PreferencesTab.general)
+    private var selectedPaneTitle: String {
+        switch selectedPane.wrappedValue {
+        case .output:
+            L10n.tr("label.output")
+        case .input:
+            L10n.tr("label.input")
+        case .busyLight:
+            L10n.tr("label.busyLight")
+        case .general:
+            L10n.tr("label.general")
+        }
+    }
+
+    private var settingsContainer: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                Image(systemName: "waveform.circle.fill")
+                    .font(.system(size: 25, weight: .semibold))
+                    .foregroundStyle(SentrioVisualStyle.brandGradient)
+                    .accessibilityHidden(true)
+                Text(L10n.tr("prefs.window.title"))
+                    .font(.system(.headline, design: .rounded, weight: .semibold))
+                Spacer()
             }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+
+            Divider()
+
+            HStack(spacing: 4) {
+                settingsPaneButton(
+                    .output,
+                    title: L10n.tr("label.output"),
+                    systemImage: "speaker.wave.2"
+                )
+                settingsPaneButton(
+                    .input,
+                    title: L10n.tr("label.input"),
+                    systemImage: "mic"
+                )
+                if hasBusyLightTab || renderMode == .screenshot {
+                    settingsPaneButton(
+                        .busyLight,
+                        title: L10n.tr("label.busyLight"),
+                        systemImage: "lightbulb"
+                    )
+                }
+                settingsPaneButton(
+                    .general,
+                    title: L10n.tr("label.general"),
+                    systemImage: "gearshape"
+                )
+            }
+            .padding(4)
+            .background(SentrioCardBackground(cornerRadius: 13))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
 
             activeTabContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding()
+        .groupBoxStyle(SentrioGroupBoxStyle())
+    }
+
+    private func settingsPaneButton(
+        _ pane: PreferencesPane,
+        title: String,
+        systemImage: String
+    ) -> some View {
+        let isSelected = selectedPane.wrappedValue == pane
+
+        return Button {
+            selectedPane.wrappedValue = pane
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 17, weight: isSelected ? .semibold : .regular))
+                Text(title)
+                    .font(.caption.weight(isSelected ? .semibold : .medium))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(isSelected ? SentrioVisualStyle.accent : Color.secondary)
+            .frame(maxWidth: .infinity, minHeight: 46)
+            .background(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(isSelected ? SentrioVisualStyle.accent.opacity(0.12) : Color.clear)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(
+                        isSelected ? SentrioVisualStyle.accent.opacity(0.22) : Color.clear,
+                        lineWidth: 1
+                    )
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(title)
+        .accessibilityLabel(title)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     @ViewBuilder
     private var activeTabContent: some View {
-        switch selectedTab {
+        switch selectedPane.wrappedValue {
         case .output:
             PriorityTab(isOutput: true)
         case .input:
@@ -133,9 +204,9 @@ struct PreferencesView: View {
     }
 }
 
-// MARK: – Preferences footer
+// MARK: – Activity summary
 
-private struct PreferencesFooterView: View {
+private struct ActivitySummaryView: View {
     @EnvironmentObject var settings: AppSettings
 
     var body: some View {
@@ -146,31 +217,9 @@ private struct PreferencesFooterView: View {
                     .foregroundStyle(.tertiary)
             }
 
-            HStack(spacing: 16) {
-                HStack(spacing: 6) {
-                    Text(L10n.tr("prefs.footer.millisecondsSaved"))
-                    Text(settings.millisecondsSaved, format: .number)
-                        .monospacedDigit()
-                }
-
-                Spacer()
-
-                HStack(spacing: 6) {
-                    Text(L10n.tr("prefs.footer.autoSwitches"))
-                    Text(settings.autoSwitchCount, format: .number)
-                        .monospacedDigit()
-                }
-
-                Spacer()
-
-                HStack(spacing: 6) {
-                    Text(L10n.tr("prefs.footer.signalIntegrityScore"))
-                    Text(settings.signalIntegrityScore, format: .number)
-                        .monospacedDigit()
-                }
-            }
-            .font(.caption2)
-            .foregroundStyle(.secondary)
+            metricRow(L10n.tr("prefs.footer.autoSwitches"), value: settings.autoSwitchCount)
+            metricRow(L10n.tr("prefs.footer.millisecondsSaved"), value: settings.millisecondsSaved)
+            metricRow(L10n.tr("prefs.footer.signalIntegrityScore"), value: settings.signalIntegrityScore)
 
             if let milestone = milestoneMessage {
                 Text(milestone)
@@ -178,10 +227,16 @@ private struct PreferencesFooterView: View {
                     .foregroundStyle(.tertiary)
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(NSColor.windowBackgroundColor))
+    }
+
+    private func metricRow(_ label: String, value: Int) -> some View {
+        HStack {
+            Text(label)
+            Spacer()
+            Text(value, format: .number)
+                .monospacedDigit()
+        }
+        .foregroundStyle(.secondary)
     }
 
     private var milestoneMessage: String? {
@@ -256,19 +311,30 @@ private struct PriorityTab: View {
 
                     ScrollView {
                         VStack(spacing: 0) {
+                            if allKnownUIDs.isEmpty, disabledUIDs.isEmpty {
+                                Text(L10n.tr("menu.noDevices"))
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                                    .frame(maxWidth: .infinity, minHeight: 96)
+                            }
                             ForEach(allKnownUIDs, id: \.self) { uid in
-                                PriorityRow(uid: uid, isOutput: isOutput, draggedUID: $draggedUID)
-                                    .background(uid == draggedUID
-                                        ? Color.accentColor.opacity(0.06)
-                                        : Color.clear)
-                                    .onDrop(of: [.plainText],
-                                            delegate: PriorityDropDelegate(
-                                                targetUID: uid,
-                                                draggedUID: $draggedUID,
-                                                onMove: { sourceUID, targetUID in
-                                                    settings.reorderPriorityForDrag(uid: sourceUID, over: targetUID, isOutput: isOutput)
-                                                }
-                                            ))
+                                PriorityRow(
+                                    uid: uid,
+                                    isOutput: isOutput,
+                                    orderedUIDs: allKnownUIDs,
+                                    draggedUID: $draggedUID
+                                )
+                                .background(uid == draggedUID
+                                    ? SentrioVisualStyle.accent.opacity(0.08)
+                                    : Color.clear)
+                                .onDrop(of: [.plainText],
+                                        delegate: PriorityDropDelegate(
+                                            targetUID: uid,
+                                            draggedUID: $draggedUID,
+                                            onMove: { sourceUID, targetUID in
+                                                settings.reorderPriorityForDrag(uid: sourceUID, over: targetUID, isOutput: isOutput)
+                                            }
+                                        ))
                                 Divider().padding(.leading, 52)
                             }
                         }
@@ -325,19 +391,37 @@ private struct PriorityTab: View {
                     playAction: isOutput ? { SoundLibrary.play(settings.testSound) } : nil,
                     onEditingEnded: isOutput ? { SoundLibrary.play(settings.testSound) } : nil
                 )
-                if isOutput, AudioManager.supportsSystemAlertVolumeControl {
-                    sliderRow(
-                        icon: "bell",
-                        label: L10n.tr("label.alert"),
-                        volume: Binding(
-                            get: { audio.alertVolume },
-                            set: { v in
-                                audio.setAlertVolume(v)
+                if isOutput {
+                    if AudioManager.supportsSystemAlertVolumeControl {
+                        sliderRow(
+                            icon: "bell",
+                            label: L10n.tr("label.alert"),
+                            volume: Binding(
+                                get: { audio.alertVolume },
+                                set: { v in
+                                    audio.setAlertVolume(v)
+                                }
+                            ),
+                            playAction: { SoundLibrary.play(settings.alertSound) },
+                            onEditingEnded: { SoundLibrary.play(settings.alertSound) }
+                        )
+                    } else {
+                        HStack(spacing: 8) {
+                            Image(systemName: "bell")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(width: 16)
+                                .accessibilityHidden(true)
+                            Text(L10n.tr("label.alert"))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Button(L10n.tr("action.soundSettings")) {
+                                NSWorkspace.shared.open(SystemSettingsLinks.sound)
                             }
-                        ),
-                        playAction: { SoundLibrary.play(settings.alertSound) },
-                        onEditingEnded: { SoundLibrary.play(settings.alertSound) }
-                    )
+                            .controlSize(.small)
+                        }
+                    }
                 }
             }
         } label: {
@@ -358,6 +442,7 @@ private struct PriorityTab: View {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.caption).foregroundStyle(.secondary).frame(width: 16)
+                .accessibilityHidden(true)
             Text(label)
                 .font(.caption).foregroundStyle(.secondary).frame(width: 44, alignment: .leading)
             Slider(
@@ -369,8 +454,11 @@ private struct PriorityTab: View {
                     }
                 }
             )
+            .accessibilityLabel(label)
+            .accessibilityValue(Text("\(Int((volume.wrappedValue * 100).rounded()))%"))
             Image(systemName: "\(icon).fill")
                 .font(.caption).foregroundStyle(.secondary).frame(width: 16)
+                .accessibilityHidden(true)
 
             if let playAction {
                 Button(action: playAction) {
@@ -381,6 +469,7 @@ private struct PriorityTab: View {
                 }
                 .buttonStyle(.plain)
                 .help(L10n.tr("action.playSound"))
+                .accessibilityLabel(L10n.tr("action.playSound"))
             }
         }
     }
@@ -450,43 +539,12 @@ private struct PriorityTab: View {
     }
 }
 
-// MARK: – Drag-and-drop delegate
-
-//
-// Items reorder in real time as the drag crosses row boundaries (dropEntered),
-// so the user sees immediate visual feedback and doesn't need to release at
-// a precise location — this is far more reliable than List.onMove on macOS.
-
-private struct PriorityDropDelegate: DropDelegate {
-    let targetUID: String
-    @Binding var draggedUID: String?
-    let onMove: (String, String) -> Void
-
-    func dropEntered(info _: DropInfo) {
-        guard
-            let source = draggedUID,
-            source != targetUID
-        else { return }
-        withAnimation(.easeInOut(duration: 0.18)) {
-            onMove(source, targetUID)
-        }
-    }
-
-    func dropUpdated(info _: DropInfo) -> DropProposal? {
-        DropProposal(operation: .move)
-    }
-
-    func performDrop(info _: DropInfo) -> Bool {
-        draggedUID = nil
-        return true
-    }
-}
-
 // MARK: – Priority Row (enabled)
 
 private struct PriorityRow: View {
     let uid: String
     let isOutput: Bool
+    let orderedUIDs: [String]
     @Binding var draggedUID: String?
 
     @EnvironmentObject var settings: AppSettings
@@ -496,6 +554,7 @@ private struct PriorityRow: View {
     @State private var showIconPicker = false
     @State private var showRenamePopover = false
     @State private var pendingName = ""
+    @State private var isShowingForgetConfirmation = false
 
     private var name: String {
         settings.displayName(for: uid, isOutput: isOutput, fallbackName: device?.name)
@@ -549,11 +608,13 @@ private struct PriorityRow: View {
                     return NSItemProvider(object: uid as NSString)
                 }
                 .help(L10n.tr("prefs.dragToReorder"))
+                .accessibilityHidden(true)
 
             // Connection dot
             Circle()
                 .fill(isConnected ? Color.green : Color.secondary.opacity(0.3))
                 .frame(width: 7, height: 7)
+                .accessibilityHidden(true)
 
             // Icon button — volume-reactive for active output speaker icons
             let displayedIcon = (isOutput && device?.uid == audio.defaultOutput?.uid)
@@ -566,13 +627,14 @@ private struct PriorityRow: View {
             Button { showIconPicker = true } label: {
                 Image(systemName: displayedIcon)
                     .font(.system(size: 16))
-                    .foregroundStyle(isConnected ? Color.accentColor : .secondary)
-                    .frame(width: 24, height: 24)
+                    .foregroundStyle(isConnected ? SentrioVisualStyle.accent : .secondary)
+                    .frame(width: 28, height: 28)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .help(device.flatMap(\.iconBaseName).map { L10n.format("prefs.iconHelp.withCoreAudioFormat", $0) }
                 ?? L10n.tr("prefs.iconHelp.noCoreAudio"))
+            .accessibilityLabel(L10n.tr("action.chooseIcon"))
             .popover(isPresented: $showIconPicker, arrowEdge: .trailing) {
                 IconPickerPopover(uid: uid, isOutput: isOutput)
                     .environmentObject(settings)
@@ -597,6 +659,15 @@ private struct PriorityRow: View {
 
                 HStack(spacing: 6) {
                     if let dev = device {
+                        if dev.uid == (isOutput ? audio.defaultOutput?.uid : audio.defaultInput?.uid) {
+                            Text(L10n.tr("status.active"))
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(SentrioVisualStyle.accent)
+                        } else {
+                            Text(L10n.tr("status.connected"))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
                         Text(dev.transportType.label)
                             .font(.caption2).foregroundStyle(.tertiary)
                         if requiresManualConnect {
@@ -639,6 +710,11 @@ private struct PriorityRow: View {
                     }
                     Divider()
                 }
+                Button(L10n.tr("action.moveUp")) { move(by: -1) }
+                    .disabled(moveTarget(direction: -1) == nil)
+                Button(L10n.tr("action.moveDown")) { move(by: 1) }
+                    .disabled(moveTarget(direction: 1) == nil)
+                Divider()
                 Button(L10n.tr("action.rename")) {
                     pendingName = settings.displayName(for: uid, isOutput: isOutput, fallbackName: device?.name)
                     showRenamePopover = true
@@ -649,7 +725,7 @@ private struct PriorityRow: View {
                     settings.hideDevice(uid: uid, isOutput: isOutput)
                 }
                 Button(L10n.tr("action.forgetDevice")) {
-                    settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+                    isShowingForgetConfirmation = true
                 }
                 .disabled(!canForget)
                 Button {
@@ -665,13 +741,37 @@ private struct PriorityRow: View {
             } label: {
                 Image(systemName: "gearshape")
                     .foregroundStyle(.secondary)
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .help(L10n.tr("action.deviceActions"))
+            .accessibilityLabel(L10n.tr("action.deviceActions"))
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .opacity(isConnected ? 1 : 0.6)
+        .alert(L10n.tr("action.forgetDevice"), isPresented: $isShowingForgetConfirmation) {
+            Button(L10n.tr("action.forgetDevice"), role: .destructive) {
+                settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+            }
+            Button(L10n.tr("action.cancel"), role: .cancel) {}
+        }
+    }
+
+    private func moveTarget(direction: Int) -> String? {
+        MenuPriorityReorderPath.targetUID(
+            for: uid,
+            direction: direction,
+            orderedUIDs: orderedUIDs
+        )
+    }
+
+    private func move(by direction: Int) {
+        guard let targetUID = moveTarget(direction: direction) else { return }
+        withAnimation(.easeInOut(duration: 0.18)) {
+            settings.reorderPriorityForDrag(uid: uid, over: targetUID, isOutput: isOutput)
+        }
     }
 
     private var effectiveIcon: String {
@@ -762,6 +862,7 @@ private struct DisabledRow: View {
 
     @State private var showRenamePopover = false
     @State private var pendingName = ""
+    @State private var isShowingForgetConfirmation = false
 
     private var device: AudioDevice? {
         (isOutput ? audio.outputDevices : audio.inputDevices).first { $0.uid == uid }
@@ -811,12 +912,14 @@ private struct DisabledRow: View {
             Circle()
                 .fill(Color.orange.opacity(0.75))
                 .frame(width: 7, height: 7)
+                .accessibilityHidden(true)
 
             // Device icon in the same column as PriorityRow's icon button
             Image(systemName: iconName)
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
                 .frame(width: 24, height: 24)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(settings.displayName(for: uid, isOutput: isOutput, fallbackName: device?.name))
@@ -857,7 +960,7 @@ private struct DisabledRow: View {
                     settings.enableDevice(uid: uid, isOutput: isOutput)
                 }
                 Button(L10n.tr("action.forgetDevice")) {
-                    settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+                    isShowingForgetConfirmation = true
                 }
                 .disabled(!canForget)
                 Button {
@@ -876,10 +979,17 @@ private struct DisabledRow: View {
             }
             .buttonStyle(.plain)
             .help(L10n.tr("action.deviceActions"))
+            .accessibilityLabel(L10n.tr("action.deviceActions"))
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .opacity(0.82)
+        .alert(L10n.tr("action.forgetDevice"), isPresented: $isShowingForgetConfirmation) {
+            Button(L10n.tr("action.forgetDevice"), role: .destructive) {
+                settings.forgetDevice(uid: uid, connectedUIDs: connectedUIDs)
+            }
+            Button(L10n.tr("action.cancel"), role: .cancel) {}
+        }
     }
 
     private var iconPickerMenu: some View {
@@ -965,9 +1075,11 @@ private struct GeneralTab: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
     @State private var launchAtLogin = false
+    @State private var launchAtLoginError: String?
     @State private var importExportStatus: String?
     @State private var importExportStatusIsError = false
     @State private var lastExportURL: URL?
+    @State private var isShowingClearVolumeMemoryConfirmation = false
 
     var body: some View {
         Form {
@@ -1003,10 +1115,29 @@ private struct GeneralTab: View {
 
             // ── System ──────────────────────────────────────────────
             Section(L10n.tr("prefs.general.system")) {
-                Toggle(L10n.tr("prefs.general.launchAtLogin"), isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { settings.setLaunchAtLogin($0) }
+                Toggle(
+                    L10n.tr("prefs.general.launchAtLogin"),
+                    isOn: Binding(
+                        get: { launchAtLogin },
+                        set: { enabled in
+                            switch settings.setLaunchAtLogin(enabled) {
+                            case let .success(actualValue):
+                                launchAtLogin = actualValue
+                                launchAtLoginError = nil
+                            case let .failure(error):
+                                launchAtLogin = settings.isLaunchAtLoginEnabled
+                                launchAtLoginError = error.localizedDescription
+                            }
+                        }
+                    )
+                )
+                if let launchAtLoginError {
+                    Text(launchAtLoginError)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
                 Button(L10n.tr("action.openSoundSettings")) {
-                    openSite("x-apple.systempreferences:com.apple.preference.sound")
+                    NSWorkspace.shared.open(SystemSettingsLinks.sound)
                 }
             }
 
@@ -1016,6 +1147,17 @@ private struct GeneralTab: View {
                 Text(L10n.tr("prefs.general.showInputLevelMeter.description"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if settings.showInputLevelMeter, audio.inputLevelMonitoringProblem {
+                    Text(L10n.tr("prefs.general.inputLevelUnavailable"))
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                    Button(L10n.tr("action.openMicrophoneSettings")) {
+                        NSWorkspace.shared.open(SystemSettingsLinks.microphonePrivacy)
+                    }
+                }
+                Button(L10n.tr("action.privacyPolicy")) {
+                    openSite("https://yunabraska.github.io/Sentrio/privacy/")
+                }
             }
 
             // ── Import / export ─────────────────────────────────────
@@ -1041,8 +1183,16 @@ private struct GeneralTab: View {
             Section(L10n.tr("prefs.general.volumeMemory")) {
                 Text(L10n.tr("prefs.general.volumeMemory.description"))
                     .font(.caption).foregroundStyle(.secondary)
-                Button(L10n.tr("action.clearVolumeMemory")) { settings.volumeMemory = [:] }
-                    .foregroundStyle(.red)
+                Button(L10n.tr("action.clearVolumeMemory")) {
+                    isShowingClearVolumeMemoryConfirmation = true
+                }
+                .foregroundStyle(.red)
+            }
+
+            // ── Activity ────────────────────────────────────────────
+            Section(L10n.tr("prefs.general.activity")) {
+                ActivitySummaryView()
+                    .environmentObject(settings)
                 Button(L10n.tr("action.resetFooterStats")) { settings.resetFooterStats() }
                     .foregroundStyle(.red)
                     .disabled(!canResetFooterStats)
@@ -1080,17 +1230,29 @@ private struct GeneralTab: View {
                 Button(L10n.tr("action.privacyPolicy")) {
                     openSite("https://yunabraska.github.io/Sentrio/privacy.html")
                 }
-                Button(L10n.tr("action.buyMeCoffee")) {
-                    openSite("https://github.com/sponsors/YunaBraska?frequency=one-time")
-                }
+                #if !SENTRIO_APP_STORE
+                    Button(L10n.tr("action.buyMeCoffee")) {
+                        openSite("https://github.com/sponsors/YunaBraska?frequency=one-time")
+                    }
+                #endif
                 Button(L10n.tr("action.reportIssue")) {
                     openSite("https://github.com/YunaBraska/Sentrio/issues/new")
                 }
             }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
         .onAppear {
             launchAtLogin = settings.isLaunchAtLoginEnabled
+        }
+        .alert(
+            L10n.tr("action.clearVolumeMemory"),
+            isPresented: $isShowingClearVolumeMemoryConfirmation
+        ) {
+            Button(L10n.tr("action.clearVolumeMemory"), role: .destructive) {
+                settings.volumeMemory = [:]
+            }
+            Button(L10n.tr("action.cancel"), role: .cancel) {}
         }
     }
 

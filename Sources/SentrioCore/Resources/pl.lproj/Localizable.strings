@@ -10,8 +10,8 @@
 "label.manualConnect" = "Połączenie ręczne";
 
 /* Wspólne akcje */
-"action.preferences" = "Preferencje…";
-"action.soundSettings" = "Ustawienia dźwięku…";
+"action.preferences" = "Ustawienia";
+"action.soundSettings" = "Dźwięk macOS";
 "action.bluetoothSettings" = "Ustawienia Bluetooth…";
 "action.quit" = "Zakończ";
 "action.playSound" = "Odtwórz dźwięk";
@@ -36,7 +36,6 @@
 "action.showInFinder" = "Pokaż w Finderze";
 "action.clearVolumeMemory" = "Wyczyść pamięć głośności";
 "action.viewSourceOnGitHub" = "Zobacz kod na GitHubie";
-"action.privacyPolicy" = "Polityka prywatności";
 "action.buyMeCoffee" = "☕  Postaw mi kawę";
 "action.reportIssue" = "Zgłoś problem";
 "action.addRule" = "Dodaj regułę";
@@ -108,12 +107,12 @@
 "prefs.general.enableAutoSwitching.description" = "Automatycznie aktywuje najwyżej ocenione podłączone urządzenie, gdy urządzenia łączą się lub rozłączają, albo gdy zmieniasz kolejność listy priorytetów.";
 "prefs.general.visibility" = "Widoczność";
 "prefs.general.hideMenuBarIcon" = "Ukryj ikonę paska menu";
-"prefs.general.hideMenuBarIcon.description" = "Gdy ikona jest ukryta, otwórz Preferencje, uruchamiając Sentrio ponownie z Launchpada.";
+"prefs.general.hideMenuBarIcon.description" = "Gdy ikona jest ukryta, otwórz Ustawienia, uruchamiając Sentrio ponownie z Launchpada.";
 "prefs.general.system" = "System";
 "prefs.general.launchAtLogin" = "Uruchom przy logowaniu";
 "prefs.general.privacy" = "Prywatność";
-"prefs.general.showInputLevelMeter" = "Pokaż miernik poziomu wejścia na żywo (Preferencje)";
-"prefs.general.showInputLevelMeter.description" = "Jeśli włączone, Sentrio monitoruje domyślne urządzenie wejściowe tylko wtedy, gdy Preferencje są otwarte. macOS pokaże w tym czasie wskaźnik użycia mikrofonu.";
+"prefs.general.showInputLevelMeter" = "Pokaż miernik poziomu wejścia na żywo (Ustawienia)";
+"prefs.general.showInputLevelMeter.description" = "Jeśli włączone, Sentrio monitoruje domyślne urządzenie wejściowe tylko wtedy, gdy Ustawienia są otwarte. macOS pokaże w tym czasie wskaźnik użycia mikrofonu.";
 "prefs.general.settings" = "Ustawienia";
 "prefs.general.settings.description" = "Eksport obejmuje listy priorytetów, ukryte urządzenia, niestandardowe nazwy/ikony oraz pamięć głośności.";
 "prefs.general.volumeMemory" = "Pamięć głośności";
@@ -154,7 +153,7 @@
 "prefs.busylight.signal.screenRecording" = "Nagrywanie ekranu";
 
 /* Tytuły okien */
-"prefs.window.title" = "Preferencje Sentrio";
+"prefs.window.title" = "Ustawienia Sentrio";
 
 /* Import / eksport */
 "error.importExport.invalidFile" = "Ten plik nie wygląda na eksport ustawień Sentrio.";
@@ -248,3 +247,13 @@
 "prefs.busylight.rule.metrics.avgDay" = "Śr./dzień";
 "prefs.busylight.rule.metrics.avgMonth" = "Śr./mies.";
 "prefs.busylight.rule.metrics.avgYear" = "Śr./rok";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Dźwięk";
+"menu.busylight.available" = "Dostępny";
+"menu.busylight.busy" = "Zajęty";
+"status.active" = "Aktywne";
+"action.privacyPolicy" = "Polityka prywatności";
+"action.openMicrophoneSettings" = "Otwórz ustawienia mikrofonu";
+"prefs.general.inputLevelUnavailable" = "Poziom wejścia na żywo jest niedostępny. Sprawdź dostęp do mikrofonu w ustawieniach macOS.";
+"prefs.general.activity" = "Aktywność";

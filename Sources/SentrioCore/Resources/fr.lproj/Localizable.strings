@@ -10,8 +10,8 @@
 "label.manualConnect" = "Connexion manuelle";
 
 /* Actions courantes */
-"action.preferences" = "Préférences…";
-"action.soundSettings" = "Réglages audio…";
+"action.preferences" = "Réglages";
+"action.soundSettings" = "Son macOS";
 "action.bluetoothSettings" = "Réglages Bluetooth…";
 "action.quit" = "Quitter";
 "action.playSound" = "Lire le son";
@@ -36,7 +36,6 @@
 "action.showInFinder" = "Afficher dans le Finder";
 "action.clearVolumeMemory" = "Effacer la mémoire des volumes";
 "action.viewSourceOnGitHub" = "Voir le code sur GitHub";
-"action.privacyPolicy" = "Politique de confidentialité";
 "action.buyMeCoffee" = "☕  M’offrir un café";
 "action.reportIssue" = "Signaler un problème";
 "action.addRule" = "Ajouter une règle";
@@ -108,12 +107,12 @@
 "prefs.general.enableAutoSwitching.description" = "Active automatiquement l’appareil connecté le mieux classé lorsque des appareils se connectent/déconnectent, ou lorsque vous réordonnez la liste de priorité.";
 "prefs.general.visibility" = "Visibilité";
 "prefs.general.hideMenuBarIcon" = "Masquer l’icône de la barre de menus";
-"prefs.general.hideMenuBarIcon.description" = "Quand elle est masquée, ouvrez Préférences en relançant Sentrio depuis Launchpad.";
+"prefs.general.hideMenuBarIcon.description" = "Quand elle est masquée, ouvrez Réglages en relançant Sentrio depuis Launchpad.";
 "prefs.general.system" = "Système";
 "prefs.general.launchAtLogin" = "Lancer à l’ouverture de session";
 "prefs.general.privacy" = "Confidentialité";
-"prefs.general.showInputLevelMeter" = "Afficher le niveau d’entrée en direct (Préférences)";
-"prefs.general.showInputLevelMeter.description" = "Si activé, Sentrio surveille l’appareil d’entrée par défaut uniquement lorsque Préférences est ouvert. macOS affichera l’indicateur micro en cours d’utilisation pendant ce temps.";
+"prefs.general.showInputLevelMeter" = "Afficher le niveau d’entrée en direct (Réglages)";
+"prefs.general.showInputLevelMeter.description" = "Si activé, Sentrio surveille l’appareil d’entrée par défaut uniquement lorsque Réglages est ouvert. macOS affichera l’indicateur micro en cours d’utilisation pendant ce temps.";
 "prefs.general.settings" = "Réglages";
 "prefs.general.settings.description" = "L’export inclut les listes de priorité, les appareils masqués, les noms/icônes personnalisés et la mémoire des volumes.";
 "prefs.general.volumeMemory" = "Mémoire des volumes";
@@ -154,7 +153,7 @@
 "prefs.busylight.signal.screenRecording" = "Enregistrement d’écran";
 
 /* Titres de fenêtre */
-"prefs.window.title" = "Préférences Sentrio";
+"prefs.window.title" = "Réglages Sentrio";
 
 /* Import / export */
 "error.importExport.invalidFile" = "Ce fichier ne semble pas être une exportation des réglages Sentrio.";
@@ -248,3 +247,13 @@
 "prefs.busylight.rule.metrics.avgDay" = "Moy./jour";
 "prefs.busylight.rule.metrics.avgMonth" = "Moy./mois";
 "prefs.busylight.rule.metrics.avgYear" = "Moy./an";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Son";
+"menu.busylight.available" = "Disponible";
+"menu.busylight.busy" = "Occupé";
+"status.active" = "Actif";
+"action.privacyPolicy" = "Politique de confidentialité";
+"action.openMicrophoneSettings" = "Ouvrir les réglages du microphone";
+"prefs.general.inputLevelUnavailable" = "Le niveau d’entrée en direct est indisponible. Vérifiez l’accès au microphone dans Réglages macOS.";
+"prefs.general.activity" = "Activité";

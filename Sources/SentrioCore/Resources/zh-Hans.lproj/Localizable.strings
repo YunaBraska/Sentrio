@@ -10,8 +10,8 @@
 "label.manualConnect" = "手动连接";
 
 /* 通用操作 */
-"action.preferences" = "偏好设置…";
-"action.soundSettings" = "声音设置…";
+"action.preferences" = "设置";
+"action.soundSettings" = "macOS 声音";
 "action.bluetoothSettings" = "蓝牙设置…";
 "action.quit" = "退出";
 "action.playSound" = "播放声音";
@@ -36,7 +36,6 @@
 "action.showInFinder" = "在 Finder 中显示";
 "action.clearVolumeMemory" = "清除音量记忆";
 "action.viewSourceOnGitHub" = "在 GitHub 查看源码";
-"action.privacyPolicy" = "隐私政策";
 "action.buyMeCoffee" = "☕  请我喝咖啡";
 "action.reportIssue" = "报告问题";
 "action.addRule" = "添加规则";
@@ -108,12 +107,12 @@
 "prefs.general.enableAutoSwitching.description" = "当设备连接或断开，或当你重新排序优先级列表时，自动启用优先级最高的已连接设备。";
 "prefs.general.visibility" = "可见性";
 "prefs.general.hideMenuBarIcon" = "隐藏菜单栏图标";
-"prefs.general.hideMenuBarIcon.description" = "隐藏后，可通过从启动台再次启动 Sentrio 来打开偏好设置。";
+"prefs.general.hideMenuBarIcon.description" = "隐藏后，可通过从启动台再次启动 Sentrio 来打开设置。";
 "prefs.general.system" = "系统";
 "prefs.general.launchAtLogin" = "登录时启动";
 "prefs.general.privacy" = "隐私";
-"prefs.general.showInputLevelMeter" = "显示实时输入电平表（偏好设置）";
-"prefs.general.showInputLevelMeter.description" = "启用后，Sentrio 仅在偏好设置打开时监测默认输入设备。macOS 会在此期间显示麦克风使用指示器。";
+"prefs.general.showInputLevelMeter" = "显示实时输入电平表（设置）";
+"prefs.general.showInputLevelMeter.description" = "启用后，Sentrio 仅在设置打开时监测默认输入设备。macOS 会在此期间显示麦克风使用指示器。";
 "prefs.general.settings" = "设置";
 "prefs.general.settings.description" = "导出内容包括优先级列表、已隐藏设备、自定义名称/图标以及音量记忆。";
 "prefs.general.volumeMemory" = "音量记忆";
@@ -154,7 +153,7 @@
 "prefs.busylight.signal.screenRecording" = "屏幕录制";
 
 /* 窗口标题 */
-"prefs.window.title" = "Sentrio 偏好设置";
+"prefs.window.title" = "Sentrio 设置";
 
 /* 导入/导出 */
 "error.importExport.invalidFile" = "该文件似乎不是 Sentrio 设置导出文件。";
@@ -248,3 +247,13 @@
 "prefs.busylight.rule.metrics.avgDay" = "平均/天";
 "prefs.busylight.rule.metrics.avgMonth" = "平均/月";
 "prefs.busylight.rule.metrics.avgYear" = "平均/年";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "声音";
+"menu.busylight.available" = "空闲";
+"menu.busylight.busy" = "忙碌";
+"status.active" = "活跃";
+"action.privacyPolicy" = "隐私政策";
+"action.openMicrophoneSettings" = "打开麦克风设置";
+"prefs.general.inputLevelUnavailable" = "实时输入电平不可用。请在 macOS“设置”中检查麦克风访问权限。";
+"prefs.general.activity" = "活动";

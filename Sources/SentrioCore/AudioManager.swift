@@ -32,14 +32,24 @@ final class AudioManager: ObservableObject {
     @Published var inputVolume: Float = 0.5
     /// System alert/beep volume [0…1]
     @Published var alertVolume: Float = 0.75
+    @Published private(set) var inputLevelMonitoringProblem = false
+
+    static let supportsSystemAlertVolumeControl: Bool = {
+        #if SENTRIO_APP_STORE
+            false
+        #else
+            true
+        #endif
+    }()
 
     // MARK: – Private
 
-    private var listeners: [Any] = []
+    private var listeners: [ListenerToken] = []
     private var volumeListeners: [ListenerToken] = []
     private var volumeListenerOutputID: AudioDeviceID = kAudioObjectUnknown
     private var volumeListenerInputID: AudioDeviceID = kAudioObjectUnknown
     private var audioEngine: AVAudioEngine?
+    private var batteryRefreshTimer: Timer?
     private var isInputLevelMonitoringEnabled = false
     private var inputLevelMonitoringDemandTokens: Set<String> = []
     private let coreAudioWorkQueue = DispatchQueue(
@@ -70,23 +80,39 @@ final class AudioManager: ObservableObject {
         refreshBluetoothBatterySnapshotIfNeeded(force: true)
     }
 
+    deinit {
+        batteryRefreshTimer?.invalidate()
+        if let audioEngine {
+            audioEngine.inputNode.removeTap(onBus: 0)
+            audioEngine.stop()
+        }
+        for token in volumeListeners + listeners {
+            var address = token.address
+            AudioObjectRemovePropertyListenerBlock(token.objectID, &address, .main, token.block)
+        }
+    }
+
     // MARK: – Input level (microphone monitor)
 
     func setInputLevelMonitoringEnabled(_ enabled: Bool) {
         guard runtimeMode == .live else {
             inputLevel = 0
+            inputLevelMonitoringProblem = false
             return
         }
         guard enabled != isInputLevelMonitoringEnabled else { return }
         isInputLevelMonitoringEnabled = enabled
         if enabled {
+            inputLevelMonitoringProblem = false
             if let uid = defaultInput?.uid, isTemporarilyUnavailable(uid) {
                 inputLevel = 0
+                inputLevelMonitoringProblem = true
                 return
             }
             startInputLevelMonitor()
         } else {
             stopInputLevelMonitor()
+            inputLevelMonitoringProblem = false
         }
     }
 
@@ -315,26 +341,23 @@ final class AudioManager: ObservableObject {
 
     // MARK: – Alert volume
 
-    static var supportsSystemAlertVolumeControl: Bool {
-        #if SENTRIO_APP_STORE
-            false
-        #else
-            true
-        #endif
-    }
-
     static func readAlertVolume() -> Float {
-        guard supportsSystemAlertVolumeControl else { return 0.75 }
-        return UserDefaults(suiteName: "com.apple.systemsound")?
-            .float(forKey: "com.apple.sound.beep.volume") ?? 0.75
+        #if SENTRIO_APP_STORE
+            0.75
+        #else
+            UserDefaults(suiteName: "com.apple.systemsound")?
+                .float(forKey: "com.apple.sound.beep.volume") ?? 0.75
+        #endif
     }
 
     func setAlertVolume(_ volume: Float) {
         alertVolume = volume
-        guard Self.supportsSystemAlertVolumeControl, runtimeMode == .live else { return }
-        let ud = UserDefaults(suiteName: "com.apple.systemsound")
-        ud?.set(volume, forKey: "com.apple.sound.beep.volume")
-        ud?.synchronize()
+        guard runtimeMode == .live else { return }
+        #if !SENTRIO_APP_STORE
+            let ud = UserDefaults(suiteName: "com.apple.systemsound")
+            ud?.set(volume, forKey: "com.apple.sound.beep.volume")
+            ud?.synchronize()
+        #endif
     }
 
     // MARK: – Device activity
@@ -373,9 +396,11 @@ final class AudioManager: ObservableObject {
         guard runtimeMode == .live else { return }
         // Batteries on Bluetooth devices can change while connected without
         // triggering a device-list change event, so a periodic refresh is needed.
-        Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { [weak self] _ in
+        batteryRefreshTimer?.invalidate()
+        batteryRefreshTimer = Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { [weak self] _ in
             self?.refreshBluetoothBatterySnapshotIfNeeded(force: true)
         }
+        batteryRefreshTimer?.tolerance = 15
     }
 
     // MARK: – Input level (AVAudioEngine)
@@ -394,16 +419,22 @@ final class AudioManager: ObservableObject {
             AVCaptureDevice.requestAccess(for: .audio) { [weak self] granted in
                 DispatchQueue.main.async {
                     guard let self else { return }
-                    guard granted, self.isInputLevelMonitoringEnabled else { return }
+                    guard granted else {
+                        self.inputLevelMonitoringProblem = true
+                        return
+                    }
+                    guard self.isInputLevelMonitoringEnabled else { return }
                     self.startInputLevelMonitor()
                 }
             }
             return
         case .denied, .restricted:
             inputLevel = 0
+            inputLevelMonitoringProblem = true
             return
         @unknown default:
             inputLevel = 0
+            inputLevelMonitoringProblem = true
             return
         }
 
@@ -427,7 +458,14 @@ final class AudioManager: ObservableObject {
             let level = min(rms * 6, 1.0)
             DispatchQueue.main.async { self?.inputLevel = level }
         }
-        do { try engine.start(); audioEngine = engine } catch {}
+        do {
+            try engine.start()
+            audioEngine = engine
+            inputLevelMonitoringProblem = false
+        } catch {
+            input.removeTap(onBus: 0)
+            inputLevelMonitoringProblem = true
+        }
     }
 
     private func stopInputLevelMonitor() {
@@ -505,13 +543,12 @@ final class AudioManager: ObservableObject {
                 uid: uid,
                 snapshot: bluetoothBatterySnapshot
             )
-            if let vendorID = bluetoothVendorIDFromBluetoothSnapshot(
-                   deviceName: name,
-                   uid: uid,
-                   snapshot: bluetoothBatterySnapshot
-               ),
-               vendorID == 0x004C
-            {
+            let vendorID = bluetoothVendorIDFromBluetoothSnapshot(
+                deviceName: name,
+                uid: uid,
+                snapshot: bluetoothBatterySnapshot
+            )
+            if vendorID == 0x004C {
                 isAppleMade = true
             }
         }
@@ -1045,10 +1082,11 @@ final class AudioManager: ObservableObject {
         while entry != 0 {
             defer { IOObjectRelease(entry); entry = IOIteratorNext(iter) }
             var propRef: Unmanaged<CFMutableDictionary>? = nil
-            guard IORegistryEntryCreateCFProperties(
-                      entry, &propRef, kCFAllocatorDefault, 0
-                  ) == KERN_SUCCESS,
-                  let dict = propRef?.takeRetainedValue() as? [String: Any] else { continue }
+            let propertyStatus = IORegistryEntryCreateCFProperties(
+                entry, &propRef, kCFAllocatorDefault, 0
+            )
+            guard propertyStatus == KERN_SUCCESS else { continue }
+            guard let dict = propRef?.takeRetainedValue() as? [String: Any] else { continue }
 
             let strings = dict.values.compactMap { $0 as? String }.map { $0.lowercased() }
             guard strings.contains(where: { $0.contains(macDash) || $0.contains(macColon) })
@@ -1187,6 +1225,7 @@ final class AudioManager: ObservableObject {
                 guard let self, isInputLevelMonitoringEnabled else { return }
                 if let uid = defaultInput?.uid, isTemporarilyUnavailable(uid) {
                     inputLevel = 0
+                    inputLevelMonitoringProblem = true
                     return
                 }
                 startInputLevelMonitor() // reattach tap to new device
@@ -1359,8 +1398,10 @@ final class AudioManager: ObservableObject {
             mElement: kAudioObjectPropertyElementMain
         )
         let block: AudioObjectPropertyListenerBlock = { _, _ in DispatchQueue.main.async { handler() } }
-        AudioObjectAddPropertyListenerBlock(objectID, &addr, .main, block)
-        listeners.append(block)
+        let status = AudioObjectAddPropertyListenerBlock(objectID, &addr, .main, block)
+        if status == noErr {
+            listeners.append(ListenerToken(objectID: objectID, address: addr, block: block))
+        }
     }
 }
 

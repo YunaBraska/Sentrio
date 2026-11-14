@@ -10,8 +10,8 @@
 "label.manualConnect" = "Manuelle Verbindung";
 
 /* Allgemeine Aktionen */
-"action.preferences" = "Einstellungen…";
-"action.soundSettings" = "Toneinstellungen…";
+"action.preferences" = "Einstellungen";
+"action.soundSettings" = "macOS-Ton";
 "action.bluetoothSettings" = "Bluetooth‑Einstellungen…";
 "action.quit" = "Beenden";
 "action.playSound" = "Sound abspielen";
@@ -248,3 +248,12 @@
 "prefs.busylight.rule.metrics.avgDay" = "Ø/Tag";
 "prefs.busylight.rule.metrics.avgMonth" = "Ø/Monat";
 "prefs.busylight.rule.metrics.avgYear" = "Ø/Jahr";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Ton";
+"menu.busylight.available" = "Verfügbar";
+"menu.busylight.busy" = "Beschäftigt";
+"status.active" = "Aktiv";
+"action.openMicrophoneSettings" = "Mikrofoneinstellungen öffnen";
+"prefs.general.inputLevelUnavailable" = "Der Live-Eingangspegel ist nicht verfügbar. Prüfe den Mikrofonzugriff in den macOS-Einstellungen.";
+"prefs.general.activity" = "Aktivität";

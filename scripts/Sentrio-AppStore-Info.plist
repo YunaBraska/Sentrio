@@ -30,6 +30,10 @@
     <string>NSApplication</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Sentrio reads microphone activity to show live input status and control compatible BusyLights.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Sentrio checks whether a camera is active to control BusyLight rules. It does not capture or store video.</string>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
     <key>CFBundleURLTypes</key>
     <array>
         <dict>

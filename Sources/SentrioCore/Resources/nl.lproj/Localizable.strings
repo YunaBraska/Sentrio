@@ -10,8 +10,8 @@
 "label.manualConnect" = "Handmatige verbinding";
 
 /* Algemene acties */
-"action.preferences" = "Voorkeuren…";
-"action.soundSettings" = "Geluidsinstellingen…";
+"action.preferences" = "Instellingen";
+"action.soundSettings" = "macOS-geluid";
 "action.bluetoothSettings" = "Bluetooth-instellingen…";
 "action.quit" = "Stop";
 "action.playSound" = "Geluid afspelen";
@@ -36,7 +36,6 @@
 "action.showInFinder" = "Toon in Finder";
 "action.clearVolumeMemory" = "Volumengeheugen wissen";
 "action.viewSourceOnGitHub" = "Broncode op GitHub bekijken";
-"action.privacyPolicy" = "Privacybeleid";
 "action.buyMeCoffee" = "☕  Koop me een koffie";
 "action.reportIssue" = "Meld een probleem";
 "action.addRule" = "Regel toevoegen";
@@ -108,12 +107,12 @@
 "prefs.general.enableAutoSwitching.description" = "Activeert automatisch het hoogst gerangschikte verbonden apparaat wanneer apparaten verbinden of verbreken, of wanneer je de prioriteitenlijst herschikt.";
 "prefs.general.visibility" = "Zichtbaarheid";
 "prefs.general.hideMenuBarIcon" = "Menubalkpictogram verbergen";
-"prefs.general.hideMenuBarIcon.description" = "Als verborgen, open Voorkeuren door Sentrio opnieuw te starten via Launchpad.";
+"prefs.general.hideMenuBarIcon.description" = "Als verborgen, open Instellingen door Sentrio opnieuw te starten via Launchpad.";
 "prefs.general.system" = "Systeem";
 "prefs.general.launchAtLogin" = "Start bij inloggen";
 "prefs.general.privacy" = "Privacy";
-"prefs.general.showInputLevelMeter" = "Live invoerniveaumeter tonen (Voorkeuren)";
-"prefs.general.showInputLevelMeter.description" = "Indien ingeschakeld, monitort Sentrio het standaard invoerapparaat alleen terwijl Voorkeuren geopend is. macOS toont in die tijd de microfoon-indicator.";
+"prefs.general.showInputLevelMeter" = "Live invoerniveaumeter tonen (Instellingen)";
+"prefs.general.showInputLevelMeter.description" = "Indien ingeschakeld, monitort Sentrio het standaard invoerapparaat alleen terwijl Instellingen geopend is. macOS toont in die tijd de microfoon-indicator.";
 "prefs.general.settings" = "Instellingen";
 "prefs.general.settings.description" = "Export bevat prioriteitenlijsten, verborgen apparaten, aangepaste namen/pictogrammen en volumengeheugen.";
 "prefs.general.volumeMemory" = "Volumengeheugen";
@@ -154,7 +153,7 @@
 "prefs.busylight.signal.screenRecording" = "Schermopname";
 
 /* Venstertitels */
-"prefs.window.title" = "Sentrio-voorkeuren";
+"prefs.window.title" = "Sentrio-instellingen";
 
 /* Import / export */
 "error.importExport.invalidFile" = "Dat bestand lijkt geen Sentrio-instellingenexport te zijn.";
@@ -248,3 +247,13 @@
 "prefs.busylight.rule.metrics.avgDay" = "Gem./dag";
 "prefs.busylight.rule.metrics.avgMonth" = "Gem./maand";
 "prefs.busylight.rule.metrics.avgYear" = "Gem./jaar";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Geluid";
+"menu.busylight.available" = "Beschikbaar";
+"menu.busylight.busy" = "Bezet";
+"status.active" = "Actief";
+"action.privacyPolicy" = "Privacybeleid";
+"action.openMicrophoneSettings" = "Microfooninstellingen openen";
+"prefs.general.inputLevelUnavailable" = "Het live-invoerniveau is niet beschikbaar. Controleer de microfoontoegang in macOS-instellingen.";
+"prefs.general.activity" = "Activiteit";

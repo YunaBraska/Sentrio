@@ -9,7 +9,9 @@ final class AppState: ObservableObject {
     let rules: RulesEngine
     let busyLight: BusyLightEngine
 
-    private var preferencesWindow: NSWindow?
+    @Published var preferencesPane: PreferencesPane
+
+    private var fallbackSettingsWindow: NSWindow?
     private var cancellables = Set<AnyCancellable>()
 
     init(
@@ -19,6 +21,8 @@ final class AppState: ObservableObject {
         busyLight: BusyLightEngine? = nil,
         bindIntegrationBridge: Bool = true
     ) {
+        preferencesPane = UserDefaults.standard.string(forKey: "preferencesPane")
+            .flatMap(PreferencesPane.init(rawValue:)) ?? .output
         self.settings = settings
         self.audio = audio
         let resolvedRules = rules ?? RulesEngine(audio: audio, settings: settings)
@@ -39,9 +43,9 @@ final class AppState: ObservableObject {
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
 
-        // Keep window chrome in sync with localization changes
-        settings.$appLanguage
-            .sink { [weak self] _ in self?.preferencesWindow?.title = L10n.tr("prefs.window.title") }
+        $preferencesPane
+            .dropFirst()
+            .sink { pane in UserDefaults.standard.set(pane.rawValue, forKey: "preferencesPane") }
             .store(in: &cancellables)
 
         // Open Preferences when the app is reopened from macOS.
@@ -88,8 +92,16 @@ final class AppState: ObservableObject {
 
     // MARK: – Preferences window
 
-    func openPreferences() {
-        if preferencesWindow == nil {
+    func openPreferences(_ pane: PreferencesPane? = nil) {
+        if let pane {
+            preferencesPane = pane
+        }
+
+        NSApp.activate(ignoringOtherApps: true)
+        let didOpenSettings = NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+        guard !didOpenSettings else { return }
+
+        if fallbackSettingsWindow == nil {
             let view = PreferencesView()
                 .environmentObject(settings)
                 .environmentObject(audio)
@@ -98,14 +110,13 @@ final class AppState: ObservableObject {
             let controller = NSHostingController(rootView: view)
             let win = NSWindow(contentViewController: controller)
             win.title = L10n.tr("prefs.window.title")
-            win.setContentSize(NSSize(width: 520, height: 620))
-            win.styleMask = [.titled, .closable, .miniaturizable]
+            win.setContentSize(NSSize(width: 540, height: 680))
+            win.styleMask = [.titled, .closable]
             win.center()
             win.isReleasedWhenClosed = false
-            preferencesWindow = win
+            fallbackSettingsWindow = win
         }
-        preferencesWindow?.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        fallbackSettingsWindow?.makeKeyAndOrderFront(nil)
     }
 
     @objc private func reopenApp() {

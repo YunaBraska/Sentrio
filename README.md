@@ -14,7 +14,7 @@ A lightweight macOS menu bar app that keeps your audio routing and BusyLight beh
 
 - Auto-switches output and input devices based on your priority order
 - Uses explicit manual connect for Continuity/iPhone routes (shown as `Continuity` transport); failed manual connects fall back to next eligible priority
-- Restores per-device Output, Input, and Alert volumes
+- Restores per-device output and input volumes. Direct builds also restore the macOS alert volume; App Store builds open macOS Sound for that system-owned setting.
 - Supports custom device names and icons
 - Shows battery info when macOS exposes it
 - Adds BusyLight automation (rules/manual), HTTP control, and macOS integrations
@@ -46,13 +46,29 @@ sh scripts/package.sh 0.0.1
 open dist/Sentrio.app
 ```
 
+To produce a local, ad-hoc signed App Store variant without releasing it:
+
+```bash
+SENTRIO_DISTRIBUTION=app-store sh scripts/package.sh 0.0.1
+scripts/verify-app-store-bundle.sh dist-app-store/Sentrio.app
+open dist-app-store/Sentrio.app
+```
+
+The argument is the three-component marketing version. Set `MACOS_BUILD_VERSION` to an independently increasing one-to-three-component numeric build version when needed. The submission package is produced only when Mac App Store application and installer signing identities are supplied.
+
+Use [docs/app-store-review-notes.md](docs/app-store-review-notes.md) for reviewer context. Generate App Store Connect screenshots with:
+
+```bash
+sh scripts/generate-app-store-screenshots.sh
+```
+
 ## Screenshots
 
 ![Menu bar panel](docs/screenshots/generated/bar_menu.png)
-![Preferences - Output](docs/screenshots/generated/preferences_output.png)
-![Preferences - Input](docs/screenshots/generated/preferences_input.png)
-![Preferences - Busy Light](docs/screenshots/generated/preferences_busy_light.png)
-![Preferences - General](docs/screenshots/generated/preferences_general.png)
+![Settings - Output](docs/screenshots/generated/preferences_output.png)
+![Settings - Input](docs/screenshots/generated/preferences_input.png)
+![Settings - Busy Light](docs/screenshots/generated/preferences_busy_light.png)
+![Settings - General](docs/screenshots/generated/preferences_general.png)
 
 ## Regenerate Screenshots
 

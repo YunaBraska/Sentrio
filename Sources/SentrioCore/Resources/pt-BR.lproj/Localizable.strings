@@ -10,8 +10,8 @@
 "label.manualConnect" = "Conexão manual";
 
 /* Ações comuns */
-"action.preferences" = "Preferências…";
-"action.soundSettings" = "Ajustes de Som…";
+"action.preferences" = "Ajustes";
+"action.soundSettings" = "Som do macOS";
 "action.bluetoothSettings" = "Ajustes de Bluetooth…";
 "action.quit" = "Sair";
 "action.playSound" = "Reproduzir som";
@@ -108,12 +108,12 @@
 "prefs.general.enableAutoSwitching.description" = "Ativa automaticamente o dispositivo conectado com maior prioridade quando os dispositivos conectam ou desconectam, ou quando você reordena a lista de prioridade.";
 "prefs.general.visibility" = "Visibilidade";
 "prefs.general.hideMenuBarIcon" = "Ocultar ícone da barra de menus";
-"prefs.general.hideMenuBarIcon.description" = "Quando oculto, abra Preferências iniciando o Sentrio novamente pelo Launchpad.";
+"prefs.general.hideMenuBarIcon.description" = "Quando oculto, abra Ajustes iniciando o Sentrio novamente pelo Launchpad.";
 "prefs.general.system" = "Sistema";
 "prefs.general.launchAtLogin" = "Iniciar ao fazer login";
 "prefs.general.privacy" = "Privacidade";
-"prefs.general.showInputLevelMeter" = "Mostrar medidor de nível de entrada ao vivo (Preferências)";
-"prefs.general.showInputLevelMeter.description" = "Se ativado, o Sentrio monitora o dispositivo de entrada padrão apenas enquanto as Preferências estiverem abertas. O macOS mostrará o indicador de microfone em uso durante esse período.";
+"prefs.general.showInputLevelMeter" = "Mostrar medidor de nível de entrada ao vivo (Ajustes)";
+"prefs.general.showInputLevelMeter.description" = "Se ativado, o Sentrio monitora o dispositivo de entrada padrão apenas enquanto os Ajustes estiverem abertos. O macOS mostrará o indicador de microfone em uso durante esse período.";
 "prefs.general.settings" = "Ajustes";
 "prefs.general.settings.description" = "A exportação inclui listas de prioridade, dispositivos ocultos, nomes/ícones personalizados e memória de volume.";
 "prefs.general.volumeMemory" = "Memória de volume";
@@ -154,7 +154,7 @@
 "prefs.busylight.signal.screenRecording" = "Gravação de tela";
 
 /* Títulos de janela */
-"prefs.window.title" = "Preferências do Sentrio";
+"prefs.window.title" = "Ajustes do Sentrio";
 
 /* Importar / exportar */
 "error.importExport.invalidFile" = "Esse arquivo não parece uma exportação de ajustes do Sentrio.";
@@ -248,3 +248,12 @@
 "prefs.busylight.rule.metrics.avgDay" = "Méd./dia";
 "prefs.busylight.rule.metrics.avgMonth" = "Méd./mês";
 "prefs.busylight.rule.metrics.avgYear" = "Méd./ano";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Som";
+"menu.busylight.available" = "Disponível";
+"menu.busylight.busy" = "Ocupado";
+"status.active" = "Ativo";
+"action.openMicrophoneSettings" = "Abrir Ajustes do Microfone";
+"prefs.general.inputLevelUnavailable" = "O nível de entrada ao vivo não está disponível. Verifique o acesso ao microfone nos Ajustes do macOS.";
+"prefs.general.activity" = "Atividade";

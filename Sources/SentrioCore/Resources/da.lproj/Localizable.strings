@@ -10,8 +10,8 @@
 "label.manualConnect" = "Manuel tilslutning";
 
 /* Almindelige handlinger */
-"action.preferences" = "Indstillinger…";
-"action.soundSettings" = "Lydindstillinger…";
+"action.preferences" = "Indstillinger";
+"action.soundSettings" = "macOS-lyd";
 "action.bluetoothSettings" = "Bluetooth-indstillinger…";
 "action.quit" = "Afslut";
 "action.playSound" = "Afspil lyd";
@@ -248,3 +248,12 @@
 "prefs.busylight.rule.metrics.avgDay" = "Gns./dag";
 "prefs.busylight.rule.metrics.avgMonth" = "Gns./måned";
 "prefs.busylight.rule.metrics.avgYear" = "Gns./år";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Lyd";
+"menu.busylight.available" = "Tilgængelig";
+"menu.busylight.busy" = "Optaget";
+"status.active" = "Aktiv";
+"action.openMicrophoneSettings" = "Åbn mikrofonindstillinger";
+"prefs.general.inputLevelUnavailable" = "Live-inputniveauet er ikke tilgængeligt. Kontrollér mikrofonadgang i macOS-indstillinger.";
+"prefs.general.activity" = "Aktivitet";

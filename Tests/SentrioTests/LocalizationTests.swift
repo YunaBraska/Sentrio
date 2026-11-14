@@ -84,6 +84,31 @@ final class LocalizationTests: XCTestCase {
         }
     }
 
+    func test_localizations_containMicrophonePurposeString() {
+        for localization in L10n.supportedLocalizations {
+            guard let path = L10n.baseBundle.path(
+                forResource: "InfoPlist",
+                ofType: "strings",
+                inDirectory: nil,
+                forLocalization: localization
+            ) else {
+                XCTFail("Missing InfoPlist.strings for localization: \(localization)")
+                continue
+            }
+            guard let table = NSDictionary(contentsOfFile: path) as? [String: String] else {
+                XCTFail("Invalid InfoPlist.strings contents for localization: \(localization)")
+                continue
+            }
+            for key in ["NSMicrophoneUsageDescription", "NSCameraUsageDescription"] {
+                let purpose = table[key] ?? ""
+                XCTAssertFalse(
+                    purpose.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                    "Missing \(key) purpose string for localization: \(localization)"
+                )
+            }
+        }
+    }
+
     func test_formatPlaceholders_preservedAcrossLocalizations() throws {
         let requiredSubstringsByKey: [String: [String]] = [
             "error.exportFailedFormat": ["%@"],

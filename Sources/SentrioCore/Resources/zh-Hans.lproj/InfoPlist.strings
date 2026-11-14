@@ -1,0 +1,2 @@
+"NSMicrophoneUsageDescription" = "Sentrio 使用麦克风输入电平，在输入设备旁显示实时活动指示器。";
+"NSCameraUsageDescription" = "Sentrio 会检查摄像头是否正在使用，以控制 BusyLight 规则。它不会拍摄或存储视频。";

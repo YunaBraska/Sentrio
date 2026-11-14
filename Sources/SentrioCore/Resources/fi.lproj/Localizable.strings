@@ -10,8 +10,8 @@
 "label.manualConnect" = "Manuaalinen yhteys";
 
 /* Yleiset toiminnot */
-"action.preferences" = "Asetukset…";
-"action.soundSettings" = "Ääniasetukset…";
+"action.preferences" = "Asetukset";
+"action.soundSettings" = "macOS-ääni";
 "action.bluetoothSettings" = "Bluetooth-asetukset…";
 "action.quit" = "Lopeta";
 "action.playSound" = "Toista ääni";
@@ -36,7 +36,6 @@
 "action.showInFinder" = "Näytä Finderissa";
 "action.clearVolumeMemory" = "Tyhjennä äänenvoimakkuusmuisti";
 "action.viewSourceOnGitHub" = "Näytä lähdekoodi GitHubissa";
-"action.privacyPolicy" = "Tietosuojakäytäntö";
 "action.buyMeCoffee" = "☕  Osta minulle kahvi";
 "action.reportIssue" = "Ilmoita ongelmasta";
 "action.addRule" = "Lisää sääntö";
@@ -248,3 +247,13 @@
 "prefs.busylight.rule.metrics.avgDay" = "Ka./päivä";
 "prefs.busylight.rule.metrics.avgMonth" = "Ka./kuukausi";
 "prefs.busylight.rule.metrics.avgYear" = "Ka./vuosi";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Ääni";
+"menu.busylight.available" = "Vapaa";
+"menu.busylight.busy" = "Varattu";
+"status.active" = "Aktiivinen";
+"action.privacyPolicy" = "Tietosuojakäytäntö";
+"action.openMicrophoneSettings" = "Avaa mikrofoniasetukset";
+"prefs.general.inputLevelUnavailable" = "Reaaliaikainen tulotaso ei ole käytettävissä. Tarkista mikrofonin käyttöoikeus macOS-asetuksista.";
+"prefs.general.activity" = "Toiminta";

@@ -7,6 +7,7 @@ app_name='Sentrio'
 version=$1
 build_number=$2
 workspace_dir=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
+sh "${workspace_dir}/scripts/validate-app-store-version.sh" "${version}" "${build_number}"
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/sentrio-app-store.XXXXXX")
 dist_dir="${workspace_dir}/dist/app-store"
 app_dir="${dist_dir}/${app_name}.app"
@@ -74,6 +75,18 @@ find "${arm64_bin}" -maxdepth 1 -type d -name '*.appintents' -exec sh -c '
     fi
   done
 ' sh "${contents_dir}/Resources" {} +
+find "${contents_dir}/Resources" -type f -path '*.bundle/Contents/Resources/*.lproj/InfoPlist.strings' -exec sh -c '
+  destination=$1
+  shift
+  for source do
+    localization_dir=${source%/InfoPlist.strings}
+    localization=${localization_dir##*/}
+    mkdir -p "${destination}/${localization}"
+    cp "${source}" "${destination}/${localization}/InfoPlist.strings"
+  done
+' sh "${contents_dir}/Resources" {} +
+cp "${workspace_dir}/scripts/PrivacyInfo.xcprivacy" "${contents_dir}/Resources/PrivacyInfo.xcprivacy"
+cp "${workspace_dir}/scripts/container-migration.plist" "${contents_dir}/Resources/container-migration.plist"
 
 icon_source="${workspace_dir}/Assets.xcassets/AppIcon.appiconset"
 test -d "${icon_source}"

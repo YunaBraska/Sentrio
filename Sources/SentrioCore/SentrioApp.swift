@@ -12,11 +12,20 @@ public struct SentrioApp: App {
     public init() {}
 
     public var body: some Scene {
-        Settings { EmptyView() }
+        Settings {
+            PreferencesView()
+                .environmentObject(appDelegate.appState.settings)
+                .environmentObject(appDelegate.appState.audio)
+                .environmentObject(appDelegate.appState.busyLight)
+                .environmentObject(appDelegate.appState)
+        }
     }
 }
 
 enum MenuBarPresentation {
+    static let preferredPopoverWidth: CGFloat = 370
+    static let popoverScreenInset: CGFloat = 12
+
     static func statusItemIsVisible(hidingMenuBarIcon: Bool) -> Bool {
         !hidingMenuBarIcon
     }
@@ -24,14 +33,43 @@ enum MenuBarPresentation {
     static func activationPolicy(hidingMenuBarIcon: Bool) -> NSApplication.ActivationPolicy {
         hidingMenuBarIcon ? .regular : .accessory
     }
+
+    static func popoverWidth(for visibleFrame: NSRect) -> CGFloat {
+        max(1, min(preferredPopoverWidth, visibleFrame.width - (popoverScreenInset * 2)))
+    }
+
+    static func clampedPopoverOrigin(popoverFrame: NSRect, visibleFrame: NSRect) -> NSPoint {
+        let minimumX = visibleFrame.minX + popoverScreenInset
+        let maximumX = visibleFrame.maxX - popoverScreenInset - popoverFrame.width
+        let minimumY = visibleFrame.minY + popoverScreenInset
+        let maximumY = visibleFrame.maxY - popoverScreenInset - popoverFrame.height
+
+        return NSPoint(
+            x: maximumX >= minimumX
+                ? min(max(popoverFrame.minX, minimumX), maximumX)
+                : minimumX,
+            y: maximumY >= minimumY
+                ? min(max(popoverFrame.minY, minimumY), maximumY)
+                : minimumY
+        )
+    }
+}
+
+final class MenuBarLayout: ObservableObject {
+    @Published private(set) var width = MenuBarPresentation.preferredPopoverWidth
+
+    func update(for visibleFrame: NSRect) {
+        width = MenuBarPresentation.popoverWidth(for: visibleFrame)
+    }
 }
 
 @MainActor
 public class AppDelegate: NSObject, NSApplicationDelegate {
-    private let appState = AppState()
+    let appState = AppState()
 
     private var statusItem: NSStatusItem?
     private let menuPopover = NSPopover()
+    private let menuLayout = MenuBarLayout()
     private var cancellables = Set<AnyCancellable>()
 
     #if !SENTRIO_APP_STORE
@@ -86,9 +124,10 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
 
         menuPopover.behavior = .transient
         menuPopover.contentViewController = NSHostingController(
-            rootView: MenuBarView()
+            rootView: MenuBarView(layout: menuLayout)
                 .environmentObject(appState.settings)
                 .environmentObject(appState.audio)
+                .environmentObject(appState.busyLight)
                 .environmentObject(appState)
         )
         updateStatusItem()
@@ -131,7 +170,19 @@ public class AppDelegate: NSObject, NSApplicationDelegate {
         if menuPopover.isShown {
             menuPopover.performClose(nil)
         } else {
+            guard let screen = button.window?.screen ?? NSScreen.main else { return }
+            menuLayout.update(for: screen.visibleFrame)
+            menuPopover.contentSize.width = menuLayout.width
             menuPopover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            DispatchQueue.main.async { [weak self] in
+                guard let self,
+                      let window = menuPopover.contentViewController?.view.window else { return }
+                let origin = MenuBarPresentation.clampedPopoverOrigin(
+                    popoverFrame: window.frame,
+                    visibleFrame: screen.visibleFrame
+                )
+                window.setFrameOrigin(origin)
+            }
         }
     }
 }

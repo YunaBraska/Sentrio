@@ -10,8 +10,8 @@
 "label.manualConnect" = "Manuel bağlantı";
 
 /* Ortak eylemler */
-"action.preferences" = "Tercihler…";
-"action.soundSettings" = "Ses Ayarları…";
+"action.preferences" = "Ayarlar";
+"action.soundSettings" = "macOS Sesi";
 "action.bluetoothSettings" = "Bluetooth Ayarları…";
 "action.quit" = "Çıkış";
 "action.playSound" = "Sesi çal";
@@ -36,7 +36,6 @@
 "action.showInFinder" = "Finder’da göster";
 "action.clearVolumeMemory" = "Ses hafızasını temizle";
 "action.viewSourceOnGitHub" = "Kaynağı GitHub’da görüntüle";
-"action.privacyPolicy" = "Gizlilik Politikası";
 "action.buyMeCoffee" = "☕  Bana bir kahve ısmarla";
 "action.reportIssue" = "Sorun bildir";
 "action.addRule" = "Kural ekle";
@@ -108,12 +107,12 @@
 "prefs.general.enableAutoSwitching.description" = "Aygıtlar bağlandığında/bağlantısı kesildiğinde veya öncelik listesini yeniden sıraladığınızda, en yüksek öncelikli bağlı aygıtı otomatik olarak etkinleştirir.";
 "prefs.general.visibility" = "Görünürlük";
 "prefs.general.hideMenuBarIcon" = "Menü çubuğu simgesini gizle";
-"prefs.general.hideMenuBarIcon.description" = "Gizliyken, Launchpad’den Sentrio’yu yeniden başlatarak Tercihler’i açın.";
+"prefs.general.hideMenuBarIcon.description" = "Gizliyken, Launchpad’den Sentrio’yu yeniden başlatarak Ayarlar’ı açın.";
 "prefs.general.system" = "Sistem";
 "prefs.general.launchAtLogin" = "Girişte başlat";
 "prefs.general.privacy" = "Gizlilik";
-"prefs.general.showInputLevelMeter" = "Canlı giriş seviye göstergesini göster (Tercihler)";
-"prefs.general.showInputLevelMeter.description" = "Etkinleştirildiğinde Sentrio, Tercihler açıkken yalnızca varsayılan giriş aygıtını izler. macOS bu süre boyunca mikrofon göstergesini gösterir.";
+"prefs.general.showInputLevelMeter" = "Canlı giriş seviye göstergesini göster (Ayarlar)";
+"prefs.general.showInputLevelMeter.description" = "Etkinleştirildiğinde Sentrio, Ayarlar açıkken yalnızca varsayılan giriş aygıtını izler. macOS bu süre boyunca mikrofon göstergesini gösterir.";
 "prefs.general.settings" = "Ayarlar";
 "prefs.general.settings.description" = "Dışa aktarma; öncelik listeleri, gizli aygıtlar, özel adlar/simgeler ve ses hafızasını içerir.";
 "prefs.general.volumeMemory" = "Ses Hafızası";
@@ -154,7 +153,7 @@
 "prefs.busylight.signal.screenRecording" = "Ekran kaydı";
 
 /* Pencere başlıkları */
-"prefs.window.title" = "Sentrio Tercihleri";
+"prefs.window.title" = "Sentrio Ayarları";
 
 /* İçe/dışa aktar */
 "error.importExport.invalidFile" = "Bu dosya Sentrio ayar dışa aktarması gibi görünmüyor.";
@@ -248,3 +247,13 @@
 "prefs.busylight.rule.metrics.avgDay" = "Ort./gün";
 "prefs.busylight.rule.metrics.avgMonth" = "Ort./ay";
 "prefs.busylight.rule.metrics.avgYear" = "Ort./yıl";
+
+/* Menu clarity and App Store privacy */
+"menu.sound" = "Ses";
+"menu.busylight.available" = "Uygun";
+"menu.busylight.busy" = "Meşgul";
+"status.active" = "Etkin";
+"action.privacyPolicy" = "Gizlilik Politikası";
+"action.openMicrophoneSettings" = "Mikrofon Ayarlarını Aç";
+"prefs.general.inputLevelUnavailable" = "Canlı giriş düzeyi kullanılamıyor. macOS Ayarları’nda mikrofon erişimini kontrol edin.";
+"prefs.general.activity" = "Etkinlik";

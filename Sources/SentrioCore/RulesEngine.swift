@@ -81,17 +81,17 @@ final class RulesEngine {
             }
             .store(in: &cancellables)
 
-        audio.$alertVolume
-            .removeDuplicates()
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] volume in
-                guard AudioManager.supportsSystemAlertVolumeControl,
-                      let self,
-                      let uid = audio.defaultOutput?.uid else { return }
-                settings.saveAlertVolume(volume, for: uid)
-            }
-            .store(in: &cancellables)
+        if AudioManager.supportsSystemAlertVolumeControl {
+            audio.$alertVolume
+                .removeDuplicates()
+                .dropFirst()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] volume in
+                    guard let self, let uid = audio.defaultOutput?.uid else { return }
+                    settings.saveAlertVolume(volume, for: uid)
+                }
+                .store(in: &cancellables)
+        }
 
         settings.$outputPriority.dropFirst().receive(on: DispatchQueue.main)
             .sink { [weak self] _ in

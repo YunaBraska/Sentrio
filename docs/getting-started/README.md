@@ -7,13 +7,13 @@ Use this page if you want Sentrio working in a few minutes.
 ## Quick visual guide
 
 ![Menu bar panel](../screenshots/generated/bar_menu.png)
-![Preferences - Output tab](../screenshots/generated/preferences_output.png)
+![Settings - Output tab](../screenshots/generated/preferences_output.png)
 
 ## 5 minute setup
 
 1. Install and open Sentrio.
 2. Click the menu bar icon.
-3. Open **Preferences...**.
+3. Open **Settings...**.
 4. In **Output** and **Input** tabs, drag devices into your preferred order.
 5. Keep **Auto** enabled.
 

@@ -31,6 +31,7 @@ enum MenuPriorityRanker {
 // MARK: – Root
 
 struct MenuBarView: View {
+    @ObservedObject private var layout: MenuBarLayout
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var audio: AudioManager
     @EnvironmentObject var busyLight: BusyLightEngine
@@ -38,6 +39,10 @@ struct MenuBarView: View {
     @State private var draggedOutputUID: String?
     @State private var draggedInputUID: String?
     @State private var selectedSurface: MenuSurface = .sound
+
+    init(layout: MenuBarLayout = MenuBarLayout()) {
+        self.layout = layout
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -55,7 +60,7 @@ struct MenuBarView: View {
             Divider()
             footerRow
         }
-        .frame(width: 370)
+        .frame(width: layout.width)
         .background(SentrioChromeBackground().ignoresSafeArea())
         .tint(SentrioVisualStyle.accent)
         .onChange(of: busyLight.connectedDevices.isEmpty) { isEmpty in

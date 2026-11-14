@@ -7,6 +7,7 @@ app_name='Sentrio'
 version=$1
 build_number=$2
 workspace_dir=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
+sh "${workspace_dir}/scripts/validate-app-store-version.sh" "${version}" "${build_number}"
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/sentrio-app-store.XXXXXX")
 dist_dir="${workspace_dir}/dist/app-store"
 app_dir="${dist_dir}/${app_name}.app"

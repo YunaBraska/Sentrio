@@ -7,36 +7,7 @@ executable_name='Sentrio'
 app_name=${MACOS_APP_NAME:-Sentrio}
 version=$1
 build_version=${MACOS_BUILD_VERSION:-${version}}
-
-case "${version}" in
-  ''|*[!0-9.]*|.*|*.|*..*)
-    printf '%s\n' "Invalid marketing version: ${version}. Expected Major.Minor.Patch." >&2
-    exit 2
-    ;;
-esac
-previous_ifs=$IFS
-IFS=.
-set -- ${version}
-IFS=$previous_ifs
-if [ "$#" -ne 3 ]; then
-  printf '%s\n' "Invalid marketing version: ${version}. Expected Major.Minor.Patch." >&2
-  exit 2
-fi
-
-case "${build_version}" in
-  ''|*[!0-9.]*|.*|*.|*..*)
-    printf '%s\n' "Invalid build version: ${build_version}. Expected one to three numeric components." >&2
-    exit 2
-    ;;
-esac
-previous_ifs=$IFS
-IFS=.
-set -- ${build_version}
-IFS=$previous_ifs
-if [ "$#" -gt 3 ]; then
-  printf '%s\n' "Invalid build version: ${build_version}. Expected one to three numeric components." >&2
-  exit 2
-fi
+script_dir=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
 
 distribution=${SENTRIO_DISTRIBUTION:-direct}
 case "${distribution}" in
@@ -46,6 +17,9 @@ case "${distribution}" in
     exit 2
     ;;
 esac
+if [ "${distribution}" = 'app-store' ]; then
+  sh "${script_dir}/scripts/validate-app-store-version.sh" "${version}" "${build_version}"
+fi
 
 if [ "${distribution}" = 'app-store' ]; then
   default_dist_dir='dist-app-store'
@@ -59,7 +33,6 @@ fi
 dist_dir=${MACOS_DIST_DIR:-${default_dist_dir}}
 app_dir="${dist_dir}/${app_name}.app"
 contents_dir="${app_dir}/Contents"
-script_dir=$(CDPATH= cd "$(dirname "$0")/.." && pwd)
 bundle_identifier=${MACOS_BUNDLE_IDENTIFIER:-com.sentrio.app}
 if [ "${distribution}" = 'app-store' ]; then
   signing_identity=${MACOS_APP_STORE_APPLICATION_IDENTITY:--}

@@ -124,23 +124,30 @@ done
 export PACKAGE_TEST_LOG="${tmp}/events"
 export PATH="${tmp}/bin:${PATH}"
 
+cd "${tmp}/work"
+export MACOS_SIGNING_IDENTITY='-'
+sh "${root}/scripts/package.sh" 2026.11.12-SNAPSHOT
+test -f dist/Sentrio-2026.11.12-SNAPSHOT.zip
+: > "${PACKAGE_TEST_LOG}"
+unset MACOS_SIGNING_IDENTITY
+
+export SENTRIO_DISTRIBUTION='app-store'
 if sh "${root}/scripts/package.sh" 1.2; then
-  printf '%s\n' 'Packaging accepted an invalid marketing version.' >&2
+  printf '%s\n' 'App Store packaging accepted an invalid marketing version.' >&2
   exit 1
 fi
 MACOS_BUILD_VERSION='1.2.3.4'
 export MACOS_BUILD_VERSION
 if sh "${root}/scripts/package.sh" 1.2.3; then
-  printf '%s\n' 'Packaging accepted an invalid build version.' >&2
+  printf '%s\n' 'App Store packaging accepted an invalid build version.' >&2
   exit 1
 fi
-unset MACOS_BUILD_VERSION
+unset MACOS_BUILD_VERSION SENTRIO_DISTRIBUTION
 
 export MACOS_SIGNING_IDENTITY='test identity'
 export MACOS_NOTARY_PROFILE='test profile'
 export MACOS_UPDATE_PRIVATE_KEY='AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
 export MACOS_UPDATE_PUBLIC_KEY='AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
-cd "${tmp}/work"
 sh "${root}/scripts/package.sh" 1.2.3
 
 grep -q '^codesign .*--entitlements .*Sentrio.entitlements ' "${PACKAGE_TEST_LOG}"

@@ -22,10 +22,7 @@ jobs:
 
   upload:
     needs: package
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store_upload.yml@d95ac8aad0332a530cd76eb875f9380a88e4c531
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store_upload.yml@3ad4cf3c1827b30d89bc13a0f331bc998fe31c46
     with:
       app_name: Sentrio
-    secrets:
-      APP_STORE_CONNECT_API_KEY: ${{ secrets.MACOS_NOTARY_KEY_ID }}
-      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
-      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.MACOS_NOTARY_KEY }}
+    secrets: inherit

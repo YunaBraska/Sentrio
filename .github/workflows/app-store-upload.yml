@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   package:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store.yml@29bd56f4cc120be2bdcab1b484c34fae14c51b35
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store.yml@36fe519dd7cafbcaf9570a0e94b15116345bcdc6
     with:
       app_name: Sentrio
       bundle_id: berlin.yuna.sentrio
@@ -22,7 +22,7 @@ jobs:
 
   upload:
     needs: package
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store_upload.yml@3ad4cf3c1827b30d89bc13a0f331bc998fe31c46
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store_upload.yml@36fe519dd7cafbcaf9570a0e94b15116345bcdc6
     with:
       app_name: Sentrio
     secrets: inherit

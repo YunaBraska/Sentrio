@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   package:
-    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store.yml@29bd56f4cc120be2bdcab1b484c34fae14c51b35
+    uses: YunaBraska/YunaBraska/.github/workflows/wc_macos_app_store.yml@36fe519dd7cafbcaf9570a0e94b15116345bcdc6
     with:
       app_name: Sentrio
       bundle_id: berlin.yuna.sentrio

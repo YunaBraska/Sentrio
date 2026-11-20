@@ -11,7 +11,7 @@ final class AppState: ObservableObject {
 
     @Published var preferencesPane: PreferencesPane
 
-    private var fallbackSettingsWindow: NSWindow?
+    private var preferencesWindow: NSWindow?
     private var cancellables = Set<AnyCancellable>()
 
     init(
@@ -97,11 +97,7 @@ final class AppState: ObservableObject {
             preferencesPane = pane
         }
 
-        NSApp.activate(ignoringOtherApps: true)
-        let didOpenSettings = NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        guard !didOpenSettings else { return }
-
-        if fallbackSettingsWindow == nil {
+        if preferencesWindow == nil {
             let view = PreferencesView()
                 .environmentObject(settings)
                 .environmentObject(audio)
@@ -114,9 +110,10 @@ final class AppState: ObservableObject {
             win.styleMask = [.titled, .closable]
             win.center()
             win.isReleasedWhenClosed = false
-            fallbackSettingsWindow = win
+            preferencesWindow = win
         }
-        fallbackSettingsWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        preferencesWindow?.makeKeyAndOrderFront(nil)
     }
 
     @objc private func reopenApp() {

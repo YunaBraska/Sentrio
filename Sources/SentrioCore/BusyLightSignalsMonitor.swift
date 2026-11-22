@@ -453,10 +453,17 @@ private final class BusyLightPlaybackMonitor: ObservableObject {
 
 // MARK: - Screen recording (best-effort)
 
+enum BusyLightScreenRecordingProcess {
+    static func isScreenRecordingUI(bundleIdentifier: String?) -> Bool {
+        bundleIdentifier == "com.apple.screencaptureui"
+    }
+}
+
 private final class BusyLightScreenRecordingMonitor: ObservableObject {
     @Published private(set) var isScreenRecordingInUse = false
 
     private var observers: [NSObjectProtocol] = []
+    private var refreshTimer: Timer?
 
     init() {
         let nc = NSWorkspace.shared.notificationCenter
@@ -474,6 +481,9 @@ private final class BusyLightScreenRecordingMonitor: ObservableObject {
         ) { [weak self] _ in
             self?.refresh()
         })
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            self?.refresh()
+        }
         refresh()
     }
 
@@ -482,11 +492,12 @@ private final class BusyLightScreenRecordingMonitor: ObservableObject {
         for o in observers {
             nc.removeObserver(o)
         }
+        refreshTimer?.invalidate()
     }
 
     private func refresh() {
         isScreenRecordingInUse = NSWorkspace.shared.runningApplications.contains { app in
-            app.bundleIdentifier == "com.apple.screencaptureui"
+            BusyLightScreenRecordingProcess.isScreenRecordingUI(bundleIdentifier: app.bundleIdentifier)
         }
     }
 }
